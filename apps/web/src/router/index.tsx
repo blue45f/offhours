@@ -8,6 +8,7 @@ import { PageLoader } from '../components/layout/PageLoader'
 const HomePage = lazy(() => import('../pages/HomePage'))
 const SpacesPage = lazy(() => import('../pages/SpacesPage'))
 const SpaceDetailPage = lazy(() => import('../pages/SpaceDetailPage'))
+const ComparePage = lazy(() => import('../pages/ComparePage'))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
 const SignupPage = lazy(() => import('../pages/SignupPage'))
 const LogoutPage = lazy(() => import('../pages/LogoutPage'))
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { index: true, element: lazyEl(<HomePage />) },
       { path: 'spaces', element: lazyEl(<SpacesPage />) },
       { path: 'spaces/:slug', element: lazyEl(<SpaceDetailPage />) },
+      { path: 'compare', element: lazyEl(<ComparePage />) },
       { path: 'login', element: lazyEl(<LoginPage />) },
       { path: 'signup', element: lazyEl(<SignupPage />) },
       { path: 'logout', element: lazyEl(<LogoutPage />) },

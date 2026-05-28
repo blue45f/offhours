@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom'
-import { Clock, Heart, MapPin, MessageCircle, Navigation, Users } from 'lucide-react'
+import {
+  Check,
+  Clock,
+  GitCompare,
+  Heart,
+  MapPin,
+  MessageCircle,
+  Navigation,
+  Users,
+} from 'lucide-react'
 import type { SpaceCard as SpaceCardType } from '@offhours/shared'
 import { VenueCategoryLabel, formatDistanceKm, formatResponseTimeBadge } from '@offhours/shared'
+import toast from 'react-hot-toast'
 
 import { Badge } from '../ui/Badge'
 import { StarRating } from '../ui/StarRating'
@@ -10,6 +20,7 @@ import { cn } from '../../utils/cn'
 import { useToggleFavorite, useFavoriteIds } from '../../features/favorites/api'
 import { useIsAuthed } from '../../store/auth'
 import { useNavigate } from 'react-router-dom'
+import { COMPARE_MAX, useCompareStore } from '../../store/compare'
 
 interface Props {
   space: SpaceCardType
@@ -23,6 +34,10 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
   const toggle = useToggleFavorite()
   const isFavorited = favoriteIds.includes(space.id)
 
+  const compareSlugs = useCompareStore((s) => s.slugs)
+  const toggleCompare = useCompareStore((s) => s.toggle)
+  const inCompare = compareSlugs.includes(space.slug)
+
   function handleToggle(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
@@ -31,6 +46,15 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
       return
     }
     toggle.mutate(space.id)
+  }
+
+  function handleCompare(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    const ok = toggleCompare(space.slug)
+    if (!ok && !inCompare) {
+      toast.error(`비교 보드는 최대 ${COMPARE_MAX}개까지만 담을 수 있어요`)
+    }
   }
 
   if (layout === 'list') {
@@ -51,17 +75,30 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
     <Link to={`/spaces/${space.slug}`} className="group block focus:outline-none">
       <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-bg-subtle)] aspect-[4/3]">
         <Thumbnail space={space} className="absolute inset-0 size-full" />
-        <button
-          type="button"
-          onClick={handleToggle}
-          aria-label={isFavorited ? '찜 해제' : '찜하기'}
-          className="absolute right-3 top-3 inline-flex size-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-transform hover:scale-105"
-        >
-          <Heart
-            size={16}
-            className={cn(isFavorited && 'fill-[var(--color-accent)] text-[var(--color-accent)]')}
-          />
-        </button>
+        <div className="absolute right-3 top-3 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleToggle}
+            aria-label={isFavorited ? '찜 해제' : '찜하기'}
+            className="inline-flex size-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-transform hover:scale-105"
+          >
+            <Heart
+              size={16}
+              className={cn(isFavorited && 'fill-[var(--color-accent)] text-[var(--color-accent)]')}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={handleCompare}
+            aria-label={inCompare ? '비교에서 빼기' : '비교에 담기'}
+            className={cn(
+              'inline-flex size-9 items-center justify-center rounded-full backdrop-blur-sm transition-transform hover:scale-105',
+              inCompare ? 'bg-[var(--color-primary)] text-white' : 'bg-black/30 text-white'
+            )}
+          >
+            {inCompare ? <Check size={16} /> : <GitCompare size={16} />}
+          </button>
+        </div>
         {space.instantBook && (
           <Badge
             tone="accent"

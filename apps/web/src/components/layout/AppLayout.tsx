@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { BottomNav } from './BottomNav'
+import { CompareBar } from '../space/CompareBar'
 
 export function AppLayout() {
   return (
@@ -13,6 +14,7 @@ export function AppLayout() {
       </main>
       <Footer />
       <BottomNav />
+      <CompareBar />
     </div>
   )
 }
