@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Filter, MapPin } from 'lucide-react'
+import { Clock, Filter, MapPin, Navigation, X } from 'lucide-react'
 import {
   AMENITY_OPTIONS,
   KOREA_REGIONS,
@@ -19,10 +19,19 @@ import { Field, Input } from '../components/ui/Input'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Dialog } from '../components/ui/Dialog'
 import { formatKRWShort } from '../utils/format'
+import { useGeolocation } from '../hooks/useGeolocation'
+import { cn } from '../utils/cn'
 
 export default function SpacesPage() {
   const [params, setParams] = useSearchParams()
   const [filterOpen, setFilterOpen] = useState(false)
+  const geo = useGeolocation()
+
+  const radiusKm = params.get('radiusKm') ? Number(params.get('radiusKm')) : undefined
+  const liveWithinHours = params.get('liveWithinHours')
+    ? Number(params.get('liveWithinHours'))
+    : undefined
+  const useGeo = !!radiusKm && geo.coords != null
 
   const query: SpaceSearchParams = useMemo(
     () => ({
@@ -35,11 +44,16 @@ export default function SpacesPage() {
       priceMax: params.get('priceMax') ? Number(params.get('priceMax')) : undefined,
       amenities: params.get('amenities') ?? undefined,
       instantBook: params.get('instantBook') === 'true' ? true : undefined,
+      lat: useGeo ? geo.coords!.lat : undefined,
+      lng: useGeo ? geo.coords!.lng : undefined,
+      radiusKm: useGeo ? radiusKm : undefined,
+      liveWithinHours,
       sort: (params.get('sort') as SpaceSearchParams['sort']) ?? 'popular',
       page: 1,
       pageSize: 24,
     }),
-    [params]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [params, geo.coords?.lat, geo.coords?.lng, useGeo, radiusKm, liveWithinHours]
   )
 
   const { data, isLoading } = useSpacesSearch(query)
@@ -86,6 +100,8 @@ export default function SpacesPage() {
               { value: 'price-asc', label: '가격 낮은 순' },
               { value: 'price-desc', label: '가격 높은 순' },
               { value: 'rating', label: '평점 순' },
+              ...(useGeo ? [{ value: 'distance', label: '거리 순' }] : []),
+              ...(liveWithinHours ? [{ value: 'live', label: '곧 시작' }] : []),
             ]}
             className="min-w-[160px]"
           />
@@ -97,6 +113,98 @@ export default function SpacesPage() {
             필터
           </Button>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <button
+          type="button"
+          onClick={() => {
+            if (geo.status === 'granted' && useGeo) {
+              set('radiusKm', undefined)
+              return
+            }
+            if (geo.status !== 'granted') geo.request()
+            set('radiusKm', String(radiusKm ?? 3))
+            set('sort', 'distance')
+          }}
+          className={cn(
+            'inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-pill)] px-3.5 text-sm font-medium border transition-colors',
+            useGeo
+              ? 'bg-[var(--color-primary)] text-[var(--color-primary-fg)] border-transparent'
+              : 'bg-[var(--color-bg-elevated)] text-[var(--color-fg)] border-[var(--color-border)] hover:border-[var(--color-border-strong)]'
+          )}
+        >
+          <Navigation size={12} />
+          {geo.status === 'pending'
+            ? '위치 확인 중...'
+            : useGeo
+              ? `내 위치 ${radiusKm}km`
+              : '내 위치로 보기'}
+        </button>
+        {useGeo && (
+          <div className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] p-0.5">
+            {[1, 3, 5, 10].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => set('radiusKm', String(r))}
+                className={cn(
+                  'rounded-[var(--radius-pill)] px-3 py-1 text-xs font-medium',
+                  radiusKm === r
+                    ? 'bg-[var(--color-bg-elevated)] text-[var(--color-fg)] shadow-[var(--shadow-sm)]'
+                    : 'text-[var(--color-fg-muted)]'
+                )}
+              >
+                {r}km
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            if (liveWithinHours) {
+              set('liveWithinHours', undefined)
+              set('sort', 'popular')
+            } else {
+              set('liveWithinHours', '24')
+              set('sort', 'live')
+            }
+          }}
+          className={cn(
+            'inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-pill)] px-3.5 text-sm font-medium border transition-colors',
+            liveWithinHours
+              ? 'bg-[var(--color-accent)] text-white border-transparent'
+              : 'bg-[var(--color-bg-elevated)] text-[var(--color-fg)] border-[var(--color-border)] hover:border-[var(--color-border-strong)]'
+          )}
+        >
+          <Clock size={12} />
+          {liveWithinHours ? `${liveWithinHours}시간 내 예약 가능` : '지금 비어있는 공간'}
+        </button>
+        {liveWithinHours && (
+          <div className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] p-0.5">
+            {[3, 6, 12, 24, 72].map((h) => (
+              <button
+                key={h}
+                type="button"
+                onClick={() => set('liveWithinHours', String(h))}
+                className={cn(
+                  'rounded-[var(--radius-pill)] px-3 py-1 text-xs font-medium',
+                  liveWithinHours === h
+                    ? 'bg-[var(--color-bg-elevated)] text-[var(--color-fg)] shadow-[var(--shadow-sm)]'
+                    : 'text-[var(--color-fg-muted)]'
+                )}
+              >
+                {h}h
+              </button>
+            ))}
+          </div>
+        )}
+        {geo.status === 'denied' && (
+          <span className="text-xs text-[var(--color-error)] inline-flex items-center gap-1">
+            <X size={12} /> 위치 권한이 차단됐어요
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">

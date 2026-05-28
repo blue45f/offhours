@@ -11,17 +11,25 @@ import {
   Image,
   Music,
   Music2,
+  Navigation,
   Sun,
   Users,
   UtensilsCrossed,
   Wine,
 } from 'lucide-react'
-import { VenueCategoryLabel, type VenueCategory } from '@offhours/shared'
+import {
+  VenueCategoryLabel,
+  type SpaceCard as SpaceCardType,
+  type VenueCategory,
+} from '@offhours/shared'
 
 import { HeroSearch } from '../components/space/HeroSearch'
+import { SpaceCard } from '../components/space/SpaceCard'
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { useSpacesSearch } from '../features/spaces/api'
 import { Button } from '../components/ui/Button'
+import { Skeleton } from '../components/ui/Skeleton'
+import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 
 const categories: { value: VenueCategory; icon: typeof Coffee }[] = [
   { value: 'CAFE', icon: Coffee },
@@ -39,12 +47,30 @@ const categories: { value: VenueCategory; icon: typeof Coffee }[] = [
 ]
 
 export default function HomePage() {
+  const geo = useGeolocation()
   const popular = useSpacesSearch({ sort: 'popular', pageSize: 8 })
   const newest = useSpacesSearch({ sort: 'newest', pageSize: 4 })
+  const liveCoords = geo.coords ?? SEOUL_FALLBACK
+  const live = useSpacesSearch({
+    lat: liveCoords.lat,
+    lng: liveCoords.lng,
+    radiusKm: 10,
+    liveWithinHours: 24,
+    sort: 'live',
+    pageSize: 4,
+  })
 
   return (
     <>
       <Hero />
+
+      <NowNearbySection
+        usingMyLocation={geo.status === 'granted'}
+        loading={live.isLoading}
+        items={live.data?.items}
+        onRequestLocation={() => geo.request()}
+        canRequest={geo.status === 'idle' || geo.status === 'denied'}
+      />
 
       <section className="container-page py-12 md:py-16">
         <div className="flex items-end justify-between mb-6">
@@ -191,6 +217,73 @@ function DifferentiationSection() {
               <p className="mt-2 text-sm text-[var(--color-fg-muted)] leading-relaxed">{it.body}</p>
             </motion.div>
           ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function NowNearbySection({
+  usingMyLocation,
+  loading,
+  items,
+  onRequestLocation,
+  canRequest,
+}: {
+  usingMyLocation: boolean
+  loading: boolean
+  items?: SpaceCardType[]
+  onRequestLocation: () => void
+  canRequest: boolean
+}) {
+  if (!loading && (!items || items.length === 0)) return null
+  return (
+    <section className="bg-[var(--color-bg-elevated)] border-y border-[var(--color-border)]">
+      <div className="container-page py-10 md:py-14">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent)]">
+              <Clock size={12} /> 라이브
+            </span>
+            <h2 className="mt-2 text-headline serif">지금 인근에서 비어있는 공간</h2>
+            <p className="mt-1 text-sm text-[var(--color-fg-muted)] flex items-center gap-1.5">
+              {usingMyLocation ? (
+                <>
+                  <Navigation size={12} className="text-[var(--color-primary)]" />내 위치 기준 10km,
+                  24시간 안에 시작 가능
+                </>
+              ) : (
+                <>서울 시청 기준 10km · 위치 권한을 켜면 더 정확해져요</>
+              )}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {canRequest && (
+              <Button
+                variant="secondary"
+                leading={<Navigation size={14} />}
+                onClick={onRequestLocation}
+              >
+                내 위치 사용
+              </Button>
+            )}
+            <Link
+              to="/spaces?liveWithinHours=24&sort=live"
+              className="hidden md:inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)]"
+            >
+              전체 라이브 보기 <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton className="aspect-[4/3] w-full rounded-[var(--radius-xl)]" />
+                  <Skeleton variant="text" className="w-3/4" />
+                </div>
+              ))
+            : items?.slice(0, 4).map((s) => <SpaceCard key={s.id} space={s} />)}
         </div>
       </div>
     </section>

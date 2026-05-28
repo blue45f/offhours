@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common'
 import { Prisma, type Space, type SpacePhoto, type Venue } from '@prisma/client'
 import {
+  haversineKm,
+  lastMinuteDiscountRate,
   paginated,
   type CreateSpaceInput,
   type SpaceCard,
@@ -55,6 +57,14 @@ export class SpacesService {
     }
     if (query.instantBook !== undefined) where.instantBook = query.instantBook
 
+    const hasGeo = query.lat != null && query.lng != null
+    const isLive = query.sort === 'live' || query.liveWithinHours != null
+    const isDistance = query.sort === 'distance' || (hasGeo && query.radiusKm != null)
+
+    // 라이브/거리 정렬이면 인메모리 처리(슬롯 매칭+거리 계산)가 필요 → 우선 충분히 많이 가져와
+    // 후처리 후 페이지네이션. 운영 규모 커지면 PostGIS + Materialized View 로 이관.
+    const usePostProcess = hasGeo || isLive
+
     const orderBy: Prisma.SpaceOrderByWithRelationInput =
       query.sort === 'newest'
         ? { createdAt: 'desc' }
@@ -66,25 +76,109 @@ export class SpacesService {
               ? { ratingAvg: 'desc' }
               : { viewCount: 'desc' }
 
-    const [items, total] = await Promise.all([
-      this.prisma.space.findMany({
-        where,
-        orderBy,
-        skip: (query.page - 1) * query.pageSize,
-        take: query.pageSize,
-        include: {
-          photos: { take: 1, orderBy: { order: 'asc' } },
-          venue: { select: { region: true, district: true, category: true } },
+    const baseInclude = {
+      photos: { take: 1, orderBy: { order: 'asc' } as const },
+      venue: {
+        select: { region: true, district: true, category: true, lat: true, lng: true },
+      },
+    }
+
+    if (!usePostProcess) {
+      const [items, total] = await Promise.all([
+        this.prisma.space.findMany({
+          where,
+          orderBy,
+          skip: (query.page - 1) * query.pageSize,
+          take: query.pageSize,
+          include: baseInclude,
+        }),
+        this.prisma.space.count({ where }),
+      ])
+      return paginated<SpaceCard>(
+        items.map((s) => this.toCard(s)),
+        total,
+        query.page,
+        query.pageSize
+      )
+    }
+
+    const candidates = await this.prisma.space.findMany({
+      where,
+      orderBy,
+      take: 240,
+      include: baseInclude,
+    })
+
+    // 거리 필터·정렬
+    let scored = candidates.map((s) => {
+      const distanceKm = hasGeo
+        ? haversineKm({ lat: query.lat!, lng: query.lng! }, { lat: s.venue.lat, lng: s.venue.lng })
+        : null
+      return { space: s, distanceKm, nextAvailableAt: null as Date | null, discount: 0 }
+    })
+
+    if (hasGeo && query.radiusKm) {
+      scored = scored.filter((x) => x.distanceKm != null && x.distanceKm <= query.radiusKm!)
+    }
+
+    // 라이브 슬롯 매칭
+    if (isLive) {
+      const hoursWindow = query.liveWithinHours ?? 24
+      const now = new Date()
+      const upper = new Date(now.getTime() + hoursWindow * 60 * 60 * 1000)
+      const spaceIds = scored.map((x) => x.space.id)
+      const liveSlots = await this.prisma.slot.findMany({
+        where: {
+          spaceId: { in: spaceIds },
+          isOpen: true,
+          startAt: { gte: now, lte: upper },
+          reservation: null,
         },
-      }),
-      this.prisma.space.count({ where }),
-    ])
+        orderBy: { startAt: 'asc' },
+        select: { spaceId: true, startAt: true, priceKRW: true },
+      })
+      const earliestBySpace = new Map<string, Date>()
+      for (const s of liveSlots) {
+        if (!earliestBySpace.has(s.spaceId)) earliestBySpace.set(s.spaceId, s.startAt)
+      }
+      scored = scored
+        .filter((x) => earliestBySpace.has(x.space.id))
+        .map((x) => {
+          const startAt = earliestBySpace.get(x.space.id)!
+          return {
+            ...x,
+            nextAvailableAt: startAt,
+            discount: lastMinuteDiscountRate(startAt, now),
+          }
+        })
+    }
+
+    if (query.sort === 'distance' && hasGeo) {
+      scored.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
+    } else if (query.sort === 'live' || isLive) {
+      scored.sort((a, b) => {
+        const at = a.nextAvailableAt?.getTime() ?? Infinity
+        const bt = b.nextAvailableAt?.getTime() ?? Infinity
+        return at - bt
+      })
+    }
+
+    const total = scored.length
+    const page = query.page
+    const pageSize = query.pageSize
+    const slice = scored.slice((page - 1) * pageSize, page * pageSize)
 
     return paginated<SpaceCard>(
-      items.map((s) => this.toCard(s)),
+      slice.map((x) =>
+        this.toCard(x.space, {
+          distanceKm: x.distanceKm,
+          nextAvailableAt: x.nextAvailableAt,
+          lastMinuteDiscount: x.discount > 0 ? x.discount : null,
+        })
+      ),
       total,
-      query.page,
-      query.pageSize
+      page,
+      pageSize
     )
   }
 
@@ -237,6 +331,12 @@ export class SpacesService {
     s: Space & {
       photos: SpacePhoto[]
       venue: Pick<Venue, 'region' | 'district' | 'category'>
+    },
+    extras?: {
+      distanceKm?: number | null
+      nextAvailableAt?: Date | null
+      lastMinuteDiscount?: number | null
+      avgApprovalMin?: number | null
     }
   ): SpaceCard {
     const cover = s.photos[0]
@@ -256,6 +356,10 @@ export class SpacesService {
       district: s.venue.district,
       category: s.venue.category,
       instantBook: s.instantBook,
+      distanceKm: extras?.distanceKm ?? null,
+      nextAvailableAt: extras?.nextAvailableAt ? extras.nextAvailableAt.toISOString() : null,
+      lastMinuteDiscount: extras?.lastMinuteDiscount ?? null,
+      avgApprovalMin: extras?.avgApprovalMin ?? null,
     }
   }
 }

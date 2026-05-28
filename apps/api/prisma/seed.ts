@@ -491,7 +491,56 @@ async function main() {
     })
   }
 
-  console.log(`✅ Seeded ${SPACE_SEEDS.length} spaces.`)
+  // 라이브 매칭·동선 추천 데모를 위해 향후 7일치 데모 슬롯 생성.
+  // 운영에서는 SlotsScheduler 의 매일 03:00 KST 크론이 담당.
+  const activeSpaces = await prisma.space.findMany({
+    where: { status: 'ACTIVE' },
+    select: { id: true, basePriceKRW: true, cleaningMinutes: true },
+  })
+  const now = new Date()
+  const slotData: {
+    spaceId: string
+    startAt: Date
+    endAt: Date
+    priceKRW: number
+    isOpen: boolean
+  }[] = []
+  for (const s of activeSpaces) {
+    for (let day = 0; day < 7; day++) {
+      // 영업 외 시간: 23:00 ~ 익일 06:00 (7시간 윈도우)
+      const dayStart = new Date(now)
+      dayStart.setHours(23, 0, 0, 0)
+      dayStart.setDate(dayStart.getDate() + day)
+      const nightEnd = new Date(dayStart.getTime() + 7 * 60 * 60 * 1000)
+      slotData.push({
+        spaceId: s.id,
+        startAt: dayStart,
+        endAt: nightEnd,
+        priceKRW: s.basePriceKRW,
+        isOpen: true,
+      })
+      // 휴무 가정 통대관: 매주 월요일 09:00 ~ 21:00
+      const isMonday = dayStart.getDay() === 1
+      if (isMonday) {
+        const dayOpen = new Date(now)
+        dayOpen.setHours(9, 0, 0, 0)
+        dayOpen.setDate(dayOpen.getDate() + day)
+        const dayClose = new Date(dayOpen.getTime() + 12 * 60 * 60 * 1000)
+        slotData.push({
+          spaceId: s.id,
+          startAt: dayOpen,
+          endAt: dayClose,
+          priceKRW: s.basePriceKRW,
+          isOpen: true,
+        })
+      }
+    }
+  }
+  if (slotData.length > 0) {
+    await prisma.slot.createMany({ data: slotData, skipDuplicates: true })
+  }
+
+  console.log(`✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots.`)
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)
   console.log(`👤 host1@offhours.kr ~ host${SPACE_SEEDS.length}@offhours.kr / host1234  (HOST)`)

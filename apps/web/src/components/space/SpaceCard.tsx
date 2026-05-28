@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Heart, MapPin, Users } from 'lucide-react'
+import { Clock, Heart, MapPin, Navigation, Users } from 'lucide-react'
 import type { SpaceCard as SpaceCardType } from '@offhours/shared'
-import { VenueCategoryLabel } from '@offhours/shared'
+import { VenueCategoryLabel, formatDistanceKm } from '@offhours/shared'
 
 import { Badge } from '../ui/Badge'
 import { StarRating } from '../ui/StarRating'
@@ -80,11 +80,28 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
           </span>
           <span>·</span>
           <span>{VenueCategoryLabel[space.category]}</span>
+          {space.distanceKm != null && (
+            <>
+              <span>·</span>
+              <span className="inline-flex items-center gap-0.5 text-[var(--color-primary)] font-medium">
+                <Navigation size={10} /> {formatDistanceKm(space.distanceKm)}
+              </span>
+            </>
+          )}
         </div>
         <h3 className="font-semibold text-[var(--color-fg)] line-clamp-1 group-hover:underline underline-offset-4 decoration-1">
           {space.title}
         </h3>
         <p className="text-sm text-[var(--color-fg-muted)] line-clamp-1">{space.summary}</p>
+        {space.nextAvailableAt && (
+          <div className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 text-[11px] font-semibold">
+            <Clock size={10} />
+            {formatNextSlot(space.nextAvailableAt)}
+            {space.lastMinuteDiscount ? (
+              <span className="ml-1">· -{Math.round(space.lastMinuteDiscount * 100)}%</span>
+            ) : null}
+          </div>
+        )}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-1 text-meta">
             <Users size={12} />
@@ -99,6 +116,17 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
       </div>
     </Link>
   )
+}
+
+function formatNextSlot(iso: string): string {
+  const start = new Date(iso)
+  const diffH = (start.getTime() - Date.now()) / (1000 * 60 * 60)
+  const hh = String(start.getHours()).padStart(2, '0')
+  const mm = String(start.getMinutes()).padStart(2, '0')
+  if (diffH < 0) return `방금 ${hh}:${mm} 가능`
+  if (diffH < 1) return `${Math.max(1, Math.round(diffH * 60))}분 뒤 ${hh}:${mm} 가능`
+  if (diffH < 24) return `${Math.round(diffH)}시간 뒤 ${hh}:${mm} 가능`
+  return `${Math.round(diffH / 24)}일 뒤 ${hh}:${mm} 가능`
 }
 
 function Header({ space }: { space: SpaceCardType }) {

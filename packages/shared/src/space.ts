@@ -80,6 +80,14 @@ export const SpaceCardSchema = z.object({
   district: z.string(),
   category: VenueCategorySchema,
   instantBook: z.boolean(),
+  /** 게스트 위치 기준 거리(km). 위치 파라미터 없이 검색하면 null */
+  distanceKm: z.number().nullable().optional(),
+  /** 곧 시작 가능한 가장 빠른 슬롯 시각 (ISO). 검색에 availableFrom/Live 옵션을 줄 때만 채워짐 */
+  nextAvailableAt: z.string().nullable().optional(),
+  /** 일반가 대비 할인율 (0~1). 라스트미닛 슬롯에 한해 표기 */
+  lastMinuteDiscount: z.number().nullable().optional(),
+  /** 평균 호스트 승인 분(=응답 속도). 작을수록 좋음. 없으면 null */
+  avgApprovalMin: z.number().nullable().optional(),
 })
 export type SpaceCard = z.infer<typeof SpaceCardSchema>
 
@@ -129,7 +137,15 @@ export const SpaceSearchSchema = z.object({
     .optional()
     .transform((v) => (v ? v.split(',').filter(Boolean) : undefined)),
   instantBook: z.coerce.boolean().optional(),
-  sort: z.enum(['popular', 'newest', 'price-asc', 'price-desc', 'rating']).default('popular'),
+  /** 위치 기반: 위도·경도 + 반경(km) */
+  lat: z.coerce.number().min(33).max(43).optional(),
+  lng: z.coerce.number().min(124).max(132).optional(),
+  radiusKm: z.coerce.number().min(0.3).max(50).optional(),
+  /** "지금부터 N시간 안에 시작 가능한 슬롯이 있는 공간" 라이브 매칭 */
+  liveWithinHours: z.coerce.number().int().min(1).max(72).optional(),
+  sort: z
+    .enum(['popular', 'newest', 'price-asc', 'price-desc', 'rating', 'distance', 'live'])
+    .default('popular'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(60).default(20),
 })

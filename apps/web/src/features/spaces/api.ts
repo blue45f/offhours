@@ -23,7 +23,11 @@ export interface SpaceSearchParams {
   priceMax?: number
   amenities?: string
   instantBook?: boolean
-  sort?: 'popular' | 'newest' | 'price-asc' | 'price-desc' | 'rating'
+  lat?: number
+  lng?: number
+  radiusKm?: number
+  liveWithinHours?: number
+  sort?: 'popular' | 'newest' | 'price-asc' | 'price-desc' | 'rating' | 'distance' | 'live'
   page?: number
   pageSize?: number
 }

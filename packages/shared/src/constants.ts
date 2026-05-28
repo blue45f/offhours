@@ -72,3 +72,44 @@ export function HHmmToMinutes(value: string): number {
 export function formatKRW(value: number): string {
   return `${value.toLocaleString('ko-KR')}원`
 }
+
+const EARTH_RADIUS_KM = 6371
+function toRad(deg: number): number {
+  return (deg * Math.PI) / 180
+}
+
+/** Haversine 공식 — 두 위경도 간 직선 거리(km) */
+export function haversineKm(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number }
+): number {
+  const dLat = toRad(b.lat - a.lat)
+  const dLng = toRad(b.lng - a.lng)
+  const lat1 = toRad(a.lat)
+  const lat2 = toRad(b.lat)
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(h)))
+}
+
+export function formatDistanceKm(km: number): string {
+  if (km < 1) return `${Math.round(km * 1000)}m`
+  if (km < 10) return `${km.toFixed(1)}km`
+  return `${Math.round(km)}km`
+}
+
+/** 라스트미닛 슬롯 자동 할인율 — 시작 6시간 내 5%, 3시간 내 10%, 1시간 내 15% */
+export function lastMinuteDiscountRate(startAt: Date | string, now: Date = new Date()): number {
+  const diffH = (new Date(startAt).getTime() - now.getTime()) / (1000 * 60 * 60)
+  if (diffH <= 0 || diffH > 6) return 0
+  if (diffH <= 1) return 0.15
+  if (diffH <= 3) return 0.1
+  return 0.05
+}
+
+export function formatResponseTimeBadge(avgApprovalMin: number | null | undefined): string | null {
+  if (avgApprovalMin == null) return null
+  if (avgApprovalMin <= 60) return '1시간 내 응답'
+  if (avgApprovalMin <= 6 * 60) return `${Math.round(avgApprovalMin / 60)}시간 내 응답`
+  if (avgApprovalMin <= 24 * 60) return '24시간 내 응답'
+  return '응답 다소 늦음'
+}
