@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Logger } from '@nestjs/common'
+import { lastMinuteDiscountRate } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { generateOffhoursPlans, pricePerHour } from './slots.engine'
@@ -103,12 +104,19 @@ export class SlotsService {
     const hours = Math.max(1, Math.ceil((endAt.getTime() - startAt.getTime()) / (60 * 60 * 1000)))
     const hourlyRate = pricePerHour(space.basePriceKRW, space.pricingRules, startAt, endAt)
     const base = hourlyRate * hours
+    // 라스트미닛 자동 할인 — 시작 6h 이내 슬롯은 5/10/15% 차감.
+    const discountRate = lastMinuteDiscountRate(startAt)
+    const discountKRW = Math.round(base * discountRate)
+    const discountedBase = base - discountKRW
     return {
       hours,
       hourlyRate,
       baseAmountKRW: base,
+      discountRate,
+      discountKRW,
+      discountedBaseAmountKRW: discountedBase,
       cleaningFeeKRW: space.cleaningFeeKRW,
-      totalKRW: base + space.cleaningFeeKRW,
+      totalKRW: discountedBase + space.cleaningFeeKRW,
     }
   }
 }

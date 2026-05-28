@@ -70,7 +70,8 @@ export class ReservationsService {
         purpose: input.purpose,
         note: input.note ?? null,
         status,
-        baseAmountKRW: quote.baseAmountKRW,
+        // 라스트미닛 할인이 적용된 실제 결제 금액을 저장. 정상가는 quote.baseAmountKRW.
+        baseAmountKRW: quote.discountedBaseAmountKRW,
         cleaningFeeKRW: quote.cleaningFeeKRW,
         totalKRW,
         feeKRW,

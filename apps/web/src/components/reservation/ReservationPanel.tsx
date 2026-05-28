@@ -168,11 +168,24 @@ export function ReservationPanel({ space }: Props) {
               label={`${formatKRW(quote.hourlyRate)} × ${quote.hours}시간`}
               value={formatKRW(quote.baseAmountKRW)}
             />
+            {quote.discountRate > 0 && (
+              <Row
+                label={`라스트미닛 할인 -${Math.round(quote.discountRate * 100)}%`}
+                value={`-${formatKRW(quote.discountKRW)}`}
+                accent
+              />
+            )}
             {quote.cleaningFeeKRW > 0 && (
               <Row label="청소비" value={formatKRW(quote.cleaningFeeKRW)} />
             )}
             <div className="h-px bg-[var(--color-border)] my-2" />
             <Row label="총 결제 금액" value={formatKRW(quote.totalKRW)} strong />
+            {quote.discountRate > 0 && (
+              <p className="text-[11px] text-[var(--color-accent)]">
+                ⚡ 시작 임박 슬롯 자동 할인 — 비어 있는 시간이 더 빨리 채워져 호스트도, 게스트도
+                이득이에요.
+              </p>
+            )}
           </div>
         )}
 
@@ -187,9 +200,23 @@ export function ReservationPanel({ space }: Props) {
   )
 }
 
-function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+function Row({
+  label,
+  value,
+  strong,
+  accent,
+}: {
+  label: string
+  value: string
+  strong?: boolean
+  accent?: boolean
+}) {
   return (
-    <div className={`flex items-center justify-between ${strong ? 'font-semibold' : ''}`}>
+    <div
+      className={`flex items-center justify-between ${strong ? 'font-semibold' : ''} ${
+        accent ? 'text-[var(--color-accent)] font-medium' : ''
+      }`}
+    >
       <span>{label}</span>
       <span>{value}</span>
     </div>
