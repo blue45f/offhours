@@ -1,6 +1,11 @@
 import { useParams } from 'react-router-dom'
-import { AlcoholPolicyLabel, CateringPolicyLabel, VenueCategoryLabel } from '@offhours/shared'
-import { Heart, MapPin, Share2, Sparkles } from 'lucide-react'
+import {
+  AlcoholPolicyLabel,
+  CateringPolicyLabel,
+  VenueCategoryLabel,
+  formatResponseTimeBadge,
+} from '@offhours/shared'
+import { Heart, MapPin, MessageCircle, Share2, Sparkles } from 'lucide-react'
 
 import { useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
 import { useToggleFavorite, useFavoriteIds } from '../features/favorites/api'
@@ -78,13 +83,26 @@ export default function SpaceDetailPage() {
           <section>
             <div className="flex items-center gap-3">
               <Avatar src={data.venue.host.avatarUrl} name={data.venue.host.name} size="lg" />
-              <div>
+              <div className="flex-1">
                 <h2 className="font-semibold">
                   {data.venue.host.name} 호스트의 {data.venue.name}
                 </h2>
                 <p className="text-sm text-[var(--color-fg-muted)]">
                   신뢰 점수 {data.venue.host.trustScore} · 운영 {data.venue.host.hostedCount}회
                 </p>
+                {(() => {
+                  const badge = formatResponseTimeBadge({
+                    medianMin: data.avgApprovalMin ?? null,
+                    rate24h: data.responseRate24h ?? null,
+                    sampleCount: data.responseSampleCount ?? null,
+                  })
+                  return badge ? (
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-fg-muted)]">
+                      <MessageCircle size={12} />
+                      {badge}
+                    </p>
+                  ) : null
+                })()}
               </div>
             </div>
           </section>

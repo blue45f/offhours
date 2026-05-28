@@ -86,8 +86,12 @@ export const SpaceCardSchema = z.object({
   nextAvailableAt: z.string().nullable().optional(),
   /** 일반가 대비 할인율 (0~1). 라스트미닛 슬롯에 한해 표기 */
   lastMinuteDiscount: z.number().nullable().optional(),
-  /** 평균 호스트 승인 분(=응답 속도). 작을수록 좋음. 없으면 null */
+  /** 호스트 응답 중앙값(분). 최근 30일 신규 문의 ≥10건 + 응답률 ≥90%일 때만 노출 */
   avgApprovalMin: z.number().nullable().optional(),
+  /** 호스트 24h 이내 응답률 (0~1). 90% 이상일 때만 뱃지 노출 */
+  responseRate24h: z.number().nullable().optional(),
+  /** 응답 통계 표본 수 (최근 30일). 10건 미만이면 뱃지 미노출 */
+  responseSampleCount: z.number().nullable().optional(),
 })
 export type SpaceCard = z.infer<typeof SpaceCardSchema>
 

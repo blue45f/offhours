@@ -540,7 +540,40 @@ async function main() {
     await prisma.slot.createMany({ data: slotData, skipDuplicates: true })
   }
 
-  console.log(`✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots.`)
+  // 데모용 호스트 응답 통계 — 호스트별로 응답 속도를 시각적으로 다양화.
+  // 표본 ≥10 + 응답률 ≥0.9 충족 시 카드에 "보통 N시간 안에 답해요" 뱃지.
+  const hostUsers = await prisma.user.findMany({
+    where: { role: 'HOST' },
+    select: { id: true },
+    orderBy: { email: 'asc' },
+  })
+  const profiles: Array<{ medianMin: number; rate: number; sample: number }> = [
+    { medianMin: 22, rate: 0.96, sample: 38 }, // 1h 뱃지
+    { medianMin: 47, rate: 0.92, sample: 21 }, // 1h 뱃지
+    { medianMin: 95, rate: 0.91, sample: 14 }, // 3h 뱃지
+    { medianMin: 170, rate: 0.93, sample: 26 }, // 3h 뱃지
+    { medianMin: 340, rate: 0.95, sample: 18 }, // 12h 뱃지
+    { medianMin: 580, rate: 0.9, sample: 12 }, // 12h 뱃지
+    { medianMin: 80, rate: 0.85, sample: 22 }, // 응답률 미달 → 뱃지 없음
+    { medianMin: 35, rate: 0.97, sample: 5 }, // 표본 미달 → 뱃지 없음
+  ]
+  for (let i = 0; i < hostUsers.length; i++) {
+    const p = profiles[i % profiles.length]
+    await prisma.user.update({
+      where: { id: hostUsers[i].id },
+      data: {
+        responseMedianMin: p.medianMin,
+        responseRate24h: p.rate,
+        responseSampleCount: p.sample,
+        responseUpdatedAt: new Date(),
+      },
+    })
+  }
+
+  console.log(
+    `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
+      `${hostUsers.length} host response stats.`
+  )
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)
   console.log(`👤 host1@offhours.kr ~ host${SPACE_SEEDS.length}@offhours.kr / host1234  (HOST)`)

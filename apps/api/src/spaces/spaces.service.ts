@@ -79,7 +79,24 @@ export class SpacesService {
     const baseInclude = {
       photos: { take: 1, orderBy: { order: 'asc' } as const },
       venue: {
-        select: { region: true, district: true, category: true, lat: true, lng: true },
+        select: {
+          region: true,
+          district: true,
+          category: true,
+          lat: true,
+          lng: true,
+          host: {
+            select: {
+              user: {
+                select: {
+                  responseMedianMin: true,
+                  responseRate24h: true,
+                  responseSampleCount: true,
+                },
+              },
+            },
+          },
+        },
       },
     }
 
@@ -330,16 +347,24 @@ export class SpacesService {
   private toCard(
     s: Space & {
       photos: SpacePhoto[]
-      venue: Pick<Venue, 'region' | 'district' | 'category'>
+      venue: Pick<Venue, 'region' | 'district' | 'category'> & {
+        host?: {
+          user?: {
+            responseMedianMin: number | null
+            responseRate24h: number | null
+            responseSampleCount: number | null
+          }
+        }
+      }
     },
     extras?: {
       distanceKm?: number | null
       nextAvailableAt?: Date | null
       lastMinuteDiscount?: number | null
-      avgApprovalMin?: number | null
     }
   ): SpaceCard {
     const cover = s.photos[0]
+    const hostUser = s.venue.host?.user
     return {
       id: s.id,
       slug: s.slug,
@@ -359,7 +384,9 @@ export class SpacesService {
       distanceKm: extras?.distanceKm ?? null,
       nextAvailableAt: extras?.nextAvailableAt ? extras.nextAvailableAt.toISOString() : null,
       lastMinuteDiscount: extras?.lastMinuteDiscount ?? null,
-      avgApprovalMin: extras?.avgApprovalMin ?? null,
+      avgApprovalMin: hostUser?.responseMedianMin ?? null,
+      responseRate24h: hostUser?.responseRate24h ?? null,
+      responseSampleCount: hostUser?.responseSampleCount ?? null,
     }
   }
 }

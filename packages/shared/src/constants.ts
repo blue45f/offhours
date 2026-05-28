@@ -106,10 +106,29 @@ export function lastMinuteDiscountRate(startAt: Date | string, now: Date = new D
   return 0.05
 }
 
-export function formatResponseTimeBadge(avgApprovalMin: number | null | undefined): string | null {
-  if (avgApprovalMin == null) return null
-  if (avgApprovalMin <= 60) return '1시간 내 응답'
-  if (avgApprovalMin <= 6 * 60) return `${Math.round(avgApprovalMin / 60)}시간 내 응답`
-  if (avgApprovalMin <= 24 * 60) return '24시간 내 응답'
-  return '응답 다소 늦음'
+/**
+ * Airbnb / Peerspace / Tagvenue 룰 합성:
+ * - 최근 30일 신규 문의 ≥ {@link RESPONSE_BADGE_MIN_SAMPLE} 건
+ * - 24h 이내 응답률 ≥ {@link RESPONSE_BADGE_MIN_RATE}
+ * 둘 다 만족하지 못하면 통계 왜곡 방지를 위해 뱃지 미노출.
+ *
+ * 라벨은 중앙값 기준 1 / 3 / 12 / 24h 4단계로 양자화. 24h 초과면 null.
+ */
+export const RESPONSE_BADGE_MIN_SAMPLE = 10
+export const RESPONSE_BADGE_MIN_RATE = 0.9
+
+export function formatResponseTimeBadge(input: {
+  medianMin: number | null | undefined
+  rate24h: number | null | undefined
+  sampleCount: number | null | undefined
+}): string | null {
+  const { medianMin, rate24h, sampleCount } = input
+  if (medianMin == null || rate24h == null || sampleCount == null) return null
+  if (sampleCount < RESPONSE_BADGE_MIN_SAMPLE) return null
+  if (rate24h < RESPONSE_BADGE_MIN_RATE) return null
+  if (medianMin <= 60) return '보통 1시간 안에 답해요'
+  if (medianMin <= 3 * 60) return '보통 3시간 안에 답해요'
+  if (medianMin <= 12 * 60) return '보통 12시간 안에 답해요'
+  if (medianMin <= 24 * 60) return '보통 24시간 안에 답해요'
+  return null
 }

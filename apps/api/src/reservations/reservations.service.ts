@@ -95,6 +95,7 @@ export class ReservationsService {
       where: { id: r.id },
       data: { status: 'APPROVED' },
     })
+    await this.recordHostResponse(hostUserId, r.createdAt)
     await this.notifications.create(r.guestId, {
       type: 'RESERVATION_APPROVED',
       title: '예약이 승인됐어요',
@@ -111,6 +112,7 @@ export class ReservationsService {
       where: { id: r.id },
       data: { status: 'CANCELED', cancelReason: reason },
     })
+    await this.recordHostResponse(hostUserId, r.createdAt)
     await this.notifications.create(r.guestId, {
       type: 'RESERVATION_REJECTED',
       title: '예약이 거절됐어요',
@@ -118,6 +120,40 @@ export class ReservationsService {
       data: { reservationId: r.id },
     })
     return updated
+  }
+
+  /**
+   * 호스트의 응답 통계를 갱신한다.
+   * 캐시는 incremental 추정 — 최근 30일 cron 재집계는 별도 잡으로 정확화.
+   * 표본 < 10 또는 응답률 < 0.9 면 SpaceCard 뱃지가 자동으로 숨겨진다.
+   */
+  private async recordHostResponse(hostUserId: string, requestedAt: Date) {
+    const respondedAtMs = Date.now()
+    const minutes = Math.max(1, Math.round((respondedAtMs - requestedAt.getTime()) / 60000))
+    const within24h = minutes <= 24 * 60
+
+    const host = await this.prisma.user.findUnique({
+      where: { id: hostUserId },
+      select: { responseMedianMin: true, responseRate24h: true, responseSampleCount: true },
+    })
+    if (!host) return
+
+    const n = (host.responseSampleCount ?? 0) + 1
+    // 중앙값은 정확히는 분포가 필요하지만 캐시 단순화를 위해 EMA(α=0.3)로 근사.
+    const prevMedian = host.responseMedianMin ?? minutes
+    const nextMedian = Math.round(prevMedian * 0.7 + minutes * 0.3)
+    const prevRate = host.responseRate24h ?? (within24h ? 1 : 0)
+    const nextRate = (prevRate * (n - 1) + (within24h ? 1 : 0)) / n
+
+    await this.prisma.user.update({
+      where: { id: hostUserId },
+      data: {
+        responseMedianMin: nextMedian,
+        responseRate24h: Number(nextRate.toFixed(3)),
+        responseSampleCount: n,
+        responseUpdatedAt: new Date(),
+      },
+    })
   }
 
   async cancelByGuest(guestId: string, reservationId: string, reason: string) {

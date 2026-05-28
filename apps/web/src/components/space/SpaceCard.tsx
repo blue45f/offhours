@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Clock, Heart, MapPin, Navigation, Users } from 'lucide-react'
+import { Clock, Heart, MapPin, MessageCircle, Navigation, Users } from 'lucide-react'
 import type { SpaceCard as SpaceCardType } from '@offhours/shared'
-import { VenueCategoryLabel, formatDistanceKm } from '@offhours/shared'
+import { VenueCategoryLabel, formatDistanceKm, formatResponseTimeBadge } from '@offhours/shared'
 
 import { Badge } from '../ui/Badge'
 import { StarRating } from '../ui/StarRating'
@@ -102,6 +102,19 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
             ) : null}
           </div>
         )}
+        {(() => {
+          const badge = formatResponseTimeBadge({
+            medianMin: space.avgApprovalMin ?? null,
+            rate24h: space.responseRate24h ?? null,
+            sampleCount: space.responseSampleCount ?? null,
+          })
+          return badge ? (
+            <div className="inline-flex items-center gap-1 text-meta">
+              <MessageCircle size={11} />
+              {badge}
+            </div>
+          ) : null
+        })()}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-1 text-meta">
             <Users size={12} />
