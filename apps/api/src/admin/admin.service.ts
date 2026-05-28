@@ -1,0 +1,304 @@
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { Prisma, type Role } from '@prisma/client'
+import type {
+  BroadcastNotificationInput,
+  ResolveReportInput,
+  SetSuspendedInput,
+} from '@offhours/shared'
+
+import { PrismaService } from '../prisma/prisma.service'
+import { NotificationsService } from '../notifications/notifications.service'
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService
+  ) {}
+
+  async kpi() {
+    const now = new Date()
+    const startOfToday = new Date(now)
+    startOfToday.setUTCHours(0, 0, 0, 0)
+    const startOfYesterday = new Date(startOfToday)
+    startOfYesterday.setUTCDate(startOfYesterday.getUTCDate() - 1)
+
+    const [
+      gmvToday,
+      gmvYesterday,
+      resvToday,
+      activeRes,
+      openDisputes,
+      newGuests,
+      newHosts,
+      openReports,
+    ] = await Promise.all([
+      this.prisma.payment.aggregate({
+        _sum: { amountKRW: true },
+        where: { status: 'CAPTURED', capturedAt: { gte: startOfToday } },
+      }),
+      this.prisma.payment.aggregate({
+        _sum: { amountKRW: true },
+        where: {
+          status: 'CAPTURED',
+          capturedAt: { gte: startOfYesterday, lt: startOfToday },
+        },
+      }),
+      this.prisma.reservation.count({ where: { createdAt: { gte: startOfToday } } }),
+      this.prisma.reservation.count({
+        where: { status: { in: ['APPROVED', 'PAID', 'CHECKED_IN'] } },
+      }),
+      this.prisma.dispute.count({ where: { status: { in: ['OPEN', 'UNDER_REVIEW'] } } }),
+      this.prisma.user.count({
+        where: { createdAt: { gte: startOfToday }, role: 'USER' },
+      }),
+      this.prisma.user.count({
+        where: { createdAt: { gte: startOfToday }, role: 'HOST' },
+      }),
+      this.prisma.report.count({ where: { status: { in: ['OPEN', 'UNDER_REVIEW'] } } }),
+    ])
+
+    const totalSpaces = await this.prisma.space.count({ where: { status: 'ACTIVE' } })
+    const totalViews = await this.prisma.space.aggregate({ _sum: { viewCount: true } })
+    const cr =
+      totalViews._sum.viewCount && totalViews._sum.viewCount > 0
+        ? Math.min(1, resvToday / Math.max(1, totalViews._sum.viewCount / 30))
+        : 0
+
+    return {
+      gmvTodayKRW: gmvToday._sum.amountKRW ?? 0,
+      gmvYesterdayKRW: gmvYesterday._sum.amountKRW ?? 0,
+      reservationsToday: resvToday,
+      reservationsActive: activeRes,
+      disputesOpen: openDisputes,
+      newGuestsToday: newGuests,
+      newHostsToday: newHosts,
+      conversionRate: cr,
+      avgApprovalMin: 0,
+      openReports,
+      activeSpaces: totalSpaces,
+    }
+  }
+
+  async gmvTimeseries(days = 30) {
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    const rows = await this.prisma.$queryRaw<{ day: Date; total: bigint }[]>`
+      SELECT date_trunc('day', "capturedAt") AS day, COALESCE(SUM("amountKRW"), 0) AS total
+      FROM "Payment"
+      WHERE "status" = 'CAPTURED' AND "capturedAt" >= ${since}
+      GROUP BY day ORDER BY day ASC
+    `
+    return rows.map((r) => ({ date: r.day.toISOString().slice(0, 10), value: Number(r.total) }))
+  }
+
+  async categoryShare() {
+    const rows = await this.prisma.$queryRaw<{ category: string; total: bigint }[]>`
+      SELECT v."category" AS category, COALESCE(SUM(p."amountKRW"), 0) AS total
+      FROM "Payment" p
+      JOIN "Reservation" r ON r."id" = p."reservationId"
+      JOIN "Space" s ON s."id" = r."spaceId"
+      JOIN "Venue" v ON v."id" = s."venueId"
+      WHERE p."status" = 'CAPTURED'
+      GROUP BY v."category" ORDER BY total DESC
+    `
+    return rows.map((r) => ({ category: r.category, value: Number(r.total) }))
+  }
+
+  async listUsers(search?: string, role?: Role, page = 1, pageSize = 20) {
+    const where: Prisma.UserWhereInput = {
+      ...(role ? { role } : {}),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { email: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    }
+    const [items, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          _count: { select: { reservations: true } },
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ])
+    return {
+      items: items.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        isSuspended: u.isSuspended,
+        isVerified: u.isVerified,
+        trustScore: u.trustScore,
+        createdAt: u.createdAt.toISOString(),
+        reservationCount: u._count.reservations,
+      })),
+      total,
+      page,
+      pageSize,
+    }
+  }
+
+  async setSuspended(actorId: string, userId: string, input: SetSuspendedInput) {
+    const before = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!before) throw new NotFoundException()
+    const after = await this.prisma.user.update({
+      where: { id: userId },
+      data: { isSuspended: input.suspended, suspendReason: input.reason ?? null },
+    })
+    await this.audit(actorId, 'USER_SUSPEND', 'USER', userId, before, after)
+    if (input.suspended) {
+      await this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      })
+    }
+    return after
+  }
+
+  async setRole(actorId: string, userId: string, role: Role) {
+    const before = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!before) throw new NotFoundException()
+    const after = await this.prisma.user.update({ where: { id: userId }, data: { role } })
+    await this.audit(actorId, 'USER_SET_ROLE', 'USER', userId, before, after)
+    return after
+  }
+
+  async pendingSpaces() {
+    return this.prisma.space.findMany({
+      where: { status: 'PENDING_REVIEW' },
+      include: {
+        photos: true,
+        venue: { include: { host: { include: { user: true } } } },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+  }
+
+  async approveSpace(actorId: string, spaceId: string) {
+    const before = await this.prisma.space.findUnique({ where: { id: spaceId } })
+    if (!before) throw new NotFoundException()
+    const after = await this.prisma.space.update({
+      where: { id: spaceId },
+      data: { status: 'ACTIVE', approvedAt: new Date() },
+    })
+    await this.audit(actorId, 'SPACE_APPROVE', 'SPACE', spaceId, before, after)
+    return after
+  }
+
+  async rejectSpace(actorId: string, spaceId: string, reason: string) {
+    const before = await this.prisma.space.findUnique({ where: { id: spaceId } })
+    if (!before) throw new NotFoundException()
+    const after = await this.prisma.space.update({
+      where: { id: spaceId },
+      data: { status: 'REJECTED' },
+    })
+    await this.audit(actorId, 'SPACE_REJECT', 'SPACE', spaceId, before, { ...after, reason })
+    return after
+  }
+
+  async listReports(page = 1, pageSize = 20) {
+    const [items, total] = await Promise.all([
+      this.prisma.report.findMany({
+        include: { reporter: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.report.count(),
+    ])
+    return { items, total, page, pageSize }
+  }
+
+  async resolveReport(actorId: string, reportId: string, input: ResolveReportInput) {
+    const before = await this.prisma.report.findUnique({ where: { id: reportId } })
+    if (!before) throw new NotFoundException()
+    const after = await this.prisma.report.update({
+      where: { id: reportId },
+      data: {
+        status: input.status,
+        resolution: input.resolution,
+        resolvedAt: ['RESOLVED', 'DISMISSED'].includes(input.status) ? new Date() : null,
+      },
+    })
+    await this.audit(actorId, 'REPORT_RESOLVE', 'REPORT', reportId, before, after)
+    return after
+  }
+
+  async auditLogs(page = 1, pageSize = 50) {
+    const [items, total] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        include: { actor: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.auditLog.count(),
+    ])
+    return {
+      items: items.map((a) => ({
+        id: a.id,
+        actorId: a.actorId,
+        actorName: a.actor.name,
+        action: a.action,
+        targetType: a.targetType,
+        targetId: a.targetId,
+        ip: a.ip,
+        createdAt: a.createdAt.toISOString(),
+      })),
+      total,
+      page,
+      pageSize,
+    }
+  }
+
+  async broadcast(actorId: string, input: BroadcastNotificationInput) {
+    const where: Prisma.UserWhereInput =
+      input.audience === 'ALL'
+        ? {}
+        : input.audience === 'GUESTS'
+          ? { role: 'USER' }
+          : input.audience === 'HOSTS'
+            ? { role: 'HOST' }
+            : { isSuspended: true }
+    const users = await this.prisma.user.findMany({ where, select: { id: true } })
+    for (const u of users) {
+      await this.notifications.create(u.id, {
+        type: 'SYSTEM',
+        title: input.title,
+        body: input.body,
+      })
+    }
+    await this.audit(actorId, 'BROADCAST', 'NOTIFICATION', input.audience, null, {
+      count: users.length,
+    })
+    return { count: users.length }
+  }
+
+  private async audit(
+    actorId: string,
+    action: string,
+    targetType: string,
+    targetId: string,
+    before: unknown,
+    after: unknown
+  ) {
+    await this.prisma.auditLog.create({
+      data: {
+        actorId,
+        action,
+        targetType,
+        targetId,
+        before: (before as object) ?? undefined,
+        after: (after as object) ?? undefined,
+      },
+    })
+  }
+}
