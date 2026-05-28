@@ -121,6 +121,11 @@ export function Header() {
                         onSelect={() => setOpen(false)}
                       />
                       <DropItem to="/favorites" label="찜한 공간" onSelect={() => setOpen(false)} />
+                      <DropItem
+                        to="/collections"
+                        label="내 컬렉션"
+                        onSelect={() => setOpen(false)}
+                      />
                       <DropItem to="/chat" label="채팅" onSelect={() => setOpen(false)} />
                       {isHost && (
                         <>

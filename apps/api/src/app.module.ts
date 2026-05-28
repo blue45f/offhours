@@ -17,6 +17,7 @@ import { ReviewsModule } from './reviews/reviews.module'
 import { ChatModule } from './chat/chat.module'
 import { NotificationsModule } from './notifications/notifications.module'
 import { FavoritesModule } from './favorites/favorites.module'
+import { CollectionsModule } from './collections/collections.module'
 import { ReportsModule } from './reports/reports.module'
 import { AdminModule } from './admin/admin.module'
 import { SeoModule } from './seo/seo.module'
@@ -41,6 +42,7 @@ import { HealthController } from './common/health.controller'
     ChatModule,
     NotificationsModule,
     FavoritesModule,
+    CollectionsModule,
     ReportsModule,
     AdminModule,
     SeoModule,

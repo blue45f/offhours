@@ -1,16 +1,28 @@
-import { Heart } from 'lucide-react'
+import { FolderHeart, Heart } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { EmptyState } from '../components/ui/EmptyState'
+import { Button } from '../components/ui/Button'
 import { useFavorites } from '../features/favorites/api'
 
 export default function FavoritesPage() {
   const { data, isLoading } = useFavorites()
   return (
     <div className="container-page py-8 md:py-12">
-      <h1 className="text-headline serif">찜한 공간</h1>
-      <p className="mt-1 text-sm text-[var(--color-fg-muted)]">관심 있는 공간을 모아두세요.</p>
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h1 className="text-headline serif">찜한 공간</h1>
+          <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
+            폴더로 정리하고 친구와 공유하려면 컬렉션을 사용하세요.
+          </p>
+        </div>
+        <Link to="/collections">
+          <Button variant="secondary" leading={<FolderHeart size={14} />}>
+            내 컬렉션
+          </Button>
+        </Link>
+      </div>
       <div className="mt-8">
         {!isLoading && (!data || data.length === 0) ? (
           <EmptyState

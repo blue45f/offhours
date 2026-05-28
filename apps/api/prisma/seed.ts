@@ -589,9 +589,66 @@ async function main() {
     })
   }
 
+  // 데모 컬렉션(위시리스트) — 게스트가 "26살 여름 결혼식 후보" 같이 그룹 결정용 폴더로
+  // 모은 공간 모음. 공유 가능한 슬러그 URL 로 친구에게 보냄.
+  await prisma.favorite.deleteMany({ where: { userId: guest.id } })
+  await prisma.collection.deleteMany({ where: { ownerId: guest.id } })
+  const activeSpacesForCollections = await prisma.space.findMany({
+    where: { status: 'ACTIVE' },
+    select: { id: true, venue: { select: { category: true } } },
+  })
+  const collectionsSeed = [
+    {
+      slug: 'summer-wedding-2026',
+      name: '26살 여름 결혼식 후보',
+      emoji: '💒',
+      description: '60~120명 스몰웨딩, 야외 가능. 친구들과 함께 골라요.',
+      isPublic: true,
+      categories: ['GALLERY', 'ROOFTOP', 'HOUSE', 'RESTAURANT'] as const,
+    },
+    {
+      slug: 'team-workshop-q3',
+      name: '3분기 사내 워크샵 후보',
+      emoji: '💼',
+      description: '20~40명, 세금계산서 가능, 프로젝터 필수.',
+      isPublic: true,
+      categories: ['MEETING', 'WORKSHOP', 'CAFE'] as const,
+    },
+    {
+      slug: 'birthday-secret',
+      name: '비공개 — 친구 깜짝 생일',
+      emoji: '🎂',
+      description: '본인만 볼 수 있는 비공개 폴더',
+      isPublic: false,
+      categories: ['BAR', 'ROOFTOP', 'RESTAURANT'] as const,
+    },
+  ]
+  for (const c of collectionsSeed) {
+    const collection = await prisma.collection.create({
+      data: {
+        ownerId: guest.id,
+        slug: c.slug,
+        name: c.name,
+        emoji: c.emoji,
+        description: c.description,
+        isPublic: c.isPublic,
+      },
+    })
+    const picks = activeSpacesForCollections
+      .filter((s) => (c.categories as readonly string[]).includes(s.venue.category))
+      .slice(0, 5)
+    for (const p of picks) {
+      await prisma.favorite.upsert({
+        where: { userId_spaceId: { userId: guest.id, spaceId: p.id } },
+        update: { collectionId: collection.id },
+        create: { userId: guest.id, spaceId: p.id, collectionId: collection.id },
+      })
+    }
+  }
+
   console.log(
     `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
-      `${hostUsers.length} host response stats.`
+      `${hostUsers.length} host response stats, ${collectionsSeed.length} collections.`
   )
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)
