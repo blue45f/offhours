@@ -129,6 +129,17 @@ export default function SpaceDetailPage() {
                     </p>
                   ) : null
                 })()}
+                {data.venue.host.reviewResponseRate != null &&
+                  data.venue.host.reviewSampleCount >= 2 && (
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-fg-muted)]">
+                      <ShieldCheck size={12} />
+                      후기 답글률{' '}
+                      <span className="font-semibold text-[var(--color-primary)]">
+                        {Math.round(data.venue.host.reviewResponseRate * 100)}%
+                      </span>{' '}
+                      ({data.venue.host.reviewSampleCount}건)
+                    </p>
+                  )}
               </div>
             </div>
             <TrustGauge score={data.venue.host.trustScore} />

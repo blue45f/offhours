@@ -4,6 +4,13 @@ import { PrismaClient, Role } from '@prisma/client'
 import * as argon2 from 'argon2'
 import { randomBytes } from 'crypto'
 
+const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+function randomCode(prefix: string, length = 6) {
+  let s = ''
+  for (let i = 0; i < length; i++) s += ALPHA[Math.floor(Math.random() * ALPHA.length)]
+  return `${prefix}-${s}`
+}
+
 const prisma = new PrismaClient({
   adapter: new PrismaPg(
     process.env.DATABASE_URL ??
@@ -585,6 +592,150 @@ async function main() {
         responseSampleCount: p.sample,
         responseUpdatedAt: new Date(),
         trustScore: p.trust,
+      },
+    })
+  }
+
+  // 데모 후기 + 호스트 답글 — 신뢰 시그널 데모. 각 공간에 2~4건 게스트 후기,
+  // 호스트별로 답글률 패턴 다르게(0%, 50%, 100%) 노출돼 디테일 페이지의 "답글률" 뱃지 확인 가능.
+  await prisma.review.deleteMany({
+    where: { author: { email: { contains: 'guest@offhours.kr' } } },
+  })
+  await prisma.reservation.deleteMany({
+    where: { guestId: guest.id, status: 'COMPLETED' },
+  })
+  const reviewCorpus = [
+    {
+      rating: 5,
+      comment:
+        '공간이 너무 예뻐서 사진이 안 잘 나올 수가 없어요. 호스트분이 음향 세팅까지 도와주셔서 마음 편하게 행사했습니다.',
+      hostResponse: '소중한 후기 감사드려요! 다음에도 편하게 이용해주시면 언제든 환영입니다 :)',
+    },
+    {
+      rating: 5,
+      comment:
+        '8시간 단위 통대관이라 처음엔 가격이 걱정됐는데, 청소비·간단 케이터링까지 포함이라 결과적으로 합리적이었어요.',
+      hostResponse:
+        '말씀해주신 패키지 구성, 게스트분들이 가장 만족해주시는 부분이라 더 신경 쓰고 있어요. 감사합니다.',
+    },
+    {
+      rating: 4,
+      comment:
+        '동선·청소 가이드가 명확해서 좋았어요. 주차장이 좁아서 친구들 차량 분산해 안내했는데, 안내 메시지를 미리 받을 수 있으면 더 좋겠습니다.',
+      hostResponse: null,
+    },
+    {
+      rating: 5,
+      comment:
+        '저녁 시간대 통대관 후 22시 마감까지 여유 있게 정리할 수 있어 정말 좋았습니다. 다음 모임에도 다시 예약할게요.',
+      hostResponse: null,
+    },
+    {
+      rating: 4,
+      comment:
+        '인스타에서 봤던 무드 그대로였어요. 30명 베이비샤워 정말 잘 진행됐습니다. 빔프로젝터 화질이 조금 아쉬워서 별 하나 뺐어요.',
+      hostResponse:
+        '아기 사진 잘 받으셨길 바라요. 프로젝터는 4K로 교체 진행 중이고 다음 달 완료 예정입니다. 알려주셔서 감사해요!',
+    },
+    {
+      rating: 3,
+      comment:
+        '청소 상태는 좋았는데 환기가 잘 안 되는 편이었습니다. 여름 행사에는 다시 고민해볼 것 같아요.',
+      hostResponse:
+        '환기 관련 피드백 감사합니다. 추가 환풍기 설치를 알아보고 있어요. 다음번엔 더 쾌적하게 모실게요.',
+    },
+  ]
+  const activeSpaceList = await prisma.space.findMany({
+    where: { status: 'ACTIVE' },
+    select: {
+      id: true,
+      basePriceKRW: true,
+      cleaningFeeKRW: true,
+      capacityMin: true,
+      venue: { select: { host: { select: { userId: true } } } },
+    },
+    take: 10,
+  })
+  let reviewIdx = 0
+  for (let i = 0; i < activeSpaceList.length; i++) {
+    const space = activeSpaceList[i]
+    const hostUserId = space.venue.host.userId
+    // host별 답글률 패턴: 0번 0%, 1번 50%, 2번 100%, 3번 100%, 4번 60%, ...
+    const responsePattern = [0, 0.5, 1, 1, 0.6, 0.8, 1, 0.4, 1, 0.7][i % 10]
+    const reviewsPerSpace = 2 + (i % 3)
+    for (let j = 0; j < reviewsPerSpace; j++) {
+      const corpus = reviewCorpus[reviewIdx % reviewCorpus.length]
+      reviewIdx++
+      const startAt = new Date()
+      startAt.setDate(startAt.getDate() - (10 + j * 7))
+      startAt.setHours(19, 0, 0, 0)
+      const endAt = new Date(startAt.getTime() + 4 * 60 * 60 * 1000)
+      const reservation = await prisma.reservation.create({
+        data: {
+          code: randomCode('RV', 6),
+          spaceId: space.id,
+          guestId: guest.id,
+          startAt,
+          endAt,
+          headcount: space.capacityMin + j * 2,
+          purpose: 'PARTY',
+          status: 'COMPLETED',
+          baseAmountKRW: space.basePriceKRW * 4,
+          cleaningFeeKRW: space.cleaningFeeKRW,
+          depositKRW: 0,
+          totalKRW: space.basePriceKRW * 4 + space.cleaningFeeKRW,
+          feeKRW: Math.round(space.basePriceKRW * 4 * 0.1),
+        },
+      })
+      const shouldRespond = Math.random() < responsePattern && corpus.hostResponse != null
+      await prisma.review.create({
+        data: {
+          reservationId: reservation.id,
+          authorId: guest.id,
+          subjectId: hostUserId,
+          spaceId: space.id,
+          rating: corpus.rating,
+          comment: corpus.comment,
+          isPublished: true,
+          publishedAt: new Date(),
+          hostResponse: shouldRespond ? corpus.hostResponse : null,
+          hostResponseAt: shouldRespond ? new Date() : null,
+        },
+      })
+    }
+    // refresh space rating
+    const agg = await prisma.review.aggregate({
+      _avg: { rating: true },
+      _count: true,
+      where: { spaceId: space.id, isPublished: true, isHidden: false },
+    })
+    await prisma.space.update({
+      where: { id: space.id },
+      data: { ratingAvg: agg._avg.rating ?? 0, ratingCount: agg._count },
+    })
+  }
+  // 호스트별 답글률 캐시 재계산
+  const uniqueHostIds = Array.from(new Set(activeSpaceList.map((s) => s.venue.host.userId)))
+  for (const hid of uniqueHostIds) {
+    const total = await prisma.review.count({
+      where: { subjectId: hid, isPublished: true, isHidden: false, spaceId: { not: null } },
+    })
+    const answered = await prisma.review.count({
+      where: {
+        subjectId: hid,
+        isPublished: true,
+        isHidden: false,
+        spaceId: { not: null },
+        hostResponse: { not: null },
+      },
+    })
+    await prisma.user.update({
+      where: { id: hid },
+      data: {
+        reviewSampleCount: total,
+        reviewResponseCount: answered,
+        reviewResponseRate: total > 0 ? Number((answered / total).toFixed(3)) : null,
+        reviewStatsUpdatedAt: new Date(),
       },
     })
   }

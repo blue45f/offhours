@@ -253,6 +253,8 @@ export class SpacesService {
           avatarUrl: space.venue.host.user.avatarUrl,
           trustScore: space.venue.host.user.trustScore,
           hostedCount: space.venue.host.user.hostedCount,
+          reviewResponseRate: space.venue.host.user.reviewResponseRate ?? null,
+          reviewSampleCount: space.venue.host.user.reviewSampleCount ?? 0,
         },
       },
     }

@@ -27,6 +27,7 @@ const HostDashboardPage = lazy(() => import('../pages/HostDashboardPage'))
 const HostSpacesPage = lazy(() => import('../pages/HostSpacesPage'))
 const HostNewSpacePage = lazy(() => import('../pages/HostNewSpacePage'))
 const HostReservationsPage = lazy(() => import('../pages/HostReservationsPage'))
+const HostReviewsPage = lazy(() => import('../pages/HostReviewsPage'))
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
 const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'))
 const AdminSpacesPage = lazy(() => import('../pages/admin/AdminSpacesPage'))
@@ -162,6 +163,14 @@ export const router = createBrowserRouter([
             element: lazyEl(
               <HostOnly>
                 <HostReservationsPage />
+              </HostOnly>
+            ),
+          },
+          {
+            path: 'reviews',
+            element: lazyEl(
+              <HostOnly>
+                <HostReviewsPage />
               </HostOnly>
             ),
           },

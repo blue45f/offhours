@@ -140,6 +140,11 @@ export function Header() {
                             label="내 공간"
                             onSelect={() => setOpen(false)}
                           />
+                          <DropItem
+                            to="/host/reviews"
+                            label="리뷰 관리"
+                            onSelect={() => setOpen(false)}
+                          />
                         </>
                       )}
                       {isAdmin && (

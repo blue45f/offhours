@@ -30,6 +30,23 @@ export class ReviewsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @Get('host/me')
+  async listForHost(
+    @CurrentUser() user: RequestUser,
+    @Query('filter') filter?: 'all' | 'unanswered' | 'answered',
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string
+  ) {
+    return this.reviews.listForHost(
+      user.id,
+      filter ?? 'all',
+      Number(page) || 1,
+      Number(pageSize) || 20
+    )
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @CurrentUser() user: RequestUser,

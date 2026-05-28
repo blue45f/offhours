@@ -42,6 +42,11 @@ model User {
   responseRate24h     Float?
   responseSampleCount Int      @default(0)
   responseUpdatedAt   DateTime?
+  // 호스트 후기 답글 통계 (전체 기간 캐시) — answered / total
+  reviewResponseRate     Float?
+  reviewResponseCount    Int      @default(0)
+  reviewSampleCount      Int      @default(0)
+  reviewStatsUpdatedAt   DateTime?
   lastLoginAt    DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

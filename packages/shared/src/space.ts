@@ -123,6 +123,9 @@ export const SpaceDetailSchema = SpaceCardSchema.extend({
       avatarUrl: z.string().nullable(),
       trustScore: z.number(),
       hostedCount: z.number(),
+      /** 호스트 후기 답글률 (0~1). 후기 ≥3건 + 답글 ≥1건일 때만 노출 권장 */
+      reviewResponseRate: z.number().nullable(),
+      reviewSampleCount: z.number(),
     }),
   }),
 })
