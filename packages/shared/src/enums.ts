@@ -128,6 +128,143 @@ export const PurposeLabel: Record<Purpose, string> = {
   OTHER: '기타',
 }
 
+/**
+ * 게스트의 멘탈모델로 검색하는 use-case 분류.
+ * Venue 카테고리(공급자 분류)와 직교: 같은 카페가 BIRTHDAY/CLASS/MEETUP 여럿에 노출될 수 있음.
+ * Peerspace 의 "Event Type" 모델 한국화. 검색 SEO 도 long-tail 로 잡힌다.
+ */
+export const UseCase = {
+  BIRTHDAY: 'BIRTHDAY',
+  WEDDING_SMALL: 'WEDDING_SMALL',
+  BABYSHOWER: 'BABYSHOWER',
+  GATHERING: 'GATHERING',
+  CORPORATE_WORKSHOP: 'CORPORATE_WORKSHOP',
+  TEAM_BUILDING: 'TEAM_BUILDING',
+  POPUP_EXHIBIT: 'POPUP_EXHIBIT',
+  FILMING: 'FILMING',
+  CLASS: 'CLASS',
+  REHEARSAL: 'REHEARSAL',
+  PHOTOSHOOT: 'PHOTOSHOOT',
+  NETWORKING: 'NETWORKING',
+} as const
+export const UseCaseSchema = z.enum([
+  'BIRTHDAY',
+  'WEDDING_SMALL',
+  'BABYSHOWER',
+  'GATHERING',
+  'CORPORATE_WORKSHOP',
+  'TEAM_BUILDING',
+  'POPUP_EXHIBIT',
+  'FILMING',
+  'CLASS',
+  'REHEARSAL',
+  'PHOTOSHOOT',
+  'NETWORKING',
+])
+export type UseCase = z.infer<typeof UseCaseSchema>
+
+export interface UseCaseMeta {
+  label: string
+  emoji: string
+  /** 게스트에게 보여줄 한 줄 설명 (홈 그리드의 sub-text) */
+  hint: string
+  /** 이 use case 에 어울리는 venue 카테고리(공급 매칭 기본값) */
+  matchCategories: VenueCategory[]
+  /** 일반적인 인원 범위 (search prefill 용) */
+  typicalCapacity: { min: number; max: number }
+}
+
+export const USE_CASE_META: Record<UseCase, UseCaseMeta> = {
+  BIRTHDAY: {
+    label: '친구 생일파티',
+    emoji: '🎂',
+    hint: '20~40명 케이크·BYOB',
+    matchCategories: ['CAFE', 'BAR', 'RESTAURANT', 'ROOFTOP', 'HOUSE'],
+    typicalCapacity: { min: 10, max: 40 },
+  },
+  WEDDING_SMALL: {
+    label: '스몰웨딩',
+    emoji: '💒',
+    hint: '60~120명, 음향·식음 가능',
+    matchCategories: ['GALLERY', 'ROOFTOP', 'HOUSE', 'RESTAURANT'],
+    typicalCapacity: { min: 40, max: 120 },
+  },
+  BABYSHOWER: {
+    label: '베이비샤워·돌잔치',
+    emoji: '🎀',
+    hint: '15~40명, 포토존 좋은 곳',
+    matchCategories: ['CAFE', 'HOUSE', 'STUDIO'],
+    typicalCapacity: { min: 10, max: 40 },
+  },
+  GATHERING: {
+    label: '동호회·모임',
+    emoji: '🍻',
+    hint: '10~30명 음료·간단한 식사',
+    matchCategories: ['CAFE', 'BAR', 'RESTAURANT', 'MEETING'],
+    typicalCapacity: { min: 6, max: 30 },
+  },
+  CORPORATE_WORKSHOP: {
+    label: '사내 워크샵·MT',
+    emoji: '💼',
+    hint: '20~50명, 프로젝터·세금계산서',
+    matchCategories: ['MEETING', 'WORKSHOP', 'HOUSE', 'ROOFTOP'],
+    typicalCapacity: { min: 10, max: 50 },
+  },
+  TEAM_BUILDING: {
+    label: '팀빌딩·송년회',
+    emoji: '🎉',
+    hint: '30~80명 통대관',
+    matchCategories: ['BAR', 'RESTAURANT', 'ROOFTOP', 'HOUSE'],
+    typicalCapacity: { min: 20, max: 80 },
+  },
+  POPUP_EXHIBIT: {
+    label: '팝업·브랜드 전시',
+    emoji: '🪧',
+    hint: '하루~주말 단위 임대',
+    matchCategories: ['GALLERY', 'STUDIO', 'CAFE', 'ETC'],
+    typicalCapacity: { min: 20, max: 200 },
+  },
+  FILMING: {
+    label: '영상·광고 촬영',
+    emoji: '🎬',
+    hint: '하루 단위, 음향 통제 가능',
+    matchCategories: ['STUDIO', 'HOUSE', 'CAFE', 'GALLERY', 'ROOFTOP'],
+    typicalCapacity: { min: 4, max: 30 },
+  },
+  CLASS: {
+    label: '원데이 클래스·강의',
+    emoji: '🧑‍🏫',
+    hint: '8~30명, 테이블·콘센트',
+    matchCategories: ['WORKSHOP', 'MEETING', 'CAFE', 'STUDIO'],
+    typicalCapacity: { min: 6, max: 30 },
+  },
+  REHEARSAL: {
+    label: '리허설·연습',
+    emoji: '🎼',
+    hint: '음향·무대 비치',
+    matchCategories: ['PRACTICE', 'DANCE', 'STUDIO'],
+    typicalCapacity: { min: 2, max: 20 },
+  },
+  PHOTOSHOOT: {
+    label: '프로필·스냅 촬영',
+    emoji: '📸',
+    hint: '1~2시간, 자연광·소품',
+    matchCategories: ['STUDIO', 'HOUSE', 'CAFE', 'ROOFTOP'],
+    typicalCapacity: { min: 1, max: 10 },
+  },
+  NETWORKING: {
+    label: '세미나·네트워킹',
+    emoji: '🗣️',
+    hint: '30~100명, 음향·마이크',
+    matchCategories: ['MEETING', 'WORKSHOP', 'BAR', 'GALLERY'],
+    typicalCapacity: { min: 20, max: 100 },
+  },
+}
+
+export const UseCaseLabel: Record<UseCase, string> = Object.fromEntries(
+  (Object.keys(USE_CASE_META) as UseCase[]).map((k) => [k, USE_CASE_META[k].label])
+) as Record<UseCase, string>
+
 export const ReservationStatusSchema = z.enum([
   'REQUESTED',
   'APPROVED',

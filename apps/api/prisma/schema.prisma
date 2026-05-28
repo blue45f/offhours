@@ -234,6 +234,8 @@ model Space {
   alcoholPolicy   AlcoholPolicy
   cateringPolicy  CateringPolicy
   amenities       String[]
+  /** use-case tags (PARTY/WEDDING_SMALL/CORPORATE_WORKSHOP…). 게스트의 멘탈모델 분류. */
+  useCases        String[]
   rules           String         @default("")
   status          SpaceStatus    @default(DRAFT)
   viewCount       Int            @default(0)

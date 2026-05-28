@@ -5,8 +5,10 @@ import {
   AlcoholPolicyLabel,
   AMENITY_OPTIONS,
   CateringPolicyLabel,
+  USE_CASE_META,
   type AlcoholPolicy,
   type CateringPolicy,
+  type UseCase,
 } from '@offhours/shared'
 
 import { Button } from '../components/ui/Button'
@@ -36,12 +38,17 @@ export default function HostNewSpacePage() {
   const [alcoholPolicy, setAlcoholPolicy] = useState<AlcoholPolicy>('BYOB')
   const [cateringPolicy, setCateringPolicy] = useState<CateringPolicy>('EXTERNAL_OK')
   const [amenities, setAmenities] = useState<string[]>(['wifi', 'speaker'])
+  const [useCases, setUseCases] = useState<UseCase[]>(['BIRTHDAY', 'GATHERING'])
   const [rules, setRules] = useState('실내 흡연 금지, 23시 이후 음향 70dB 이하, 원상복구 의무.')
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
   const [photoInput, setPhotoInput] = useState('')
 
   function toggleAmenity(a: string) {
     setAmenities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]))
+  }
+
+  function toggleUseCase(c: UseCase) {
+    setUseCases((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
   }
 
   function addPhoto() {
@@ -67,6 +74,7 @@ export default function HostNewSpacePage() {
         alcoholPolicy,
         cateringPolicy,
         amenities,
+        useCases,
         rules,
         photoUrls,
       })
@@ -216,21 +224,39 @@ export default function HostNewSpacePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>편의시설</CardTitle>
+            <CardTitle>모임 유형 · 편의시설</CardTitle>
             <span className="text-xs text-[var(--color-fg-muted)]">3 / 4</span>
           </CardHeader>
-          <CardBody>
-            <div className="flex flex-wrap gap-2">
-              {AMENITY_OPTIONS.map((a) => (
-                <Chip
-                  key={a.value}
-                  selected={amenities.includes(a.value)}
-                  onClick={() => toggleAmenity(a.value)}
-                >
-                  {a.label}
-                </Chip>
-              ))}
-            </div>
+          <CardBody className="space-y-5">
+            <Field
+              label="이런 모임에 좋아요"
+              helper="게스트는 카테고리가 아니라 '친구 생일 30명' 같은 시나리오로 검색해요. 어울리는 모임을 모두 선택해주세요."
+            >
+              <div className="flex flex-wrap gap-2">
+                {(Object.keys(USE_CASE_META) as UseCase[]).map((c) => {
+                  const meta = USE_CASE_META[c]
+                  return (
+                    <Chip key={c} selected={useCases.includes(c)} onClick={() => toggleUseCase(c)}>
+                      <span className="mr-1.5">{meta.emoji}</span>
+                      {meta.label}
+                    </Chip>
+                  )
+                })}
+              </div>
+            </Field>
+            <Field label="편의시설">
+              <div className="flex flex-wrap gap-2">
+                {AMENITY_OPTIONS.map((a) => (
+                  <Chip
+                    key={a.value}
+                    selected={amenities.includes(a.value)}
+                    onClick={() => toggleAmenity(a.value)}
+                  >
+                    {a.label}
+                  </Chip>
+                ))}
+              </div>
+            </Field>
           </CardBody>
         </Card>
 

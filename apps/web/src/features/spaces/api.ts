@@ -22,6 +22,8 @@ export interface SpaceSearchParams {
   priceMin?: number
   priceMax?: number
   amenities?: string
+  /** UseCase 코드 콤마 구분 — 백엔드에서 hasSome 매칭 */
+  useCases?: string
   instantBook?: boolean
   lat?: number
   lng?: number

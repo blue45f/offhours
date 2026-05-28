@@ -4,6 +4,7 @@ import {
   CateringPolicySchema,
   PurposeSchema,
   SpaceStatusSchema,
+  UseCaseSchema,
   VenueCategorySchema,
 } from './enums'
 
@@ -56,6 +57,7 @@ export const CreateSpaceSchema = z.object({
   alcoholPolicy: AlcoholPolicySchema,
   cateringPolicy: CateringPolicySchema,
   amenities: z.array(z.string()).default([]),
+  useCases: z.array(UseCaseSchema).max(12).default([]),
   rules: z.string().trim().max(2000).default(''),
   photoUrls: z.array(z.string().url()).min(1, '대표 사진을 1장 이상 등록해주세요').max(20),
 })
@@ -80,6 +82,8 @@ export const SpaceCardSchema = z.object({
   district: z.string(),
   category: VenueCategorySchema,
   instantBook: z.boolean(),
+  /** 호스트가 정한 use-case 태그. 게스트의 멘탈모델 검색용 */
+  useCases: z.array(UseCaseSchema).default([]),
   /** 게스트 위치 기준 거리(km). 위치 파라미터 없이 검색하면 null */
   distanceKm: z.number().nullable().optional(),
   /** 곧 시작 가능한 가장 빠른 슬롯 시각 (ISO). 검색에 availableFrom/Live 옵션을 줄 때만 채워짐 */
@@ -162,6 +166,12 @@ export const SpaceSearchSchema = z.object({
     .string()
     .optional()
     .transform((v) => (v ? v.split(',').filter(Boolean) : undefined)),
+  useCases: z
+    .string()
+    .optional()
+    .transform((v) =>
+      v ? (v.split(',').filter(Boolean) as Array<z.infer<typeof UseCaseSchema>>) : undefined
+    ),
   instantBook: z.coerce.boolean().optional(),
   /** 위치 기반: 위도·경도 + 반경(km) */
   lat: z.coerce.number().min(33).max(43).optional(),

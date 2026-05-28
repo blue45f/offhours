@@ -43,8 +43,25 @@ interface SeedSpaceSpec {
   alcohol: 'PROHIBITED' | 'BYOB' | 'HOST_LICENSED' | 'UNRESTRICTED'
   catering: 'EXTERNAL_OK' | 'HOST_ONLY' | 'BYO_OK'
   amenities: string[]
+  /** 호스트가 직접 지정한 use-case 태그. 비우면 카테고리 기반 디폴트가 채워짐 */
+  useCases?: string[]
   rating: number
   photos: string[]
+}
+
+const DEFAULT_USE_CASES_BY_CATEGORY: Record<SeedSpaceSpec['category'], string[]> = {
+  CAFE: ['BIRTHDAY', 'BABYSHOWER', 'GATHERING', 'CLASS'],
+  BAR: ['BIRTHDAY', 'GATHERING', 'TEAM_BUILDING'],
+  RESTAURANT: ['WEDDING_SMALL', 'TEAM_BUILDING', 'BIRTHDAY'],
+  STUDIO: ['FILMING', 'PHOTOSHOOT', 'POPUP_EXHIBIT'],
+  GALLERY: ['POPUP_EXHIBIT', 'WEDDING_SMALL', 'NETWORKING'],
+  ROOFTOP: ['BIRTHDAY', 'TEAM_BUILDING', 'WEDDING_SMALL'],
+  HOUSE: ['BIRTHDAY', 'WEDDING_SMALL', 'PHOTOSHOOT'],
+  FITNESS: ['CLASS', 'REHEARSAL'],
+  DANCE: ['CLASS', 'REHEARSAL', 'PHOTOSHOOT'],
+  PRACTICE: ['REHEARSAL', 'CLASS'],
+  WORKSHOP: ['CLASS', 'CORPORATE_WORKSHOP', 'BIRTHDAY'],
+  MEETING: ['CORPORATE_WORKSHOP', 'NETWORKING', 'CLASS'],
 }
 
 const SPACE_SEEDS: SeedSpaceSpec[] = [
@@ -478,6 +495,7 @@ async function main() {
         alcoholPolicy: spec.alcohol,
         cateringPolicy: spec.catering,
         amenities: spec.amenities,
+        useCases: spec.useCases ?? DEFAULT_USE_CASES_BY_CATEGORY[spec.category] ?? [],
         rules: '실내 흡연 금지, 23시 이후 음향 70dB 이하, 원상복구 의무.',
         status: 'ACTIVE',
         approvedAt: new Date(),

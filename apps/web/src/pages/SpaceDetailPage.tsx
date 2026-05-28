@@ -2,11 +2,14 @@ import { useParams } from 'react-router-dom'
 import {
   AlcoholPolicyLabel,
   CateringPolicyLabel,
+  USE_CASE_META,
   VenueCategoryLabel,
   formatResponseTimeBadge,
   formatTrustTier,
+  type UseCase,
 } from '@offhours/shared'
 import { Heart, MapPin, MessageCircle, ShieldCheck, Share2, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { useNearbyBundle, useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
 import { SpaceCard } from '../components/space/SpaceCard'
@@ -48,6 +51,27 @@ export default function SpaceDetailPage() {
             <span className="text-[var(--color-fg-muted)]">최대 {data.capacityMax}명</span>
             {data.instantBook && <Badge tone="accent">즉시 예약</Badge>}
           </div>
+          {data.useCases && data.useCases.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--color-fg-muted)] mr-1">
+                이런 모임에 좋아요
+              </span>
+              {data.useCases.slice(0, 5).map((c) => {
+                const meta = USE_CASE_META[c as UseCase]
+                if (!meta) return null
+                return (
+                  <Link
+                    key={c}
+                    to={`/spaces?useCases=${c}`}
+                    className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] px-2.5 py-1 text-xs font-medium hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-fg)] transition-colors"
+                  >
+                    <span aria-hidden>{meta.emoji}</span>
+                    {meta.label}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
         <div className="hidden md:flex items-center gap-1">
           <Button

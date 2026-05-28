@@ -11,10 +11,13 @@ import {
   lastMinuteDiscountRate,
   paginated,
   type CreateSpaceInput,
+  type PriceSuggestion,
+  type PriceSuggestionQuery,
   type SpaceCard,
   type SpaceDetail,
   type SpaceSearch,
   type UpdateSpaceInput,
+  type UseCase,
 } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
@@ -54,6 +57,9 @@ export class SpacesService {
     }
     if (query.amenities && query.amenities.length > 0) {
       where.amenities = { hasEvery: query.amenities }
+    }
+    if (query.useCases && query.useCases.length > 0) {
+      where.useCases = { hasSome: query.useCases }
     }
     if (query.instantBook !== undefined) where.instantBook = query.instantBook
 
@@ -289,6 +295,7 @@ export class SpacesService {
         alcoholPolicy: input.alcoholPolicy,
         cateringPolicy: input.cateringPolicy,
         amenities: input.amenities,
+        useCases: input.useCases,
         rules: input.rules,
         status: 'PENDING_REVIEW',
         photos: {
@@ -319,6 +326,7 @@ export class SpacesService {
       alcoholPolicy: input.alcoholPolicy ?? undefined,
       cateringPolicy: input.cateringPolicy ?? undefined,
       amenities: input.amenities ?? undefined,
+      useCases: input.useCases ?? undefined,
       rules: input.rules ?? undefined,
     }
     if (input.photoUrls) {
@@ -544,6 +552,7 @@ export class SpacesService {
       district: s.venue.district,
       category: s.venue.category,
       instantBook: s.instantBook,
+      useCases: (s.useCases ?? []) as UseCase[],
       distanceKm: extras?.distanceKm ?? null,
       nextAvailableAt: extras?.nextAvailableAt ? extras.nextAvailableAt.toISOString() : null,
       lastMinuteDiscount: extras?.lastMinuteDiscount ?? null,

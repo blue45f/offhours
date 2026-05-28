@@ -5,8 +5,10 @@ import {
   AMENITY_OPTIONS,
   KOREA_REGIONS,
   PurposeLabel,
+  USE_CASE_META,
   VenueCategoryLabel,
   type Purpose,
+  type UseCase,
   type VenueCategory,
 } from '@offhours/shared'
 
@@ -43,6 +45,7 @@ export default function SpacesPage() {
       priceMin: params.get('priceMin') ? Number(params.get('priceMin')) : undefined,
       priceMax: params.get('priceMax') ? Number(params.get('priceMax')) : undefined,
       amenities: params.get('amenities') ?? undefined,
+      useCases: params.get('useCases') ?? undefined,
       instantBook: params.get('instantBook') === 'true' ? true : undefined,
       lat: useGeo ? geo.coords!.lat : undefined,
       lng: useGeo ? geo.coords!.lng : undefined,
@@ -79,6 +82,11 @@ export default function SpacesPage() {
       `${formatKRWShort(query.priceMin ?? 0)}~${query.priceMax ? formatKRWShort(query.priceMax) : '∞'}`
     )
   if (query.amenities) activeFilters.push(`편의 ${query.amenities.split(',').length}개`)
+  if (query.useCases) {
+    const codes = query.useCases.split(',').filter(Boolean) as UseCase[]
+    const labels = codes.map((c) => USE_CASE_META[c]?.label ?? c).join(', ')
+    activeFilters.push(`모임: ${labels}`)
+  }
   if (query.instantBook) activeFilters.push('즉시 예약')
 
   return (
@@ -207,13 +215,14 @@ export default function SpacesPage() {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="space-y-2 mb-6">
         <ChipBar
           options={KOREA_REGIONS.map((r) => ({ value: r, label: r }))}
           value={query.region}
           onChange={(v) => set('region', v)}
           allLabel="전체 지역"
         />
+        <UseCaseChipBar value={query.useCases} onChange={(v) => set('useCases', v)} />
       </div>
 
       {activeFilters.length > 0 && (
@@ -297,6 +306,51 @@ function ChipBar({
   )
 }
 
+function UseCaseChipBar({
+  value,
+  onChange,
+}: {
+  value?: string
+  onChange: (v: string | undefined) => void
+}) {
+  const selected = new Set((value ?? '').split(',').filter(Boolean))
+  const ORDER: UseCase[] = [
+    'BIRTHDAY',
+    'WEDDING_SMALL',
+    'TEAM_BUILDING',
+    'CORPORATE_WORKSHOP',
+    'GATHERING',
+    'BABYSHOWER',
+    'CLASS',
+    'NETWORKING',
+    'PHOTOSHOOT',
+    'FILMING',
+    'POPUP_EXHIBIT',
+    'REHEARSAL',
+  ]
+  function toggle(c: UseCase) {
+    if (selected.has(c)) selected.delete(c)
+    else selected.add(c)
+    onChange(selected.size === 0 ? undefined : Array.from(selected).join(','))
+  }
+  return (
+    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+      <Chip selected={selected.size === 0} onClick={() => onChange(undefined)}>
+        전체 모임
+      </Chip>
+      {ORDER.map((c) => {
+        const meta = USE_CASE_META[c]
+        return (
+          <Chip key={c} selected={selected.has(c)} onClick={() => toggle(c)} className="shrink-0">
+            <span className="mr-1.5">{meta.emoji}</span>
+            {meta.label}
+          </Chip>
+        )
+      })}
+    </div>
+  )
+}
+
 function FilterContent({
   query,
   onApply,
@@ -310,6 +364,9 @@ function FilterContent({
   const [amenities, setAmenities] = useState<string[]>(
     query.amenities ? query.amenities.split(',') : []
   )
+  const [useCases, setUseCases] = useState<UseCase[]>(
+    query.useCases ? (query.useCases.split(',').filter(Boolean) as UseCase[]) : []
+  )
   const [instantBook, setInstantBook] = useState(query.instantBook ?? false)
   const [category, setCategory] = useState<VenueCategory | undefined>(query.category)
   const [purpose, setPurpose] = useState<Purpose | undefined>(query.purpose)
@@ -317,10 +374,26 @@ function FilterContent({
   function toggleAmenity(a: string) {
     setAmenities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]))
   }
+  function toggleUseCase(c: UseCase) {
+    setUseCases((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
+  }
 
   return (
     <div className="space-y-6">
-      <Field label="용도">
+      <Field label="모임 유형" helper="여러 개 선택 가능">
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(USE_CASE_META) as UseCase[]).map((c) => {
+            const meta = USE_CASE_META[c]
+            return (
+              <Chip key={c} selected={useCases.includes(c)} onClick={() => toggleUseCase(c)}>
+                <span className="mr-1.5">{meta.emoji}</span>
+                {meta.label}
+              </Chip>
+            )
+          })}
+        </div>
+      </Field>
+      <Field label="용도(레거시)">
         <ChipBar
           options={(Object.keys(PurposeLabel) as Purpose[]).map((p) => ({
             value: p,
@@ -397,6 +470,7 @@ function FilterContent({
               priceMin: undefined,
               priceMax: undefined,
               amenities: undefined,
+              useCases: undefined,
               instantBook: undefined,
               category: undefined,
               purpose: undefined,
@@ -412,6 +486,7 @@ function FilterContent({
               priceMin,
               priceMax,
               amenities: amenities.length ? amenities.join(',') : undefined,
+              useCases: useCases.length ? useCases.join(',') : undefined,
               instantBook: instantBook ? 'true' : undefined,
               category,
               purpose,
