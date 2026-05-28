@@ -19,6 +19,7 @@ import { NotificationsModule } from './notifications/notifications.module'
 import { FavoritesModule } from './favorites/favorites.module'
 import { CollectionsModule } from './collections/collections.module'
 import { SplitsModule } from './splits/splits.module'
+import { CalendarsModule } from './calendars/calendars.module'
 import { ReportsModule } from './reports/reports.module'
 import { AdminModule } from './admin/admin.module'
 import { SeoModule } from './seo/seo.module'
@@ -45,6 +46,7 @@ import { HealthController } from './common/health.controller'
     FavoritesModule,
     CollectionsModule,
     SplitsModule,
+    CalendarsModule,
     ReportsModule,
     AdminModule,
     SeoModule,

@@ -164,9 +164,11 @@ model Venue {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  spaces        Space[]
-  businessHours BusinessHour[]
-  holidays      Holiday[]
+  spaces            Space[]
+  businessHours     BusinessHour[]
+  holidays          Holiday[]
+  blocks            VenueBlock[]
+  externalCalendars ExternalCalendar[]
 
   @@index([region, district])
   @@index([category, status])
@@ -198,6 +200,56 @@ model Holiday {
   reason  String?
 
   @@index([venueId, date])
+}
+
+enum BlockSource {
+  MANUAL
+  EXTERNAL
+}
+
+/**
+ * 호스트가 슬롯 노출을 막는 시간 블록. 카톡으로 받은 외부 예약, 본인 일정, iCal 동기화된
+ * 구글 캘린더 일정 등. 검색·예약 시 이 시간대와 겹치는 슬롯은 자동으로 제외돼 더블 부킹
+ * 가능성을 차단한다. Airbnb/Peerspace 의 핵심 호스트 기능이지만 한국 공간대여에는 부재.
+ */
+model VenueBlock {
+  id                  String            @id @default(cuid())
+  venueId             String
+  venue               Venue             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  label               String
+  startAt             DateTime
+  endAt               DateTime
+  source              BlockSource       @default(MANUAL)
+  externalCalendarId  String?
+  externalCalendar    ExternalCalendar? @relation(fields: [externalCalendarId], references: [id], onDelete: SetNull)
+  externalUid         String?
+  color               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([externalCalendarId, externalUid])
+  @@index([venueId, startAt])
+}
+
+/**
+ * 호스트의 외부 캘린더(iCal URL) — 구글 캘린더, 네이버 캘린더 등. 정기적으로 가져와
+ * VenueBlock 으로 캐싱. 동기화 실패는 lastError 에 기록해 UI 에 노출.
+ */
+model ExternalCalendar {
+  id            String       @id @default(cuid())
+  venueId       String
+  venue         Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  label         String
+  icsUrl        String
+  color         String?
+  lastSyncedAt  DateTime?
+  lastError     String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  blocks VenueBlock[]
+
+  @@index([venueId])
 }
 
 enum AlcoholPolicy {

@@ -63,26 +63,46 @@ export class SlotsService {
   }
 
   async list(spaceId: string, from: Date, to: Date) {
-    const slots = await this.prisma.slot.findMany({
-      where: {
-        spaceId,
-        startAt: { gte: from, lte: to },
-      },
-      include: { reservation: { select: { id: true } } },
-      orderBy: { startAt: 'asc' },
+    const space = await this.prisma.space.findUnique({
+      where: { id: spaceId },
+      select: { venueId: true },
     })
-    return slots.map((s) => ({
-      id: s.id,
-      spaceId: s.spaceId,
-      startAt: s.startAt.toISOString(),
-      endAt: s.endAt.toISOString(),
-      priceKRW: s.priceKRW,
-      isOpen: s.isOpen,
-      isReserved: !!s.reservation,
-    }))
+    const [slots, blocks] = await Promise.all([
+      this.prisma.slot.findMany({
+        where: {
+          spaceId,
+          startAt: { gte: from, lte: to },
+        },
+        include: { reservation: { select: { id: true } } },
+        orderBy: { startAt: 'asc' },
+      }),
+      space
+        ? this.prisma.venueBlock.findMany({
+            where: { venueId: space.venueId, endAt: { gt: from }, startAt: { lt: to } },
+            select: { startAt: true, endAt: true },
+          })
+        : Promise.resolve([] as { startAt: Date; endAt: Date }[]),
+    ])
+    return slots.map((s) => {
+      const blocked = blocks.some((b) => b.startAt < s.endAt && b.endAt > s.startAt)
+      return {
+        id: s.id,
+        spaceId: s.spaceId,
+        startAt: s.startAt.toISOString(),
+        endAt: s.endAt.toISOString(),
+        priceKRW: s.priceKRW,
+        // 외부 차단된 시간대는 isOpen=false 로 노출해 UI 가 잡힌 상태로 표시
+        isOpen: s.isOpen && !blocked,
+        isReserved: !!s.reservation,
+      }
+    })
   }
 
   async availableHours(spaceId: string, startAt: Date, endAt: Date) {
+    const space = await this.prisma.space.findUnique({
+      where: { id: spaceId },
+      select: { venueId: true },
+    })
     const slot = await this.prisma.slot.findFirst({
       where: {
         spaceId,
@@ -92,6 +112,13 @@ export class SlotsService {
         reservation: null,
       },
     })
+    if (!slot || !space) return slot
+    // 외부 차단(VenueBlock) 과 겹치는 경우 사용 불가
+    const conflict = await this.prisma.venueBlock.findFirst({
+      where: { venueId: space.venueId, startAt: { lt: endAt }, endAt: { gt: startAt } },
+      select: { id: true },
+    })
+    if (conflict) return null
     return slot
   }
 

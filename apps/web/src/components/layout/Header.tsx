@@ -145,6 +145,11 @@ export function Header() {
                             label="리뷰 관리"
                             onSelect={() => setOpen(false)}
                           />
+                          <DropItem
+                            to="/host/calendar"
+                            label="캘린더 차단"
+                            onSelect={() => setOpen(false)}
+                          />
                         </>
                       )}
                       {isAdmin && (

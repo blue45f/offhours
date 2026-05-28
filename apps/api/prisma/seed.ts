@@ -797,9 +797,50 @@ async function main() {
     }
   }
 
+  // 데모 캘린더 차단 — 호스트가 "카톡으로 받은 외부 예약" 등을 등록한 시나리오.
+  // 호스트 페이지에서 차단 시간이 슬롯 검색에 반영되는 걸 보여줌.
+  await prisma.venueBlock.deleteMany({})
+  await prisma.externalCalendar.deleteMany({})
+  const venuesForBlocks = await prisma.venue.findMany({
+    select: { id: true, name: true },
+    take: 6,
+  })
+  let blockSeedCount = 0
+  for (let i = 0; i < venuesForBlocks.length; i++) {
+    const v = venuesForBlocks[i]
+    const base = new Date()
+    base.setHours(0, 0, 0, 0)
+    const day1 = new Date(base.getTime() + (3 + i) * 24 * 60 * 60 * 1000)
+    day1.setHours(18, 0, 0, 0)
+    const day1End = new Date(day1.getTime() + 4 * 60 * 60 * 1000)
+    const day2 = new Date(base.getTime() + (8 + i) * 24 * 60 * 60 * 1000)
+    day2.setHours(20, 0, 0, 0)
+    const day2End = new Date(day2.getTime() + 3 * 60 * 60 * 1000)
+    await prisma.venueBlock.createMany({
+      data: [
+        {
+          venueId: v.id,
+          label: '카톡으로 받은 외부 예약',
+          startAt: day1,
+          endAt: day1End,
+          source: 'MANUAL',
+        },
+        {
+          venueId: v.id,
+          label: '본인 일정 (가족 모임)',
+          startAt: day2,
+          endAt: day2End,
+          source: 'MANUAL',
+        },
+      ],
+    })
+    blockSeedCount += 2
+  }
+
   console.log(
     `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
-      `${hostUsers.length} host response stats, ${collectionsSeed.length} collections.`
+      `${hostUsers.length} host response stats, ${collectionsSeed.length} collections, ` +
+      `${blockSeedCount} venue blocks.`
   )
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)
