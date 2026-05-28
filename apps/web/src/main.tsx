@@ -1,0 +1,14 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+
+import './styles/global.css'
+import { AppProviders } from './app/AppProviders'
+
+const root = document.getElementById('root')
+if (!root) throw new Error('root element not found')
+
+createRoot(root).render(
+  <StrictMode>
+    <AppProviders />
+  </StrictMode>
+)

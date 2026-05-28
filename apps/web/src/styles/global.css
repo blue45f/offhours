@@ -1,0 +1,204 @@
+@import './tokens.css';
+@import 'tailwindcss';
+
+@theme {
+  --font-sans:
+    'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui,
+    'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-serif: 'Noto Serif KR', 'Pretendard', serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  --color-fg: var(--color-fg);
+  --color-fg-muted: var(--color-fg-muted);
+  --color-fg-subtle: var(--color-fg-subtle);
+  --color-bg: var(--color-bg);
+  --color-bg-elevated: var(--color-bg-elevated);
+  --color-bg-subtle: var(--color-bg-subtle);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-soft: var(--color-primary-soft);
+  --color-primary-fg: var(--color-primary-fg);
+  --color-accent: var(--color-accent);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  --animate-fade-in: fadeIn var(--duration-base) var(--easing-standard);
+  --animate-slide-up: slideUp var(--duration-base) var(--easing-standard);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family:
+      'Pretendard Variable',
+      'Pretendard',
+      -apple-system,
+      system-ui,
+      sans-serif;
+    font-feature-settings: 'ss03';
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    line-height: 1.55;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  ::selection {
+    background: var(--color-primary-soft);
+    color: var(--color-fg);
+  }
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .container-page {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 16px;
+    max-width: 1440px;
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 24px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-page {
+      padding-inline: 32px;
+    }
+  }
+  @media (min-width: 1440px) {
+    .container-page {
+      padding-inline: 48px;
+    }
+  }
+  .text-display {
+    font-size: clamp(2.25rem, 1.6rem + 2.6vw, 3.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .text-headline {
+    font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .text-title {
+    font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.625rem);
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  .text-body {
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.0625rem);
+    line-height: 1.55;
+  }
+  .text-meta {
+    font-size: clamp(0.75rem, 0.7rem + 0.2vw, 0.8125rem);
+    color: var(--color-fg-muted);
+    letter-spacing: 0.01em;
+  }
+  .serif {
+    font-family: var(--font-serif);
+  }
+  .glass {
+    background: color-mix(in srgb, var(--color-bg-elevated) 80%, transparent);
+    backdrop-filter: saturate(140%) blur(12px);
+  }
+  .hairline {
+    border: 1px solid var(--color-border);
+  }
+  .hairline-strong {
+    border: 1px solid var(--color-border-strong);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-subtle) 0%,
+    color-mix(in srgb, var(--color-bg-subtle) 50%, var(--color-bg-elevated)) 50%,
+    var(--color-bg-subtle) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

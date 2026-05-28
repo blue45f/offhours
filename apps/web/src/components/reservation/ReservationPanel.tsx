@@ -1,0 +1,197 @@
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import {
+  CreateReservationSchema,
+  PurposeLabel,
+  type CreateReservationInput,
+  type Purpose,
+  type SpaceDetail,
+} from '@offhours/shared'
+import toast from 'react-hot-toast'
+import { Calendar, Clock, Users } from 'lucide-react'
+
+import { Button } from '../ui/Button'
+import { Field, Input, Textarea } from '../ui/Input'
+import { Select } from '../ui/Select'
+import { Card } from '../ui/Card'
+import { useCreateReservation } from '../../features/reservations/api'
+import { useQuote, useSpaceSlots } from '../../features/spaces/api'
+import { useIsAuthed } from '../../store/auth'
+import { formatKRW } from '../../utils/format'
+import { getErrorMessage } from '../../services/api'
+
+interface Props {
+  space: SpaceDetail
+}
+
+export function ReservationPanel({ space }: Props) {
+  const navigate = useNavigate()
+  const isAuthed = useIsAuthed()
+  const [date, setDate] = useState('')
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
+  const [headcount, setHeadcount] = useState<number>(Math.max(space.capacityMin, 10))
+  const [purpose, setPurpose] = useState<Purpose>('PARTY')
+  const [note, setNote] = useState('')
+
+  const { startAt, endAt } = useMemo(() => {
+    if (!date || !startTime || !endTime) return { startAt: undefined, endAt: undefined }
+    return {
+      startAt: new Date(`${date}T${startTime}:00+09:00`).toISOString(),
+      endAt: new Date(`${date}T${endTime}:00+09:00`).toISOString(),
+    }
+  }, [date, startTime, endTime])
+
+  const { data: quote } = useQuote(space.id, startAt, endAt)
+  const { data: slots } = useSpaceSlots(
+    space.id,
+    date ? `${date}T00:00:00Z` : undefined,
+    date ? `${date}T23:59:59Z` : undefined
+  )
+  const createMutation = useCreateReservation()
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<CreateReservationInput>({
+    resolver: zodResolver(CreateReservationSchema),
+  })
+
+  async function onSubmit() {
+    if (!isAuthed) {
+      navigate('/login')
+      return
+    }
+    if (!startAt || !endAt) {
+      toast.error('이용 시간을 선택해주세요')
+      return
+    }
+    try {
+      const reservation = await createMutation.mutateAsync({
+        spaceId: space.id,
+        startAt,
+        endAt,
+        headcount,
+        purpose,
+        note: note || undefined,
+      })
+      toast.success(space.instantBook ? '예약이 확정됐어요!' : '예약 요청을 보냈어요')
+      navigate(`/me/reservations/${reservation.id}`)
+    } catch (e) {
+      toast.error(getErrorMessage(e, '예약에 실패했어요'))
+    }
+  }
+
+  return (
+    <Card elevated className="p-0 overflow-hidden">
+      <div className="p-6 border-b border-[var(--color-border-subtle)]">
+        <div className="flex items-baseline gap-2">
+          <span className="text-2xl font-bold text-[var(--color-primary)]">
+            {formatKRW(space.basePriceKRW)}
+          </span>
+          <span className="text-sm text-[var(--color-fg-muted)]">/시간</span>
+        </div>
+        {space.cleaningFeeKRW > 0 && (
+          <div className="mt-1 text-xs text-[var(--color-fg-muted)]">
+            청소비 별도 {formatKRW(space.cleaningFeeKRW)}
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        <Field label="날짜" required>
+          <Input
+            type="date"
+            leading={<Calendar size={14} />}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="시작" required>
+            <Input
+              type="time"
+              leading={<Clock size={14} />}
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+            />
+          </Field>
+          <Field label="종료" required>
+            <Input
+              type="time"
+              leading={<Clock size={14} />}
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+            />
+          </Field>
+        </div>
+        {slots && slots.length > 0 && (
+          <div className="rounded-[var(--radius-md)] bg-[var(--color-primary-soft)] p-3 text-xs text-[var(--color-primary)]">
+            오늘 가능한 슬롯: {slots.filter((s) => s.isOpen && !s.isReserved).length}개
+          </div>
+        )}
+        <Field label="인원" required>
+          <Input
+            type="number"
+            leading={<Users size={14} />}
+            min={space.capacityMin}
+            max={space.capacityMax}
+            value={headcount}
+            onChange={(e) => setHeadcount(Number(e.target.value))}
+          />
+        </Field>
+        <Field label="용도">
+          <Select
+            value={purpose}
+            onValueChange={(v) => setPurpose(v as Purpose)}
+            options={(Object.keys(PurposeLabel) as Purpose[]).map((p) => ({
+              value: p,
+              label: PurposeLabel[p],
+            }))}
+          />
+        </Field>
+        <Field label="요청 메시지">
+          <Textarea
+            placeholder="모임의 성격, 필요한 셋업 등을 자유롭게 적어주세요"
+            rows={3}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+        </Field>
+
+        {quote && (
+          <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-4 space-y-2 text-sm">
+            <Row
+              label={`${formatKRW(quote.hourlyRate)} × ${quote.hours}시간`}
+              value={formatKRW(quote.baseAmountKRW)}
+            />
+            {quote.cleaningFeeKRW > 0 && (
+              <Row label="청소비" value={formatKRW(quote.cleaningFeeKRW)} />
+            )}
+            <div className="h-px bg-[var(--color-border)] my-2" />
+            <Row label="총 결제 금액" value={formatKRW(quote.totalKRW)} strong />
+          </div>
+        )}
+
+        <Button type="submit" size="lg" full loading={isSubmitting}>
+          {space.instantBook ? '즉시 예약하기' : '예약 요청하기'}
+        </Button>
+        <p className="text-xs text-[var(--color-fg-subtle)] text-center">
+          취소·환불 정책은 결제 전에 확인할 수 있어요.
+        </p>
+      </form>
+    </Card>
+  )
+}
+
+function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className={`flex items-center justify-between ${strong ? 'font-semibold' : ''}`}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  )
+}
