@@ -3,9 +3,11 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { ReservationStatus } from '@prisma/client'
 import {
   CancelReservationSchema,
+  CheckOutSchema,
   CreateReservationSchema,
   RejectReservationSchema,
   type CancelReservationInput,
+  type CheckOutInput,
   type CreateReservationInput,
   type RejectReservationInput,
 } from '@offhours/shared'
@@ -78,7 +80,11 @@ export class ReservationsController {
   }
 
   @Patch(':id/check-out')
-  async checkOut(@CurrentUser() user: RequestUser, @Param('id') id: string) {
-    return this.reservations.checkOut(user.id, id)
+  async checkOut(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(CheckOutSchema)) body: CheckOutInput
+  ) {
+    return this.reservations.checkOut(user.id, id, body)
   }
 }

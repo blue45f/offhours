@@ -26,6 +26,35 @@ export const ApproveReservationSchema = z.object({
 })
 export type ApproveReservationInput = z.infer<typeof ApproveReservationSchema>
 
+/**
+ * 호스트 체크아웃 체크리스트 — 청소 SLA의 운영 마지막 단계.
+ * 모든 필수 항목을 체크하지 않으면 백엔드에서 거절한다.
+ */
+export const CHECKOUT_ITEMS = [
+  { key: 'restored', label: '집기·테이블 원상복구', required: true },
+  { key: 'trash', label: '쓰레기 분리·반출', required: true },
+  { key: 'audio', label: '음향·전자기기 종료', required: true },
+  { key: 'lights', label: '조명·냉난방 종료', required: true },
+  { key: 'lock', label: '출입문 잠금 확인', required: true },
+  { key: 'lost', label: '분실물 확인', required: false },
+] as const
+
+export type CheckoutItemKey = (typeof CHECKOUT_ITEMS)[number]['key']
+
+export const CheckOutSchema = z.object({
+  checklist: z.object({
+    restored: z.boolean(),
+    trash: z.boolean(),
+    audio: z.boolean(),
+    lights: z.boolean(),
+    lock: z.boolean(),
+    lost: z.boolean().optional(),
+  }),
+  note: z.string().trim().max(500).optional(),
+  photoUrls: z.array(z.string().url()).max(5).optional(),
+})
+export type CheckOutInput = z.infer<typeof CheckOutSchema>
+
 export const RejectReservationSchema = z.object({
   reason: z.string().trim().min(2).max(300),
 })

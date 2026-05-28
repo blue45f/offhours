@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { ReservationStatusLabel, type ReservationStatus } from '@offhours/shared'
+import { ClipboardCheck, QrCode } from 'lucide-react'
 
 import { Tabs } from '../components/ui/Tabs'
 import { Card, CardBody } from '../components/ui/Card'
@@ -12,13 +14,15 @@ import {
   useMyReservations,
   useRejectReservation,
 } from '../features/reservations/api'
+import { api, getErrorMessage } from '../services/api'
 import { formatDateTimeKR, formatKRW } from '../utils/format'
-import { getErrorMessage } from '../services/api'
+import { CheckOutDialog } from '../components/host/CheckOutDialog'
 
 const TABS = [
   { value: 'REQUESTED', label: '요청' },
   { value: 'APPROVED', label: '승인' },
   { value: 'PAID', label: '결제완료' },
+  { value: 'CHECKED_IN', label: '체크인' },
   { value: 'COMPLETED', label: '완료' },
   { value: 'CANCELED', label: '취소' },
 ]
@@ -28,6 +32,18 @@ export default function HostReservationsPage() {
   const { data } = useMyReservations('host', tab)
   const approve = useApproveReservation()
   const reject = useRejectReservation()
+  const qc = useQueryClient()
+  const [checkout, setCheckout] = useState<{ id: string; code: string; title: string } | null>(null)
+
+  const checkIn = useMutation({
+    mutationFn: (vars: { id: string; code: string }) =>
+      api.patch(`/reservations/${vars.id}/check-in`, { code: vars.code }),
+    onSuccess: () => {
+      toast.success('체크인 완료')
+      qc.invalidateQueries({ queryKey: ['reservations'] })
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
 
   async function onApprove(id: string) {
     try {
@@ -47,6 +63,12 @@ export default function HostReservationsPage() {
     } catch (e) {
       toast.error(getErrorMessage(e))
     }
+  }
+
+  async function onCheckIn(id: string) {
+    const code = prompt('게스트가 보여준 6자리 체크인 코드 또는 QR을 입력하세요')
+    if (!code || code.length < 4) return
+    checkIn.mutate({ id, code: code.trim().toUpperCase() })
   }
 
   return (
@@ -97,6 +119,24 @@ export default function HostReservationsPage() {
                         </Button>
                       </div>
                     )}
+                    {r.status === 'PAID' && (
+                      <Button
+                        size="sm"
+                        leading={<QrCode size={14} />}
+                        onClick={() => onCheckIn(r.id)}
+                      >
+                        체크인 처리
+                      </Button>
+                    )}
+                    {r.status === 'CHECKED_IN' && (
+                      <Button
+                        size="sm"
+                        leading={<ClipboardCheck size={14} />}
+                        onClick={() => setCheckout({ id: r.id, code: r.code, title: r.spaceTitle })}
+                      >
+                        체크아웃 + 청소 SLA
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardBody>
@@ -104,6 +144,16 @@ export default function HostReservationsPage() {
           ))
         )}
       </div>
+
+      {checkout && (
+        <CheckOutDialog
+          open={!!checkout}
+          onOpenChange={(o) => !o && setCheckout(null)}
+          reservationId={checkout.id}
+          reservationCode={checkout.code}
+          spaceTitle={checkout.title}
+        />
+      )}
     </div>
   )
 }

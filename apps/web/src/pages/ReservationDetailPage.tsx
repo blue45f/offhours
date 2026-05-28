@@ -90,14 +90,24 @@ export default function ReservationDetailPage() {
             <Row label="용도" value={reservation.purpose} />
             {reservation.note && <Row label="요청 메시지" value={reservation.note} />}
             {reservation.checkInCode && reservation.status === 'PAID' && (
-              <div className="rounded-[var(--radius-lg)] bg-[var(--color-primary-soft)] p-4">
-                <div className="text-xs font-semibold text-[var(--color-primary)]">체크인 코드</div>
-                <div className="mt-1 font-mono text-2xl font-bold tracking-widest text-[var(--color-fg)]">
-                  {reservation.checkInCode}
+              <div className="rounded-[var(--radius-lg)] bg-[var(--color-primary-soft)] p-4 flex flex-col sm:flex-row gap-4 items-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=8&data=${encodeURIComponent(`offhours-checkin:${reservation.checkInCode}`)}`}
+                  alt="체크인 QR"
+                  className="size-32 rounded-[var(--radius-md)] bg-white p-1.5"
+                />
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="text-xs font-semibold text-[var(--color-primary)]">
+                    체크인 QR + 코드
+                  </div>
+                  <div className="mt-1 font-mono text-2xl font-bold tracking-widest text-[var(--color-fg)]">
+                    {reservation.checkInCode}
+                  </div>
+                  <p className="mt-2 text-xs text-[var(--color-fg-muted)] leading-relaxed">
+                    당일 호스트에게 QR을 보여주거나 위 6자리 코드를 알려주세요. 호스트가 스캔하면
+                    바로 체크인 완료돼요.
+                  </p>
                 </div>
-                <p className="mt-1 text-xs text-[var(--color-fg-muted)]">
-                  당일 호스트에게 이 코드를 보여주세요.
-                </p>
               </div>
             )}
           </CardBody>

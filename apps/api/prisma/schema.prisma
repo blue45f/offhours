@@ -346,6 +346,8 @@ model Reservation {
   checkInCode    String?
   checkedInAt    DateTime?
   checkedOutAt   DateTime?
+  /** 호스트 체크아웃 체크리스트 — { restored, trash, audio, lights, lock, note?, photoUrls? } */
+  checkoutChecklist Json?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 

@@ -10,6 +10,7 @@ import {
   calcReservationFee,
   calcRefundRate,
   clampTrust,
+  type CheckOutInput,
   type CreateReservationInput,
 } from '@offhours/shared'
 
@@ -218,13 +219,29 @@ export class ReservationsService {
     })
   }
 
-  async checkOut(hostUserId: string, reservationId: string) {
+  async checkOut(hostUserId: string, reservationId: string, input: CheckOutInput) {
     const r = await this.ensureHost(hostUserId, reservationId)
     if (r.status !== 'CHECKED_IN')
       throw new BadRequestException('체크인 상태에서만 체크아웃 가능해요')
+    const c = input.checklist
+    if (!c.restored || !c.trash || !c.audio || !c.lights || !c.lock) {
+      throw new BadRequestException(
+        '청소 SLA — 원상복구·쓰레기·음향·조명·잠금 5개 항목을 모두 확인해주세요'
+      )
+    }
     const updated = await this.prisma.reservation.update({
       where: { id: r.id },
-      data: { status: 'COMPLETED', checkedOutAt: new Date() },
+      data: {
+        status: 'COMPLETED',
+        checkedOutAt: new Date(),
+        checkoutChecklist: {
+          ...c,
+          note: input.note ?? null,
+          photoUrls: input.photoUrls ?? [],
+          completedAt: new Date().toISOString(),
+          completedBy: hostUserId,
+        } as object,
+      },
     })
     await this.prisma.user.update({
       where: { id: r.guestId },
