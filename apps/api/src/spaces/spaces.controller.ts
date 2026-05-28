@@ -32,6 +32,16 @@ export class SpacesController {
     return this.spaces.getBySlug(slug)
   }
 
+  @Public()
+  @Get('slug/:slug/nearby-bundle')
+  async nearbyBundle(
+    @Param('slug') slug: string,
+    @Query('radiusKm') radiusKm?: string,
+    @Query('max') max?: string
+  ) {
+    return this.spaces.nearbyBundle(slug, Number(radiusKm) || 1, Number(max) || 4)
+  }
+
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('mine')

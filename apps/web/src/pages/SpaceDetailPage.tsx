@@ -7,7 +7,8 @@ import {
 } from '@offhours/shared'
 import { Heart, MapPin, MessageCircle, Share2, Sparkles } from 'lucide-react'
 
-import { useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
+import { useNearbyBundle, useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
+import { SpaceCard } from '../components/space/SpaceCard'
 import { useToggleFavorite, useFavoriteIds } from '../features/favorites/api'
 import { StarRating } from '../components/ui/StarRating'
 import { Badge } from '../components/ui/Badge'
@@ -171,6 +172,10 @@ export default function SpaceDetailPage() {
 
           <Divider />
 
+          <NearbyBundleSection slug={slug} />
+
+          <Divider />
+
           <section>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-title font-semibold">리뷰</h3>
@@ -221,6 +226,34 @@ export default function SpaceDetailPage() {
         </aside>
       </div>
     </div>
+  )
+}
+
+function NearbyBundleSection({ slug }: { slug?: string }) {
+  const { data, isLoading } = useNearbyBundle(slug, 1, 4)
+  if (!isLoading && (!data || data.length === 0)) return null
+  return (
+    <section>
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <h3 className="text-title font-semibold">이 동네 동선 후보</h3>
+          <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
+            걸어서 갈 수 있는 1km 안의 다른 공간. 1차 다이닝 → 2차 통대관처럼 묶어서 예약하기
+            좋아요.
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8">
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-3">
+                <Skeleton className="aspect-[4/3] w-full rounded-[var(--radius-xl)]" />
+                <Skeleton variant="text" className="w-3/4" />
+              </div>
+            ))
+          : data?.map((s) => <SpaceCard key={s.id} space={s} />)}
+      </div>
+    </section>
   )
 }
 

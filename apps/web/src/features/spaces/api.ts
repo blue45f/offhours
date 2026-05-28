@@ -90,6 +90,18 @@ export function useQuote(spaceId?: string, startAt?: string, endAt?: string) {
   })
 }
 
+export function useNearbyBundle(slug?: string, radiusKm = 1, max = 4) {
+  return useQuery({
+    queryKey: ['spaces', 'nearby-bundle', slug, radiusKm, max] as const,
+    enabled: !!slug,
+    queryFn: () =>
+      api.get<SpaceCard[]>(`/spaces/slug/${slug}/nearby-bundle`, {
+        params: { radiusKm, max },
+      }),
+    staleTime: 60_000,
+  })
+}
+
 export function useSpaceReviews(spaceId?: string) {
   return useQuery({
     queryKey: spacesKeys.reviews(spaceId ?? ''),

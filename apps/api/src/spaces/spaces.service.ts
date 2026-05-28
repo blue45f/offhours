@@ -334,6 +334,71 @@ export class SpacesService {
     return updated
   }
 
+  /**
+   * 동선 추천(번들) — 이 공간 1km 내 다른 venue 공간을
+   * "다른 카테고리 우선"으로 정렬해 최대 max개 반환한다.
+   * "1차 다이닝 → 2차 통대관" 같은 회식·송년 시나리오의 핵심 차별점.
+   */
+  async nearbyBundle(slug: string, radiusKm = 1, max = 4): Promise<SpaceCard[]> {
+    const origin = await this.prisma.space.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        venueId: true,
+        venue: { select: { lat: true, lng: true, category: true } },
+      },
+    })
+    if (!origin) throw new NotFoundException('Space not found')
+
+    const candidates = await this.prisma.space.findMany({
+      where: {
+        status: 'ACTIVE',
+        id: { not: origin.id },
+        venueId: { not: origin.venueId },
+      },
+      include: {
+        photos: { take: 1, orderBy: { order: 'asc' } },
+        venue: {
+          select: {
+            region: true,
+            district: true,
+            category: true,
+            lat: true,
+            lng: true,
+            host: {
+              select: {
+                user: {
+                  select: {
+                    responseMedianMin: true,
+                    responseRate24h: true,
+                    responseSampleCount: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      take: 200,
+    })
+
+    const here = { lat: origin.venue.lat, lng: origin.venue.lng }
+    return candidates
+      .map((c) => ({
+        space: c,
+        distanceKm: haversineKm(here, { lat: c.venue.lat, lng: c.venue.lng }),
+        sameCategory: c.venue.category === origin.venue.category,
+      }))
+      .filter((x) => x.distanceKm <= radiusKm)
+      .sort((a, b) => {
+        // 다른 카테고리 우선, 그 안에서 가까운 순
+        if (a.sameCategory !== b.sameCategory) return a.sameCategory ? 1 : -1
+        return a.distanceKm - b.distanceKm
+      })
+      .slice(0, max)
+      .map((x) => this.toCard(x.space, { distanceKm: x.distanceKm }))
+  }
+
   private async ensureOwner(userId: string, spaceId: string) {
     const space = await this.prisma.space.findUnique({
       where: { id: spaceId },
