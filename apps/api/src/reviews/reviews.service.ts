@@ -4,7 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { TRUST_SCORE, type CreateReviewInput, type RespondReviewInput } from '@offhours/shared'
+import {
+  TRUST_SCORE,
+  clampTrust,
+  type CreateReviewInput,
+  type RespondReviewInput,
+} from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -55,16 +60,25 @@ export class ReviewsService {
       await this.refreshSpaceRating(reservation.spaceId)
     }
 
-    if (input.rating >= 4) {
-      await this.prisma.user.update({
-        where: { id: subjectId },
-        data: {
-          trustScore: { increment: TRUST_SCORE.BUMP_ON_GOOD_REVIEW },
-        },
-      })
+    // 평점별 trustScore 양방향 갱신 (5점 +3 … 1점 -5). 0~100 클램프 보장.
+    const delta = TRUST_SCORE.REVIEW_DELTA[input.rating] ?? 0
+    if (delta !== 0) {
+      await this.bumpTrust(subjectId, delta)
     }
 
     return review
+  }
+
+  private async bumpTrust(userId: string, delta: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { trustScore: true },
+    })
+    if (!user) return
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { trustScore: clampTrust(user.trustScore + delta) },
+    })
   }
 
   async respond(hostUserId: string, reviewId: string, input: RespondReviewInput) {

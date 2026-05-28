@@ -4,8 +4,9 @@ import {
   CateringPolicyLabel,
   VenueCategoryLabel,
   formatResponseTimeBadge,
+  formatTrustTier,
 } from '@offhours/shared'
-import { Heart, MapPin, MessageCircle, Share2, Sparkles } from 'lucide-react'
+import { Heart, MapPin, MessageCircle, ShieldCheck, Share2, Sparkles } from 'lucide-react'
 
 import { useNearbyBundle, useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
 import { SpaceCard } from '../components/space/SpaceCard'
@@ -89,7 +90,7 @@ export default function SpaceDetailPage() {
                   {data.venue.host.name} 호스트의 {data.venue.name}
                 </h2>
                 <p className="text-sm text-[var(--color-fg-muted)]">
-                  신뢰 점수 {data.venue.host.trustScore} · 운영 {data.venue.host.hostedCount}회
+                  운영 {data.venue.host.hostedCount}회
                 </p>
                 {(() => {
                   const badge = formatResponseTimeBadge({
@@ -106,6 +107,7 @@ export default function SpaceDetailPage() {
                 })()}
               </div>
             </div>
+            <TrustGauge score={data.venue.host.trustScore} />
           </section>
 
           <Divider />
@@ -225,6 +227,42 @@ export default function SpaceDetailPage() {
           <ReservationPanel space={data} />
         </aside>
       </div>
+    </div>
+  )
+}
+
+function TrustGauge({ score }: { score: number }) {
+  const tier = formatTrustTier(score)
+  const toneClass =
+    tier.key === 'top'
+      ? 'bg-[var(--color-primary)]'
+      : tier.key === 'excellent'
+        ? 'bg-[var(--color-primary)]/85'
+        : tier.key === 'good'
+          ? 'bg-[var(--color-primary)]/65'
+          : tier.key === 'normal'
+            ? 'bg-[var(--color-fg-muted)]/50'
+            : 'bg-[var(--color-warning)]'
+  const labelTone =
+    tier.key === 'caution' ? 'text-[var(--color-warning)]' : 'text-[var(--color-primary)]'
+  return (
+    <div className="mt-4 hairline rounded-[var(--radius-lg)] bg-[var(--color-bg-elevated)] p-4">
+      <div className="flex items-center justify-between text-sm">
+        <span className="inline-flex items-center gap-1.5 font-semibold">
+          <ShieldCheck size={14} className={labelTone} />
+          호스트 신뢰 <span className={labelTone}>{tier.label}</span>
+        </span>
+        <span className="font-mono text-xs text-[var(--color-fg-muted)]">{score} / 100</span>
+      </div>
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
+        <div
+          className={`h-full rounded-full ${toneClass} transition-[width]`}
+          style={{ width: `${Math.round(tier.progress * 100)}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-[var(--color-fg-muted)]">
+        {tier.hint} · 평점·취소·응답률에 따라 실시간으로 갱신돼요
+      </p>
     </div>
   )
 }

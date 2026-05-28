@@ -20,11 +20,41 @@ export const TRUST_SCORE = {
   INITIAL: 50,
   MIN: 0,
   MAX: 100,
-  BUMP_ON_GOOD_REVIEW: 2,
-  PENALTY_ON_CANCEL: -5,
-  PENALTY_ON_DISPUTE: -15,
+  /** 평점별 적용 — 5점 +3, 4점 +2, 3점 -1, 2점 -3, 1점 -5 */
+  REVIEW_DELTA: { 5: 3, 4: 2, 3: -1, 2: -3, 1: -5 } as Record<number, number>,
+  PENALTY_HOST_REJECT: -2,
+  PENALTY_HOST_NO_SHOW: -8,
+  PENALTY_GUEST_CANCEL: -2,
+  PENALTY_DISPUTE: -15,
   BONUS_ON_VERIFY: 10,
 } as const
+
+export function clampTrust(score: number): number {
+  return Math.max(TRUST_SCORE.MIN, Math.min(TRUST_SCORE.MAX, score))
+}
+
+export type TrustTier = {
+  key: 'top' | 'excellent' | 'good' | 'normal' | 'caution'
+  label: string
+  hint: string
+  /** 0~1 진행도 (UI 게이지) */
+  progress: number
+}
+
+/**
+ * 신뢰 점수 → 사용자 친화 티어. Airbnb Superhost / Peerspace Power Host / Tagvenue
+ * Supervenue 의 4~5단 분류를 합성. caution 은 거래 위험 시그널이라 회색 대신 amber 톤.
+ */
+export function formatTrustTier(score: number | null | undefined): TrustTier {
+  const s = clampTrust(score ?? TRUST_SCORE.INITIAL)
+  if (s >= 90) return { key: 'top', label: '최고 신뢰', hint: '상위 5% 호스트', progress: s / 100 }
+  if (s >= 75)
+    return { key: 'excellent', label: '우수', hint: '응답·이행·평점 모두 우수', progress: s / 100 }
+  if (s >= 60) return { key: 'good', label: '양호', hint: '안정적인 운영 이력', progress: s / 100 }
+  if (s >= 45)
+    return { key: 'normal', label: '보통', hint: '신규 또는 표본 부족', progress: s / 100 }
+  return { key: 'caution', label: '주의', hint: '최근 취소·분쟁 누적', progress: s / 100 }
+}
 
 export const KOREA_REGIONS = [
   '서울',

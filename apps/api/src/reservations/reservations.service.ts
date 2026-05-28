@@ -5,7 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { Prisma, type Reservation, type ReservationStatus } from '@prisma/client'
-import { calcReservationFee, calcRefundRate, type CreateReservationInput } from '@offhours/shared'
+import {
+  TRUST_SCORE,
+  calcReservationFee,
+  calcRefundRate,
+  clampTrust,
+  type CreateReservationInput,
+} from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { SlotsService } from '../slots/slots.service'
@@ -114,6 +120,7 @@ export class ReservationsService {
       data: { status: 'CANCELED', cancelReason: reason },
     })
     await this.recordHostResponse(hostUserId, r.createdAt)
+    await this.bumpTrust(hostUserId, TRUST_SCORE.PENALTY_HOST_REJECT)
     await this.notifications.create(r.guestId, {
       type: 'RESERVATION_REJECTED',
       title: '예약이 거절됐어요',
@@ -121,6 +128,18 @@ export class ReservationsService {
       data: { reservationId: r.id },
     })
     return updated
+  }
+
+  private async bumpTrust(userId: string, delta: number) {
+    const u = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { trustScore: true },
+    })
+    if (!u) return
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { trustScore: clampTrust(u.trustScore + delta) },
+    })
   }
 
   /**
@@ -174,6 +193,9 @@ export class ReservationsService {
       where: { id: r.id },
       data: { status: next, cancelReason: reason },
     })
+    // 환불률이 낮을수록(=시작 임박 취소) 페널티 가중.
+    const penalty = refundRate < 1 ? TRUST_SCORE.PENALTY_GUEST_CANCEL : 0
+    if (penalty) await this.bumpTrust(guestId, penalty)
     await this.notifications.create(r.space.venue.host.userId, {
       type: 'SYSTEM',
       title: '예약 취소',

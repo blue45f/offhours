@@ -547,15 +547,15 @@ async function main() {
     select: { id: true },
     orderBy: { email: 'asc' },
   })
-  const profiles: Array<{ medianMin: number; rate: number; sample: number }> = [
-    { medianMin: 22, rate: 0.96, sample: 38 }, // 1h 뱃지
-    { medianMin: 47, rate: 0.92, sample: 21 }, // 1h 뱃지
-    { medianMin: 95, rate: 0.91, sample: 14 }, // 3h 뱃지
-    { medianMin: 170, rate: 0.93, sample: 26 }, // 3h 뱃지
-    { medianMin: 340, rate: 0.95, sample: 18 }, // 12h 뱃지
-    { medianMin: 580, rate: 0.9, sample: 12 }, // 12h 뱃지
-    { medianMin: 80, rate: 0.85, sample: 22 }, // 응답률 미달 → 뱃지 없음
-    { medianMin: 35, rate: 0.97, sample: 5 }, // 표본 미달 → 뱃지 없음
+  const profiles: Array<{ medianMin: number; rate: number; sample: number; trust: number }> = [
+    { medianMin: 22, rate: 0.96, sample: 38, trust: 95 }, // 최고 신뢰
+    { medianMin: 47, rate: 0.92, sample: 21, trust: 88 }, // 우수
+    { medianMin: 95, rate: 0.91, sample: 14, trust: 78 }, // 우수
+    { medianMin: 170, rate: 0.93, sample: 26, trust: 72 }, // 양호
+    { medianMin: 340, rate: 0.95, sample: 18, trust: 65 }, // 양호
+    { medianMin: 580, rate: 0.9, sample: 12, trust: 55 }, // 보통
+    { medianMin: 80, rate: 0.85, sample: 22, trust: 50 }, // 보통 (응답률 미달)
+    { medianMin: 35, rate: 0.97, sample: 5, trust: 40 }, // 주의 (표본 부족)
   ]
   for (let i = 0; i < hostUsers.length; i++) {
     const p = profiles[i % profiles.length]
@@ -566,6 +566,7 @@ async function main() {
         responseRate24h: p.rate,
         responseSampleCount: p.sample,
         responseUpdatedAt: new Date(),
+        trustScore: p.trust,
       },
     })
   }
