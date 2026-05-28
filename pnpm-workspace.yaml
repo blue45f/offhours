@@ -1,0 +1,12 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+allowBuilds:
+  prisma: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.17.0
+  - zustand@5.0.14
+overrides:
+  electron-to-chromium: 1.5.362
+  enhanced-resolve: 5.22.0
+  turbo: 2.9.15

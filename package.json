@@ -1,0 +1,56 @@
+{
+  "name": "offhours",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.4.0+sha512.f0febc7e37552ab485494a914241b338e0b3580b93d54ce31f00933015880863129038a1b4ae4e414a0ee63ac35bf21197e990172c4a68256450b5636310968f",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=11"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm shared:build && pnpm -r --parallel --stream --if-present run dev",
+    "dev:web": "pnpm --filter @offhours/web dev",
+    "dev:api": "pnpm --filter @offhours/api dev",
+    "dev:shared": "pnpm --filter @offhours/shared dev",
+    "build": "pnpm -r --if-present run build",
+    "clean": "pnpm -r --if-present run clean",
+    "typecheck": "pnpm shared:build && pnpm -r --if-present run typecheck",
+    "lint": "pnpm -r --if-present run lint",
+    "test": "pnpm -r --if-present run test",
+    "test:run": "pnpm shared:build && pnpm -r --if-present run test:run",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,html,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,html,css}\"",
+    "db:push": "pnpm --filter @offhours/api db:push",
+    "db:generate": "pnpm --filter @offhours/api db:generate",
+    "db:migrate": "pnpm --filter @offhours/api db:migrate",
+    "db:reset": "pnpm --filter @offhours/api db:reset",
+    "seed": "pnpm --filter @offhours/api seed",
+    "shared:build": "pnpm --filter @offhours/shared build",
+    "shared:dev": "pnpm --filter @offhours/shared dev",
+    "postinstall": "pnpm --filter @offhours/shared build",
+    "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
+    "verify": "pnpm run ci",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
+    "prettier": "^3.8.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,html,css}": [
+      "prettier --write"
+    ]
+  }
+}
