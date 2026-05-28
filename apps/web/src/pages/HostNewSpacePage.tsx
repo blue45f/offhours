@@ -16,6 +16,7 @@ import { Chip } from '../components/ui/Chip'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { useCreateSpace } from '../features/spaces/api'
 import { getErrorMessage } from '../services/api'
+import { PriceSuggestionCard } from '../components/host/PriceSuggestionCard'
 
 export default function HostNewSpacePage() {
   const navigate = useNavigate()
@@ -127,6 +128,11 @@ export default function HostNewSpacePage() {
             <span className="text-xs text-[var(--color-fg-muted)]">2 / 4</span>
           </CardHeader>
           <CardBody className="space-y-4">
+            <PriceSuggestionCard
+              basePriceKRW={basePriceKRW}
+              defaultCapacityMax={capacityMax}
+              onApply={(p) => setBasePriceKRW(p)}
+            />
             <div className="grid grid-cols-2 gap-3">
               <Field label="시간당 기본가 (원)">
                 <Input

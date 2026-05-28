@@ -124,6 +124,28 @@ export const SpaceDetailSchema = SpaceCardSchema.extend({
 })
 export type SpaceDetail = z.infer<typeof SpaceDetailSchema>
 
+export const PriceSuggestionQuerySchema = z.object({
+  category: VenueCategorySchema,
+  region: z.string().trim().max(20).optional(),
+  district: z.string().trim().max(30).optional(),
+  capacityMax: z.coerce.number().int().min(1).optional(),
+})
+export type PriceSuggestionQuery = z.infer<typeof PriceSuggestionQuerySchema>
+
+export const PriceSuggestionSchema = z.object({
+  sampleCount: z.number(),
+  p25: z.number().nullable(),
+  median: z.number().nullable(),
+  p75: z.number().nullable(),
+  /** 시장 분포 + 인원·점유 보정한 권장가 (KRW/h). 표본 미달이면 null */
+  suggested: z.number().nullable(),
+  /** 같은 지역 활성 공간의 최근 30일 평균 슬롯 점유율 (0~1). null=데이터 부족 */
+  occupancy: z.number().nullable(),
+  /** 사용자에게 보여줄 한 줄 설명 */
+  hint: z.string(),
+})
+export type PriceSuggestion = z.infer<typeof PriceSuggestionSchema>
+
 export const SpaceSearchSchema = z.object({
   q: z.string().trim().max(80).optional(),
   region: z.string().trim().max(20).optional(),

@@ -335,6 +335,104 @@ export class SpacesService {
   }
 
   /**
+   * 동적 가격 제안 — 같은 지역·카테고리 공간의 시간당 가격 분포(p25/median/p75)와
+   * 최근 30일 슬롯 점유율을 합쳐 부업 호스트에게 적정 가격을 제시.
+   * Airbnb Smart Pricing 의 마켓플레이스 버전이지만 한국 공간대여 어디에도 없음.
+   */
+  async priceSuggestion(
+    input: import('@offhours/shared').PriceSuggestionQuery
+  ): Promise<import('@offhours/shared').PriceSuggestion> {
+    // 1) 지역 우선순위: district 매칭 → region 매칭 → 카테고리 전체
+    const baseWhere: Prisma.SpaceWhereInput = {
+      status: 'ACTIVE',
+      venue: { category: input.category },
+    }
+    const layers: { where: Prisma.SpaceWhereInput; scope: 'district' | 'region' | 'category' }[] =
+      []
+    if (input.district)
+      layers.push({
+        where: { ...baseWhere, venue: { category: input.category, district: input.district } },
+        scope: 'district',
+      })
+    if (input.region)
+      layers.push({
+        where: { ...baseWhere, venue: { category: input.category, region: input.region } },
+        scope: 'region',
+      })
+    layers.push({ where: baseWhere, scope: 'category' })
+
+    let prices: number[] = []
+    let scope: 'district' | 'region' | 'category' = 'category'
+    for (const layer of layers) {
+      const rows = await this.prisma.space.findMany({
+        where: layer.where,
+        select: { basePriceKRW: true, capacityMax: true },
+        take: 200,
+      })
+      if (rows.length >= 3) {
+        prices = rows
+          .map((r) =>
+            input.capacityMax && r.capacityMax > 0
+              ? Math.round((r.basePriceKRW * input.capacityMax) / r.capacityMax)
+              : r.basePriceKRW
+          )
+          .sort((a, b) => a - b)
+        scope = layer.scope
+        break
+      }
+    }
+
+    if (prices.length < 3) {
+      return {
+        sampleCount: prices.length,
+        p25: null,
+        median: null,
+        p75: null,
+        suggested: null,
+        occupancy: null,
+        hint: '아직 같은 카테고리·지역의 비교 데이터가 부족해요. 자유롭게 시작 가격을 정해주세요.',
+      }
+    }
+
+    const q = (frac: number) =>
+      prices[Math.min(prices.length - 1, Math.floor(prices.length * frac))]
+    const p25 = q(0.25)
+    const median = q(0.5)
+    const p75 = q(0.75)
+
+    // 2) 같은 지역의 최근 30일 슬롯 점유율
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    const slotWhere: Prisma.SlotWhereInput = {
+      startAt: { gte: since },
+      space: {
+        status: 'ACTIVE',
+        venue: {
+          category: input.category,
+          ...(input.region ? { region: input.region } : {}),
+          ...(input.district ? { district: input.district } : {}),
+        },
+      },
+    }
+    const [open, reserved] = await Promise.all([
+      this.prisma.slot.count({ where: slotWhere }),
+      this.prisma.slot.count({ where: { ...slotWhere, reservation: { isNot: null } } }),
+    ])
+    const occupancy = open > 0 ? Number((reserved / open).toFixed(3)) : null
+
+    // 3) 추천가 = median * 점유 보정(0.92~1.12). 점유 0.5 기준 ±20%p.
+    const occBoost =
+      occupancy != null ? 0.92 + Math.min(0.2, Math.max(-0.08, (occupancy - 0.5) * 0.4)) : 1
+    const suggested = Math.max(1000, Math.round((median * occBoost) / 1000) * 1000)
+
+    const scopeLabel =
+      scope === 'district' ? '같은 동네' : scope === 'region' ? '같은 시·도' : '전국'
+    const occLabel = occupancy == null ? '' : ` · 점유율 ${Math.round(occupancy * 100)}%`
+    const hint = `${scopeLabel} ${prices.length}개 공간의 시장가 중앙값 ${(median / 10000).toFixed(1)}만원${occLabel}.`
+
+    return { sampleCount: prices.length, p25, median, p75, suggested, occupancy, hint }
+  }
+
+  /**
    * 동선 추천(번들) — 이 공간 1km 내 다른 venue 공간을
    * "다른 카테고리 우선"으로 정렬해 최대 max개 반환한다.
    * "1차 다이닝 → 2차 통대관" 같은 회식·송년 시나리오의 핵심 차별점.

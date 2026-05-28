@@ -2,9 +2,11 @@ import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@ne
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
   CreateSpaceSchema,
+  PriceSuggestionQuerySchema,
   SpaceSearchSchema,
   UpdateSpaceSchema,
   type CreateSpaceInput,
+  type PriceSuggestionQuery,
   type SpaceSearch,
   type UpdateSpaceInput,
 } from '@offhours/shared'
@@ -30,6 +32,15 @@ export class SpacesController {
   @Get('slug/:slug')
   async getBySlug(@Param('slug') slug: string) {
     return this.spaces.getBySlug(slug)
+  }
+
+  @Public()
+  @Public()
+  @Get('price-suggestion')
+  async priceSuggestion(
+    @Query(new ZodValidationPipe(PriceSuggestionQuerySchema)) q: PriceSuggestionQuery
+  ) {
+    return this.spaces.priceSuggestion(q)
   }
 
   @Public()
