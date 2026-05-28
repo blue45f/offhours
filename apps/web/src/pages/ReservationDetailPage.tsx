@@ -13,6 +13,7 @@ import { Field, Textarea } from '../components/ui/Input'
 import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 import { getErrorMessage } from '../services/api'
 import { useTossPayment } from '../features/payments/useTossPayment'
+import { SplitPaymentPanel } from '../components/reservation/SplitPaymentPanel'
 
 export default function ReservationDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -129,6 +130,14 @@ export default function ReservationDetailPage() {
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
           </CardBody>
         </Card>
+
+        {['APPROVED', 'PAID', 'CHECKED_IN', 'COMPLETED'].includes(reservation.status) && (
+          <SplitPaymentPanel
+            reservationId={reservation.id}
+            totalKRW={reservation.totalKRW}
+            spaceTitle={reservation.spaceTitle}
+          />
+        )}
 
         {['REQUESTED', 'APPROVED', 'PAID'].includes(reservation.status) && (
           <div className="flex flex-wrap gap-2">

@@ -363,6 +363,7 @@ model Reservation {
   reviews Review[]
   chat    Chat?
   dispute Dispute?
+  split   ReservationSplit?
 
   @@index([guestId, status])
   @@index([spaceId, startAt])
@@ -399,6 +400,48 @@ model Payment {
   refundedAt    DateTime?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+}
+
+/**
+ * 1/N 그룹 분담 결제 — 한국 모임 문화에 맞춰 친구·동료가 토스로 본인 부담분만 송금.
+ * 결제자(예약자)는 본 예약을 단독으로 결제·정산하고, 정산 진척만 추적.
+ * 토스 송금은 mock 처리(POC); 실 결제는 데모 후 연동.
+ */
+model ReservationSplit {
+  id            String           @id @default(cuid())
+  reservationId String           @unique
+  reservation   Reservation      @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  memberCount   Int
+  perMemberKRW  Int
+  note          String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  members SplitMember[]
+
+  @@index([reservationId])
+}
+
+enum SplitMemberStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+model SplitMember {
+  id        String            @id @default(cuid())
+  splitId   String
+  split     ReservationSplit  @relation(fields: [splitId], references: [id], onDelete: Cascade)
+  idx       Int
+  /** 청구 링크에 들어가는 공개 토큰 */
+  token     String            @unique @default(cuid())
+  label     String?
+  status    SplitMemberStatus @default(PENDING)
+  paidAt    DateTime?
+  createdAt DateTime          @default(now())
+
+  @@unique([splitId, idx])
+  @@index([token])
 }
 
 enum SettlementStatus {

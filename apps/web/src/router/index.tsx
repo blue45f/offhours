@@ -19,6 +19,7 @@ const ReservationDetailPage = lazy(() => import('../pages/ReservationDetailPage'
 const FavoritesPage = lazy(() => import('../pages/FavoritesPage'))
 const CollectionsPage = lazy(() => import('../pages/CollectionsPage'))
 const CollectionDetailPage = lazy(() => import('../pages/CollectionDetailPage'))
+const PayTokenPage = lazy(() => import('../pages/PayTokenPage'))
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage'))
 const ChatPage = lazy(() => import('../pages/ChatPage'))
 const HostLandingPage = lazy(() => import('../pages/HostLandingPage'))
@@ -106,6 +107,8 @@ export const router = createBrowserRouter([
       },
       // 공개 슬러그 — 로그인 없이 접근 가능. 본인 컬렉션이 비공개여도 토큰 있으면 보임
       { path: 'c/:slug', element: lazyEl(<CollectionDetailPage />) },
+      // 1/N 분담 결제 청구 링크 — 토큰으로만 접근, 로그인 불필요
+      { path: 'pay/:token', element: lazyEl(<PayTokenPage />) },
       {
         path: 'notifications',
         element: lazyEl(
