@@ -19,6 +19,7 @@ const FavoritesPage = lazy(() => import('../pages/FavoritesPage'))
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage'))
 const ChatPage = lazy(() => import('../pages/ChatPage'))
 const HostLandingPage = lazy(() => import('../pages/HostLandingPage'))
+const HostProfilePage = lazy(() => import('../pages/HostProfilePage'))
 const HostDashboardPage = lazy(() => import('../pages/HostDashboardPage'))
 const HostSpacesPage = lazy(() => import('../pages/HostSpacesPage'))
 const HostNewSpacePage = lazy(() => import('../pages/HostNewSpacePage'))
@@ -110,6 +111,14 @@ export const router = createBrowserRouter([
       {
         path: 'host',
         children: [
+          {
+            path: 'profile',
+            element: lazyEl(
+              <Protected>
+                <HostProfilePage />
+              </Protected>
+            ),
+          },
           {
             path: 'dashboard',
             element: lazyEl(
