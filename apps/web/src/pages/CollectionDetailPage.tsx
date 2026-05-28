@@ -1,18 +1,45 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Globe2, Lock, MapPin, Share2 } from 'lucide-react'
+import { Globe2, Lock, MapPin, Share2, ThumbsDown, ThumbsUp } from 'lucide-react'
+import type { CollectionDetail, VoteValue } from '@offhours/shared'
 
 import { SpaceCard } from '../components/space/SpaceCard'
 import { Button } from '../components/ui/Button'
 import { Avatar } from '../components/ui/Avatar'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageLoader } from '../components/layout/PageLoader'
-import { useCollectionBySlug } from '../features/collections/api'
+import { useCastCollectionVote, useCollectionBySlug } from '../features/collections/api'
+import { getErrorMessage } from '../services/api'
 import { formatDateKR } from '../utils/format'
+import { cn } from '../utils/cn'
+
+const VOTER_TOKEN_KEY = 'offhours.voter.token'
+const VOTER_NAME_KEY = 'offhours.voter.name'
+
+function getOrCreateVoterToken() {
+  let t = localStorage.getItem(VOTER_TOKEN_KEY)
+  if (!t) {
+    t = `v_${Math.random().toString(36).slice(2)}_${Date.now().toString(36)}`
+    localStorage.setItem(VOTER_TOKEN_KEY, t)
+  }
+  return t
+}
 
 export default function CollectionDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const { data, isLoading, error } = useCollectionBySlug(slug)
+  const [voterToken] = useState(() => getOrCreateVoterToken())
+  const [voterName, setVoterName] = useState<string | null>(() =>
+    localStorage.getItem(VOTER_NAME_KEY)
+  )
+  const { data, isLoading, error } = useCollectionBySlug(slug, voterToken)
+  const cast = useCastCollectionVote(slug ?? '')
+
+  useEffect(() => {
+    if (voterName) localStorage.setItem(VOTER_NAME_KEY, voterName)
+  }, [voterName])
+
+  const tally = useMemo(() => summarizeVotes(data?.items ?? []), [data])
 
   if (isLoading) return <PageLoader />
   if (error || !data) {
@@ -39,6 +66,21 @@ export default function CollectionDetailPage() {
     }
     await navigator.clipboard?.writeText(url)
     toast.success('공유 링크를 복사했어요')
+  }
+
+  async function vote(favoriteId: string, value: VoteValue | null) {
+    let name = voterName
+    if (!name) {
+      const input = prompt('투표 전에 닉네임을 알려주세요 (친구에게 보일 이름)')?.trim()
+      if (!input) return
+      name = input.slice(0, 20)
+      setVoterName(name)
+    }
+    try {
+      await cast.mutateAsync({ favoriteId, voterToken, voterName: name, vote: value })
+    } catch (e) {
+      toast.error(getErrorMessage(e))
+    }
   }
 
   return (
@@ -79,6 +121,45 @@ export default function CollectionDetailPage() {
                 컬렉션 · {data.itemCount}개 공간 · {formatDateKR(data.updatedAt)} 업데이트
               </span>
             </div>
+            {data.isPublic && tally && (
+              <div className="mt-5 inline-flex items-center gap-3 rounded-[var(--radius-pill)] bg-[var(--color-bg-elevated)] px-4 py-2 text-xs">
+                <span className="inline-flex items-center gap-1 text-[var(--color-primary)]">
+                  <ThumbsUp size={12} />
+                  <span className="font-bold">{tally.totalUp}</span>
+                </span>
+                <span className="inline-flex items-center gap-1 text-[var(--color-fg-muted)]">
+                  <ThumbsDown size={12} />
+                  <span className="font-bold">{tally.totalDown}</span>
+                </span>
+                {tally.leader && (
+                  <span className="text-[var(--color-fg-muted)] truncate max-w-[260px]">
+                    · 1위{' '}
+                    <span className="font-semibold text-[var(--color-fg)]">{tally.leader}</span>
+                  </span>
+                )}
+              </div>
+            )}
+            {data.isPublic && (
+              <p className="mt-2 text-[11px] text-[var(--color-fg-muted)]">
+                {voterName ? (
+                  <>
+                    <span className="font-semibold text-[var(--color-fg)]">{voterName}</span> 님으로
+                    투표 중 ·{' '}
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem(VOTER_NAME_KEY)
+                        setVoterName(null)
+                      }}
+                      className="underline"
+                    >
+                      이름 변경
+                    </button>
+                  </>
+                ) : (
+                  '👍/👎 누르면 친구에게 보일 닉네임을 한 번만 정해주세요'
+                )}
+              </p>
+            )}
           </div>
           <Button variant="secondary" leading={<Share2 size={14} />} onClick={share}>
             공유
@@ -97,6 +178,9 @@ export default function CollectionDetailPage() {
             {data.items.map((s) => (
               <div key={s.id} className="space-y-2">
                 <SpaceCard space={s} />
+                {data.isPublic && (
+                  <VoteBar item={s} busy={cast.isPending} onVote={(v) => vote(s.favoriteId, v)} />
+                )}
                 {s.note && (
                   <p className="rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] px-3 py-2 text-xs text-[var(--color-fg-muted)] leading-relaxed">
                     💬 {s.note}
@@ -109,4 +193,76 @@ export default function CollectionDetailPage() {
       </div>
     </div>
   )
+}
+
+function VoteBar({
+  item,
+  busy,
+  onVote,
+}: {
+  item: CollectionDetail['items'][number]
+  busy: boolean
+  onVote: (v: VoteValue | null) => void
+}) {
+  const my = item.votes.myVote
+  return (
+    <div className="flex items-center justify-between gap-2 rounded-[var(--radius-md)] hairline px-3 py-2">
+      <div className="flex gap-1.5">
+        <button
+          disabled={busy}
+          onClick={() => onVote(my === 'UP' ? null : 'UP')}
+          className={cn(
+            'inline-flex items-center gap-1 rounded-[var(--radius-pill)] px-2.5 py-1 text-xs font-semibold border transition-colors',
+            my === 'UP'
+              ? 'bg-[var(--color-primary)] text-[var(--color-primary-fg)] border-transparent'
+              : 'bg-[var(--color-bg-elevated)] border-[var(--color-border)] hover:border-[var(--color-primary)]'
+          )}
+        >
+          <ThumbsUp size={11} />
+          {item.votes.up}
+        </button>
+        <button
+          disabled={busy}
+          onClick={() => onVote(my === 'DOWN' ? null : 'DOWN')}
+          className={cn(
+            'inline-flex items-center gap-1 rounded-[var(--radius-pill)] px-2.5 py-1 text-xs font-semibold border transition-colors',
+            my === 'DOWN'
+              ? 'bg-[var(--color-error)]/20 text-[var(--color-error)] border-transparent'
+              : 'bg-[var(--color-bg-elevated)] border-[var(--color-border)] hover:border-[var(--color-error)]'
+          )}
+        >
+          <ThumbsDown size={11} />
+          {item.votes.down}
+        </button>
+      </div>
+      {item.votes.voters.length > 0 && (
+        <span className="text-[11px] text-[var(--color-fg-muted)] truncate min-w-0">
+          {item.votes.voters.slice(0, 3).join(', ')}
+          {item.votes.voters.length > 3 ? ` 외 ${item.votes.voters.length - 3}명` : ''}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function summarizeVotes(items: CollectionDetail['items']) {
+  if (items.length === 0) return null
+  let totalUp = 0
+  let totalDown = 0
+  let leader = items[0]
+  let leaderScore = -Infinity
+  for (const it of items) {
+    totalUp += it.votes.up
+    totalDown += it.votes.down
+    const score = it.votes.up - it.votes.down
+    if (score > leaderScore) {
+      leaderScore = score
+      leader = it
+    }
+  }
+  return {
+    totalUp,
+    totalDown,
+    leader: leaderScore > 0 ? leader.title : null,
+  }
 }

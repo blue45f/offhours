@@ -27,15 +27,36 @@ export const CollectionSummarySchema = z.object({
 })
 export type CollectionSummary = z.infer<typeof CollectionSummarySchema>
 
+export const VoteValueSchema = z.enum(['UP', 'DOWN'])
+export type VoteValue = z.infer<typeof VoteValueSchema>
+
+export const ItemVoteSummarySchema = z.object({
+  up: z.number(),
+  down: z.number(),
+  voters: z.array(z.string()),
+  /** 현재 voterToken 의 투표(없으면 null) */
+  myVote: VoteValueSchema.nullable(),
+})
+export type ItemVoteSummary = z.infer<typeof ItemVoteSummarySchema>
+
 export const CollectionDetailSchema = CollectionSummarySchema.extend({
   items: z.array(
     SpaceCardSchema.extend({
+      favoriteId: z.string(),
       note: z.string().nullable(),
       addedAt: z.string(),
+      votes: ItemVoteSummarySchema,
     })
   ),
 })
 export type CollectionDetail = z.infer<typeof CollectionDetailSchema>
+
+export const CastVoteSchema = z.object({
+  voterToken: z.string().trim().min(8).max(80),
+  voterName: z.string().trim().min(1).max(20),
+  vote: VoteValueSchema.nullable(),
+})
+export type CastVoteInput = z.infer<typeof CastVoteSchema>
 
 export const AddToCollectionSchema = z.object({
   spaceId: z.string().min(1),

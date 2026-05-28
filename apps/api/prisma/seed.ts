@@ -774,6 +774,14 @@ async function main() {
       categories: ['BAR', 'ROOFTOP', 'RESTAURANT'] as const,
     },
   ]
+  const demoVoters = [
+    { token: 'demo-voter-jiwon', name: '지원' },
+    { token: 'demo-voter-minho', name: '민호' },
+    { token: 'demo-voter-seoyeon', name: '서연' },
+    { token: 'demo-voter-junseok', name: '준석' },
+    { token: 'demo-voter-yejin', name: '예진' },
+    { token: 'demo-voter-hyeri', name: '혜리' },
+  ]
   for (const c of collectionsSeed) {
     const collection = await prisma.collection.create({
       data: {
@@ -788,12 +796,33 @@ async function main() {
     const picks = activeSpacesForCollections
       .filter((s) => (c.categories as readonly string[]).includes(s.venue.category))
       .slice(0, 5)
-    for (const p of picks) {
-      await prisma.favorite.upsert({
+    for (let i = 0; i < picks.length; i++) {
+      const p = picks[i]
+      const fav = await prisma.favorite.upsert({
         where: { userId_spaceId: { userId: guest.id, spaceId: p.id } },
         update: { collectionId: collection.id },
         create: { userId: guest.id, spaceId: p.id, collectionId: collection.id },
       })
+      // 공개 컬렉션은 친구들이 미리 투표한 데모: 첫 후보일수록 더 많은 👍
+      if (!c.isPublic) continue
+      const upCount = Math.max(0, 5 - i)
+      const downCount = Math.max(0, i - 2)
+      for (let k = 0; k < upCount; k++) {
+        const v = demoVoters[k]
+        await prisma.collectionItemVote.upsert({
+          where: { favoriteId_voterToken: { favoriteId: fav.id, voterToken: v.token } },
+          create: { favoriteId: fav.id, voterToken: v.token, voterName: v.name, vote: 'UP' },
+          update: { vote: 'UP' as const, voterName: v.name },
+        })
+      }
+      for (let k = 0; k < downCount; k++) {
+        const v = demoVoters[demoVoters.length - 1 - k]
+        await prisma.collectionItemVote.upsert({
+          where: { favoriteId_voterToken: { favoriteId: fav.id, voterToken: v.token } },
+          create: { favoriteId: fav.id, voterToken: v.token, voterName: v.name, vote: 'DOWN' },
+          update: { vote: 'DOWN' as const, voterName: v.name },
+        })
+      }
     }
   }
 

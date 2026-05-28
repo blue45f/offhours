@@ -85,8 +85,9 @@ export class CollectionsService {
   /**
    * 슬러그로 조회. 공개 컬렉션이면 누구나, 비공개면 본인만.
    * viewerId 가 없으면(인증 안 됨) 공개 컬렉션만 노출.
+   * voterToken 이 주어지면 각 item 에 본인의 투표(myVote) 포함.
    */
-  async getBySlug(slug: string, viewerId?: string): Promise<CollectionDetail> {
+  async getBySlug(slug: string, viewerId?: string, voterToken?: string): Promise<CollectionDetail> {
     const row = await this.prisma.collection.findUnique({
       where: { slug },
       include: {
@@ -106,6 +107,9 @@ export class CollectionsService {
                 },
               },
             },
+            votes: {
+              select: { vote: true, voterName: true, voterToken: true },
+            },
           },
         },
         _count: { select: { favorites: true } },
@@ -118,27 +122,73 @@ export class CollectionsService {
     const summary = this.toSummary(row)
     return {
       ...summary,
-      items: row.favorites.map((f) => ({
-        id: f.space.id,
-        slug: f.space.slug,
-        title: f.space.title,
-        summary: f.space.summary,
-        capacityMin: f.space.capacityMin,
-        capacityMax: f.space.capacityMax,
-        basePriceKRW: f.space.basePriceKRW,
-        ratingAvg: f.space.ratingAvg,
-        ratingCount: f.space.ratingCount,
-        thumbnailUrl: f.space.photos[0]?.url ?? null,
-        blurhash: f.space.photos[0]?.blurhash ?? null,
-        region: f.space.venue.region,
-        district: f.space.venue.district,
-        category: f.space.venue.category,
-        instantBook: f.space.instantBook,
-        useCases: f.space.useCases as CollectionDetail['items'][number]['useCases'],
-        note: f.note,
-        addedAt: f.createdAt.toISOString(),
-      })),
+      items: row.favorites.map((f) => {
+        const up = f.votes.filter((v) => v.vote === 'UP').length
+        const down = f.votes.filter((v) => v.vote === 'DOWN').length
+        const voterNames = Array.from(new Set(f.votes.map((v) => v.voterName))).slice(0, 8)
+        const myVote = voterToken
+          ? (f.votes.find((v) => v.voterToken === voterToken)?.vote ?? null)
+          : null
+        return {
+          id: f.space.id,
+          slug: f.space.slug,
+          title: f.space.title,
+          summary: f.space.summary,
+          capacityMin: f.space.capacityMin,
+          capacityMax: f.space.capacityMax,
+          basePriceKRW: f.space.basePriceKRW,
+          ratingAvg: f.space.ratingAvg,
+          ratingCount: f.space.ratingCount,
+          thumbnailUrl: f.space.photos[0]?.url ?? null,
+          blurhash: f.space.photos[0]?.blurhash ?? null,
+          region: f.space.venue.region,
+          district: f.space.venue.district,
+          category: f.space.venue.category,
+          instantBook: f.space.instantBook,
+          useCases: f.space.useCases as CollectionDetail['items'][number]['useCases'],
+          favoriteId: f.id,
+          note: f.note,
+          addedAt: f.createdAt.toISOString(),
+          votes: { up, down, voters: voterNames, myVote },
+        }
+      }),
     }
+  }
+
+  /**
+   * 공개 컬렉션의 후보(favorite)에 투표. 1인 1표 (voterToken 기준).
+   * vote=null 이면 기존 투표를 취소. 1인 1닉네임 유지(같은 토큰 다른 이름은 마지막 이름 적용).
+   */
+  async castVote(
+    slug: string,
+    favoriteId: string,
+    voterToken: string,
+    voterName: string,
+    vote: 'UP' | 'DOWN' | null
+  ) {
+    const collection = await this.prisma.collection.findUnique({
+      where: { slug },
+      select: { id: true, isPublic: true },
+    })
+    if (!collection || !collection.isPublic) throw new NotFoundException()
+    const fav = await this.prisma.favorite.findUnique({
+      where: { id: favoriteId },
+      select: { collectionId: true },
+    })
+    if (!fav || fav.collectionId !== collection.id) throw new NotFoundException()
+
+    if (vote === null) {
+      await this.prisma.collectionItemVote.deleteMany({
+        where: { favoriteId, voterToken },
+      })
+      return { cleared: true }
+    }
+    await this.prisma.collectionItemVote.upsert({
+      where: { favoriteId_voterToken: { favoriteId, voterToken } },
+      create: { favoriteId, voterToken, voterName, vote },
+      update: { vote, voterName },
+    })
+    return { cast: vote }
   }
 
   /**

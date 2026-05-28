@@ -620,8 +620,34 @@ model Favorite {
   note         String?
   createdAt    DateTime    @default(now())
 
+  votes CollectionItemVote[]
+
   @@unique([userId, spaceId])
   @@index([collectionId])
+}
+
+enum VoteValue {
+  UP
+  DOWN
+}
+
+/**
+ * 공개 컬렉션의 후보 공간에 친구·동료가 익명 닉네임으로 남기는 1인 1표 투표.
+ * voterToken 은 브라우저 localStorage 에서 발급해 (cuid) 같은 사람의 중복 투표를 막는다.
+ * Pinterest Collab Board 의 공간대여 버전 — 한국 그룹 의사결정 문화 fit.
+ */
+model CollectionItemVote {
+  id          String    @id @default(cuid())
+  favoriteId  String
+  favorite    Favorite  @relation(fields: [favoriteId], references: [id], onDelete: Cascade)
+  voterToken  String
+  voterName   String
+  vote        VoteValue
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([favoriteId, voterToken])
+  @@index([favoriteId])
 }
 
 /**

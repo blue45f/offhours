@@ -1,11 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common'
 import type { Request } from 'express'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
   AddToCollectionSchema,
+  CastVoteSchema,
   CreateCollectionSchema,
   UpdateCollectionSchema,
   type AddToCollectionInput,
+  type CastVoteInput,
   type CreateCollectionInput,
   type UpdateCollectionInput,
 } from '@offhours/shared'
@@ -53,8 +66,22 @@ export class CollectionsController {
   // public: 비공개 컬렉션은 ownerId === viewer 일 때만 200, 아니면 404
   @Public()
   @Get('slug/:slug')
-  async getBySlug(@Param('slug') slug: string, @Req() req: Request & { user?: RequestUser }) {
-    return this.collections.getBySlug(slug, req.user?.id)
+  async getBySlug(
+    @Param('slug') slug: string,
+    @Query('voterToken') voterToken: string | undefined,
+    @Req() req: Request & { user?: RequestUser }
+  ) {
+    return this.collections.getBySlug(slug, req.user?.id, voterToken)
+  }
+
+  @Public()
+  @Post('slug/:slug/items/:favoriteId/vote')
+  async castVote(
+    @Param('slug') slug: string,
+    @Param('favoriteId') favoriteId: string,
+    @Body(new ZodValidationPipe(CastVoteSchema)) body: CastVoteInput
+  ) {
+    return this.collections.castVote(slug, favoriteId, body.voterToken, body.voterName, body.vote)
   }
 
   @Post(':id/items')

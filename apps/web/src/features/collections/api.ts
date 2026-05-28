@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type {
+  CastVoteInput,
   CollectionDetail,
   CollectionSummary,
   CreateCollectionInput,
@@ -24,12 +25,24 @@ export function useMyCollections() {
   })
 }
 
-export function useCollectionBySlug(slug?: string) {
+export function useCollectionBySlug(slug?: string, voterToken?: string) {
   return useQuery({
-    queryKey: collectionKeys.detail(slug ?? ''),
+    queryKey: [...collectionKeys.detail(slug ?? ''), voterToken ?? null] as const,
     enabled: !!slug,
-    queryFn: () => api.get<CollectionDetail>(`/collections/slug/${slug}`),
-    staleTime: 30_000,
+    queryFn: () =>
+      api.get<CollectionDetail>(`/collections/slug/${slug}`, {
+        params: voterToken ? { voterToken } : undefined,
+      }),
+    staleTime: 15_000,
+  })
+}
+
+export function useCastCollectionVote(slug: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ favoriteId, ...body }: { favoriteId: string } & CastVoteInput) =>
+      api.post(`/collections/slug/${slug}/items/${favoriteId}/vote`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: collectionKeys.detail(slug) }),
   })
 }
 
