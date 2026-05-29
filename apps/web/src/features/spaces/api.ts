@@ -29,6 +29,7 @@ export interface SpaceSearchParams {
   /** UseCase 코드 콤마 구분 — 백엔드에서 hasSome 매칭 */
   useCases?: string
   instantBook?: boolean
+  verifiedOnly?: boolean
   lat?: number
   lng?: number
   radiusKm?: number

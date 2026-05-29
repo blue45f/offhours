@@ -522,6 +522,7 @@ async function main() {
         bankAccount: `1000${randomBytes(2).toString('hex')}`,
         payoutCycle: 'D7',
         approvedAt: new Date(),
+        isInsured: i % 2 === 0,
       },
     })
 

@@ -142,6 +142,20 @@ export default function SpaceDetailPage() {
                 <p className="text-sm text-[var(--color-fg-muted)]">
                   운영 {data.venue.host.hostedCount}회
                 </p>
+                {(data.venue.host.isVerifiedBusiness || data.venue.host.isInsured) && (
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    {data.venue.host.isVerifiedBusiness && (
+                      <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] px-2 py-0.5 text-[11px] font-semibold">
+                        <ShieldCheck size={11} /> 검증된 사업장
+                      </span>
+                    )}
+                    {data.venue.host.isInsured && (
+                      <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)] px-2 py-0.5 text-[11px] font-medium">
+                        책임보험 가입
+                      </span>
+                    )}
+                  </div>
+                )}
                 {(() => {
                   const badge = formatResponseTimeBadge({
                     medianMin: data.avgApprovalMin ?? null,

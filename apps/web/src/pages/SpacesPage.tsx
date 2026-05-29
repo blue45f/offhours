@@ -47,6 +47,7 @@ export default function SpacesPage() {
       amenities: params.get('amenities') ?? undefined,
       useCases: params.get('useCases') ?? undefined,
       instantBook: params.get('instantBook') === 'true' ? true : undefined,
+      verifiedOnly: params.get('verifiedOnly') === 'true' ? true : undefined,
       lat: useGeo ? geo.coords!.lat : undefined,
       lng: useGeo ? geo.coords!.lng : undefined,
       radiusKm: useGeo ? radiusKm : undefined,
@@ -88,6 +89,7 @@ export default function SpacesPage() {
     activeFilters.push(`모임: ${labels}`)
   }
   if (query.instantBook) activeFilters.push('즉시 예약')
+  if (query.verifiedOnly) activeFilters.push('검증된 사업장')
 
   return (
     <div className="container-page py-8 md:py-12">
@@ -368,6 +370,7 @@ function FilterContent({
     query.useCases ? (query.useCases.split(',').filter(Boolean) as UseCase[]) : []
   )
   const [instantBook, setInstantBook] = useState(query.instantBook ?? false)
+  const [verifiedOnly, setVerifiedOnly] = useState(query.verifiedOnly ?? false)
   const [category, setCategory] = useState<VenueCategory | undefined>(query.category)
   const [purpose, setPurpose] = useState<Purpose | undefined>(query.purpose)
 
@@ -461,6 +464,15 @@ function FilterContent({
         />
         즉시 예약 가능한 공간만 보기
       </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={verifiedOnly}
+          onChange={(e) => setVerifiedOnly(e.target.checked)}
+          className="size-4 accent-[var(--color-primary)]"
+        />
+        검증된 사업장만 보기 (사업자 인증 완료)
+      </label>
       <div className="flex justify-end gap-2 pt-2">
         <Button
           variant="ghost"
@@ -472,6 +484,7 @@ function FilterContent({
               amenities: undefined,
               useCases: undefined,
               instantBook: undefined,
+              verifiedOnly: undefined,
               category: undefined,
               purpose: undefined,
             })
@@ -488,6 +501,7 @@ function FilterContent({
               amenities: amenities.length ? amenities.join(',') : undefined,
               useCases: useCases.length ? useCases.join(',') : undefined,
               instantBook: instantBook ? 'true' : undefined,
+              verifiedOnly: verifiedOnly ? 'true' : undefined,
               category,
               purpose,
             })

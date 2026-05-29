@@ -128,6 +128,15 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
               🆕 신규
             </Badge>
           )}
+          {space.verifiedBusiness && (
+            <Badge
+              tone="primary"
+              soft={false}
+              className="!bg-[var(--color-bg-elevated)] !text-[var(--color-primary)] !shadow-[var(--shadow-sm)]"
+            >
+              <Check size={11} className="mr-0.5 inline" /> 검증 사업장
+            </Badge>
+          )}
         </div>
       </div>
       <div className="mt-3 space-y-1.5">

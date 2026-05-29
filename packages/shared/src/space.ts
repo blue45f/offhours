@@ -106,6 +106,10 @@ export const SpaceCardSchema = z.object({
   isNew: z.boolean().optional(),
   /** 인기 공간 (평점 ≥4.85 + 후기 ≥10건) — 카드에 "🔥 인기" 뱃지 */
   isHot: z.boolean().optional(),
+  /** 사업자 인증 완료(approvedAt) — 카드/상세에 "검증 사업장" 뱃지. 실제 사업장 신뢰 시그널 */
+  verifiedBusiness: z.boolean().optional(),
+  /** 호스트 책임보험 가입 */
+  hostInsured: z.boolean().optional(),
 })
 export type SpaceCard = z.infer<typeof SpaceCardSchema>
 
@@ -138,6 +142,9 @@ export const SpaceDetailSchema = SpaceCardSchema.extend({
       /** 호스트 후기 답글률 (0~1). 후기 ≥3건 + 답글 ≥1건일 때만 노출 권장 */
       reviewResponseRate: z.number().nullable(),
       reviewSampleCount: z.number(),
+      /** 사업자 인증 완료 — 실제 사업장 검증(스페이스클라우드의 개인 호스트가 못 하는 신뢰) */
+      isVerifiedBusiness: z.boolean(),
+      isInsured: z.boolean(),
     }),
   }),
   /** 활동 시그널: 최근 30일 PAID/COMPLETED 예약 건수 */
@@ -192,6 +199,8 @@ export const SpaceSearchSchema = z.object({
       v ? (v.split(',').filter(Boolean) as Array<z.infer<typeof UseCaseSchema>>) : undefined
     ),
   instantBook: z.coerce.boolean().optional(),
+  /** 사업자 인증된(검증된) 사업장만 */
+  verifiedOnly: z.coerce.boolean().optional(),
   /** 위치 기반: 위도·경도 + 반경(km) */
   lat: z.coerce.number().min(33).max(43).optional(),
   lng: z.coerce.number().min(124).max(132).optional(),

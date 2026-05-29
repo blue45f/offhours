@@ -42,13 +42,13 @@ export class SpacesService {
         { description: { contains: query.q, mode: 'insensitive' } },
       ]
     }
-    if (query.region || query.district || query.category) {
-      where.venue = {
-        ...(query.region ? { region: query.region } : {}),
-        ...(query.district ? { district: query.district } : {}),
-        ...(query.category ? { category: query.category } : {}),
-      }
-    }
+    const venueWhere: Prisma.VenueWhereInput = {}
+    if (query.region) venueWhere.region = query.region
+    if (query.district) venueWhere.district = query.district
+    if (query.category) venueWhere.category = query.category
+    // 검증된 사업장만 — 사업자 인증(approvedAt) 완료된 호스트의 공간
+    if (query.verifiedOnly) venueWhere.host = { approvedAt: { not: null } }
+    if (Object.keys(venueWhere).length > 0) where.venue = venueWhere
     if (query.capacity) where.capacityMax = { gte: query.capacity }
     if (query.priceMin !== undefined || query.priceMax !== undefined) {
       where.basePriceKRW = {
@@ -94,6 +94,8 @@ export class SpacesService {
           lng: true,
           host: {
             select: {
+              approvedAt: true,
+              isInsured: true,
               user: {
                 select: {
                   responseMedianMin: true,
@@ -268,6 +270,8 @@ export class SpacesService {
           hostedCount: space.venue.host.user.hostedCount,
           reviewResponseRate: space.venue.host.user.reviewResponseRate ?? null,
           reviewSampleCount: space.venue.host.user.reviewSampleCount ?? 0,
+          isVerifiedBusiness: !!space.venue.host.approvedAt,
+          isInsured: space.venue.host.isInsured,
         },
       },
     }
@@ -714,6 +718,8 @@ export class SpacesService {
       photos: SpacePhoto[]
       venue: Pick<Venue, 'region' | 'district' | 'category'> & {
         host?: {
+          approvedAt?: Date | null
+          isInsured?: boolean
           user?: {
             responseMedianMin: number | null
             responseRate24h: number | null
@@ -756,6 +762,8 @@ export class SpacesService {
       avgApprovalMin: hostUser?.responseMedianMin ?? null,
       responseRate24h: hostUser?.responseRate24h ?? null,
       responseSampleCount: hostUser?.responseSampleCount ?? null,
+      verifiedBusiness: !!s.venue.host?.approvedAt,
+      hostInsured: !!s.venue.host?.isInsured,
     }
   }
 }
