@@ -11,6 +11,9 @@ export function earnedPoints(paidKRW: number): number {
   return Math.round(Math.max(0, paidKRW) * POINTS_EARN_RATE)
 }
 
+/** 추천인 적립 — 친구가 추천 코드로 가입하면 추천인·신규 회원 양쪽에 적립(B05). */
+export const REFERRAL_BONUS_KRW = 10000
+
 /**
  * 취소·환불 정책 티어 — 호스트가 공간별로 선택. 영업 외 대관은 라스트미닛 비중이 커서
  * 유연(FLEXIBLE) 정책이 전환 레버가 되고, 인기 주말·성수기 공간은 엄격(STRICT)으로

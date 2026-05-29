@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config'
 import * as argon2 from 'argon2'
 import { randomBytes, createHash } from 'crypto'
 import type { Role, User } from '@prisma/client'
-import { type SignInInput, type SignUpInput } from '@offhours/shared'
+import { REFERRAL_BONUS_KRW, type SignInInput, type SignUpInput } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { randomReferralCode } from '../common/util/code'
@@ -44,8 +44,17 @@ export class AuthService {
         marketingOptIn: input.marketingOptIn ?? false,
         referralCode,
         referredById: referredBy?.id ?? null,
+        // 추천인 코드로 가입하면 신규 회원에게 가입 적립(B05)
+        pointsKRW: referredBy ? REFERRAL_BONUS_KRW : 0,
       },
     })
+    // 추천인에게도 동일 포인트 적립
+    if (referredBy) {
+      await this.prisma.user.update({
+        where: { id: referredBy.id },
+        data: { pointsKRW: { increment: REFERRAL_BONUS_KRW } },
+      })
+    }
 
     return this.issueTokens(user, meta)
   }

@@ -405,7 +405,8 @@
 - [B02] **알림 센터** (인앱 + 이메일) — `Notification` 모델 + SSE
 - [B03] **즐겨찾기** (SavedSpace) — rotifolk `SavedParty` 패턴
 - [B04] **호스트 신뢰점수(Trust Score)** — rotifolk `trustScore`/`hostedCount`
-- [B05] **추천인 코드(Referral)** + 포인트 적립 — rotifolk `pointsKRW`/`referralCode`
+- [B05] **추천인 코드(Referral)** + 포인트 적립 — rotifolk `pointsKRW`/`referralCode` _(구현:
+  가입 시 추천 코드 입력 → 추천인·신규 회원 양쪽 10,000P 적립, 적립 포인트는 예약 결제에 사용)_
 - [B06] **감사 로그(Audit Log)** — 관리자 모든 액션 추적
 - [B07] **마케팅 옵트인** — resume `marketingOptIn`
 - [B08] **다국어(i18n, ko/en)** — pettography `i18next` 패턴
