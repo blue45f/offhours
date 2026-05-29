@@ -166,6 +166,30 @@ export class ReservationsService {
       data: { reservationId: reservation.id },
     })
 
+    // 청소 대행 자동 매칭 — 청소비가 있으면 지역 우선·활성 폴백으로 제휴 업체를 배정한다.
+    // 청소 SLA의 Phase 2: "다음 영업 전 원상복구"를 호스트 대신 플랫폼이 운영으로 보장.
+    if (space.cleaningFeeKRW > 0) {
+      const partner =
+        (await this.prisma.cleaningPartner.findFirst({
+          where: { isActive: true, region: space.venue.region },
+          orderBy: { ratingAvg: 'desc' },
+        })) ??
+        (await this.prisma.cleaningPartner.findFirst({
+          where: { isActive: true },
+          orderBy: { ratingAvg: 'desc' },
+        }))
+      if (partner) {
+        await this.prisma.cleaningJob.create({
+          data: {
+            reservationId: reservation.id,
+            partnerId: partner.id,
+            scheduledAt: endAt,
+            feeKRW: space.cleaningFeeKRW,
+          },
+        })
+      }
+    }
+
     return reservation
   }
 
@@ -490,6 +514,11 @@ export class ReservationsService {
       where: { id: r.space.venue.host.userId },
       data: { hostedCount: { increment: 1 } },
     })
+    // 청소 대행 배정이 있으면 완료 처리
+    await this.prisma.cleaningJob.updateMany({
+      where: { reservationId: r.id, status: 'SCHEDULED' },
+      data: { status: 'DONE' },
+    })
     await this.notifications.create(r.guestId, {
       type: 'REVIEW_REQUESTED',
       title: '리뷰를 남겨주세요',
@@ -621,6 +650,7 @@ export class ReservationsService {
         },
         payment: true,
         dispute: true,
+        cleaningJob: { include: { partner: true } },
       },
     })
     if (!r) throw new NotFoundException()
@@ -633,6 +663,14 @@ export class ReservationsService {
     return {
       ...row,
       dispute: r.dispute ? this.toDisputeSummary(r.dispute) : null,
+      cleaningJob: r.cleaningJob
+        ? {
+            partnerName: r.cleaningJob.partner.name,
+            scheduledAt: r.cleaningJob.scheduledAt.toISOString(),
+            status: r.cleaningJob.status,
+            feeKRW: r.cleaningJob.feeKRW,
+          }
+        : null,
       venueAddressRoad: showArrival ? r.space.venue.addressRoad : null,
       arrivalGuide: showArrival ? (r.space.venue.arrivalGuide as object | null) : null,
     }

@@ -493,6 +493,7 @@ model Reservation {
   dispute Dispute?
   split   ReservationSplit?
   rsvps   EventRsvp[]
+  cleaningJob CleaningJob?
 
   @@index([guestId, status])
   @@index([spaceId, startAt])
@@ -911,4 +912,45 @@ model SpaceAddon {
   createdAt   DateTime      @default(now())
 
   @@index([spaceId, isActive, order])
+}
+
+// ─────────────────────────────────────────────────────────────
+// 청소 대행 마켓 — 청소 SLA 의 Phase 2 완성. 청소비가 있는 예약에 지역 기반으로 제휴
+// 청소업체를 자동 매칭해 "다음 영업 전 원상복구" 라는 호스트 #1 진입장벽을 운영으로 닫는다.
+// 스페이스클라우드/아워플레이스/Peerspace 어디에도 없는 차별점.
+// ─────────────────────────────────────────────────────────────
+
+model CleaningPartner {
+  id             String   @id @default(cuid())
+  name           String
+  region         String
+  phone          String?
+  pricePerJobKRW Int      @default(0)
+  ratingAvg      Float    @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  jobs CleaningJob[]
+
+  @@index([region, isActive])
+}
+
+enum CleaningJobStatus {
+  SCHEDULED
+  DONE
+  CANCELED
+}
+
+model CleaningJob {
+  id            String            @id @default(cuid())
+  reservationId String            @unique
+  reservation   Reservation       @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  partnerId     String
+  partner       CleaningPartner   @relation(fields: [partnerId], references: [id])
+  scheduledAt   DateTime
+  status        CleaningJobStatus @default(SCHEDULED)
+  feeKRW        Int               @default(0)
+  createdAt     DateTime          @default(now())
+
+  @@index([partnerId, scheduledAt])
 }

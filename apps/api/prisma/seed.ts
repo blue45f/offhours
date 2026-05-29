@@ -906,6 +906,49 @@ async function main() {
     }
   }
 
+  // 데모 청소 대행 제휴 업체 — 청소비 있는 예약에 지역 기반으로 자동 매칭(없으면 활성 폴백)
+  await prisma.cleaningJob.deleteMany({})
+  await prisma.cleaningPartner.deleteMany({})
+  await prisma.cleaningPartner.createMany({
+    data: [
+      {
+        name: '클린업 망원',
+        region: '서울',
+        phone: '010-1000-2001',
+        pricePerJobKRW: 28000,
+        ratingAvg: 4.9,
+      },
+      {
+        name: '스파크 클리닝',
+        region: '서울',
+        phone: '010-1000-2002',
+        pricePerJobKRW: 32000,
+        ratingAvg: 4.7,
+      },
+      {
+        name: '데이앤나잇 클린',
+        region: '서울',
+        phone: '010-1000-2003',
+        pricePerJobKRW: 26000,
+        ratingAvg: 4.6,
+      },
+      {
+        name: '프레시 경기',
+        region: '경기',
+        phone: '010-1000-2004',
+        pricePerJobKRW: 30000,
+        ratingAvg: 4.8,
+      },
+      {
+        name: '올케어 부산',
+        region: '부산',
+        phone: '010-1000-2005',
+        pricePerJobKRW: 27000,
+        ratingAvg: 4.5,
+      },
+    ],
+  })
+
   // 데모 법인 결제 프로필 — 게스트 user 가 사내 워크샵 시나리오로 사용
   await prisma.corporateProfile.upsert({
     where: { userId: guest.id },

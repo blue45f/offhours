@@ -3,12 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
   CANCELLATION_POLICIES,
+  CleaningJobStatusLabel,
   DisputeStatusLabel,
   PurposeLabel,
   ReservationStatusLabel,
   calcRefundRate,
 } from '@offhours/shared'
-import { Building2, Clock, MessageCircle, ShieldCheck, Share2, X } from 'lucide-react'
+import { Building2, Clock, MessageCircle, ShieldCheck, Share2, Sparkles, X } from 'lucide-react'
 import { CorporateTaxTypeLabel } from '@offhours/shared'
 
 import {
@@ -329,6 +330,34 @@ export default function ReservationDetailPage() {
                   </Button>
                 )
               )}
+            </CardBody>
+          </Card>
+        )}
+
+        {reservation.cleaningJob && (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <span className="inline-flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-[var(--color-primary)]" />
+                  청소 대행
+                </span>
+              </CardTitle>
+              <Badge tone={reservation.cleaningJob.status === 'DONE' ? 'primary' : 'accent'} soft>
+                {CleaningJobStatusLabel[reservation.cleaningJob.status]}
+              </Badge>
+            </CardHeader>
+            <CardBody className="space-y-2 text-sm">
+              <Row label="제휴 업체" value={reservation.cleaningJob.partnerName} />
+              <Row
+                label="청소 예정"
+                value={formatDateTimeKR(reservation.cleaningJob.scheduledAt)}
+              />
+              <Row label="청소비" value={formatKRW(reservation.cleaningJob.feeKRW)} />
+              <p className="text-[11px] text-[var(--color-fg-muted)] leading-relaxed">
+                이용 종료 후 제휴 청소업체가 원상복구를 진행해 다음 영업 전 공간이 깔끔하게
+                정리돼요.
+              </p>
             </CardBody>
           </Card>
         )}

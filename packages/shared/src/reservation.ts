@@ -7,6 +7,7 @@ import {
 } from './enums'
 import { AddonLineSchema, AddonSelectionSchema } from './addon'
 import { DisputeSummarySchema } from './protection'
+import { CleaningJobSummarySchema } from './cleaning'
 
 // 베이스 오브젝트(미정제) — refine 이 붙은 스키마에는 .omit()/.extend() 를 쓸 수 없으므로
 // (Zod v4 런타임 가드) 파생 스키마는 이 오브젝트에서 만든 뒤 각자 refine 을 다시 적용한다.
@@ -123,6 +124,8 @@ export const ReservationSchema = z.object({
   cancellationPolicy: CancellationPolicySchema.default('STANDARD'),
   /** 파손 보장 청구(있으면) — 호스트가 넣은 청구의 상태 요약 */
   dispute: DisputeSummarySchema.nullable().optional(),
+  /** 청소 대행 배정(있으면) — 청소비 있는 예약에 자동 매칭된 제휴 업체 */
+  cleaningJob: CleaningJobSummarySchema.nullable().optional(),
   totalKRW: z.number(),
   feeKRW: z.number(),
   /** 법인 크레딧 차감액 — 실 결제액 = totalKRW - creditAppliedKRW */
