@@ -44,4 +44,9 @@ export class HostController {
   async stats(@CurrentUser() user: RequestUser) {
     return this.host.getStats(user.id)
   }
+
+  @Get('demand-heatmap')
+  async demandHeatmap(@CurrentUser() user: RequestUser) {
+    return this.host.getDemandHeatmap(user.id)
+  }
 }

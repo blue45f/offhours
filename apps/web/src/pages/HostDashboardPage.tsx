@@ -6,6 +6,7 @@ import { api } from '../services/api'
 import { Card, CardBody } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { formatKRW } from '../utils/format'
+import { DemandHeatmap } from '../components/host/DemandHeatmap'
 
 interface HostStats {
   venues: number
@@ -47,6 +48,10 @@ export default function HostDashboardPage() {
           label="평점"
           value={data?.ratingAvg ? `${data.ratingAvg.toFixed(1)} (${data.reviewCount})` : '—'}
         />
+      </div>
+
+      <div className="mt-8">
+        <DemandHeatmap />
       </div>
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">

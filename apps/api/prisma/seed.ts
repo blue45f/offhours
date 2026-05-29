@@ -667,8 +667,10 @@ async function main() {
       const corpus = reviewCorpus[reviewIdx % reviewCorpus.length]
       reviewIdx++
       const startAt = new Date()
-      startAt.setDate(startAt.getDate() - (10 + j * 7))
-      startAt.setHours(19, 0, 0, 0)
+      // 요일과 시간 둘 다 분산해 demand-heatmap 이 의미있게 채워지도록.
+      startAt.setDate(startAt.getDate() - (5 + ((i * 3 + j * 11) % 50)))
+      const hourOptions = [13, 14, 18, 19, 20, 21]
+      startAt.setHours(hourOptions[(i + j * 2) % hourOptions.length], 0, 0, 0)
       const endAt = new Date(startAt.getTime() + 4 * 60 * 60 * 1000)
       const reservation = await prisma.reservation.create({
         data: {
