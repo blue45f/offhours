@@ -170,3 +170,16 @@ export type RecurringResult = z.infer<typeof RecurringResultSchema>
 export function calcReservationFee(totalKRW: number): number {
   return Math.round(totalKRW * 0.12)
 }
+
+/**
+ * 실 결제액 — 총액 + 보증금 − 법인 크레딧 − 적립 포인트. 결제 인텐트·연장 재계산·화면
+ * 표시가 모두 이 단일 공식을 쓰도록 공유한다(중복 계산으로 인한 정합성 버그 방지).
+ */
+export function payableKRW(r: {
+  totalKRW: number
+  depositKRW: number
+  creditAppliedKRW: number
+  pointsAppliedKRW: number
+}): number {
+  return Math.max(0, r.totalKRW + r.depositKRW - r.creditAppliedKRW - r.pointsAppliedKRW)
+}

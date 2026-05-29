@@ -13,6 +13,7 @@ import {
   calcRefundRate,
   clampTrust,
   earnedPoints,
+  payableKRW,
   type AddonLine,
   type CheckOutInput,
   type CreateRecurringInput,
@@ -494,11 +495,16 @@ export class ReservationsService {
       },
     })
     if (r.payment) {
-      // 실 결제액 정합성 유지 — 크레딧·포인트 차감과 보증금을 반영(연장 전 결제식과 동일)
+      // 실 결제액 정합성 유지 — 공유 payableKRW 단일 공식 사용(연장 후 금액 재계산)
       await this.prisma.payment.update({
         where: { reservationId: r.id },
         data: {
-          amountKRW: newTotal - r.creditAppliedKRW - r.pointsAppliedKRW + r.depositKRW,
+          amountKRW: payableKRW({
+            totalKRW: newTotal,
+            depositKRW: r.depositKRW,
+            creditAppliedKRW: r.creditAppliedKRW,
+            pointsAppliedKRW: r.pointsAppliedKRW,
+          }),
         },
       })
     }

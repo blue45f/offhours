@@ -8,6 +8,7 @@ import {
   PurposeLabel,
   ReservationStatusLabel,
   calcRefundRate,
+  payableKRW,
 } from '@offhours/shared'
 import { Building2, Clock, MessageCircle, ShieldCheck, Share2, Sparkles, X } from 'lucide-react'
 import { CorporateTaxTypeLabel } from '@offhours/shared'
@@ -57,11 +58,7 @@ export default function ReservationDetailPage() {
   const refundRate = calcRefundRate(reservation.startAt, new Date(), reservation.cancellationPolicy)
   const refundKRW = Math.round(reservation.totalKRW * refundRate)
   const isHost = !!me && me.id === reservation.hostId
-  const payableKRW =
-    reservation.totalKRW +
-    reservation.depositKRW -
-    reservation.creditAppliedKRW -
-    reservation.pointsAppliedKRW
+  const payable = payableKRW(reservation)
 
   async function onCancel() {
     if (cancelReason.trim().length < 2) {
@@ -81,7 +78,7 @@ export default function ReservationDetailPage() {
     try {
       await startPay({
         reservationId: reservation.id,
-        amount: payableKRW,
+        amount: payable,
         orderName: reservation.spaceTitle,
       })
       toast.success('결제가 완료됐어요!')
@@ -259,7 +256,7 @@ export default function ReservationDetailPage() {
                     value={`-${formatKRW(reservation.pointsAppliedKRW)}`}
                   />
                 )}
-                <Row label="실 결제액" value={formatKRW(payableKRW)} strong />
+                <Row label="실 결제액" value={formatKRW(payable)} strong />
               </>
             )}
           </CardBody>
@@ -402,7 +399,7 @@ export default function ReservationDetailPage() {
           <div className="flex flex-wrap gap-2">
             {reservation.status === 'APPROVED' && (
               <Button size="lg" onClick={onPay}>
-                결제하기 ({formatKRW(payableKRW)})
+                결제하기 ({formatKRW(payable)})
               </Button>
             )}
             <Button

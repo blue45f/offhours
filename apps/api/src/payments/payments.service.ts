@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import type { ConfirmPaymentInput } from '@offhours/shared'
+import { payableKRW, type ConfirmPaymentInput } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { NotificationsService } from '../notifications/notifications.service'
@@ -38,12 +38,8 @@ export class PaymentsService {
         providerKey: orderId,
         orderId,
         method,
-        // 크레딧·포인트 차감 후 보증금을 더한 실 결제액(보증금은 추후 자동 환급)
-        amountKRW:
-          reservation.totalKRW -
-          reservation.creditAppliedKRW -
-          reservation.pointsAppliedKRW +
-          reservation.depositKRW,
+        // 실 결제액(공유 단일 공식): 총액 + 보증금 − 크레딧 − 포인트
+        amountKRW: payableKRW(reservation),
         status: 'READY',
       },
     })
