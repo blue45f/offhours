@@ -8,6 +8,7 @@ import { Prisma, Role } from '@prisma/client'
 import type {
   ArrivalGuide,
   CreateHostProfileInput,
+  HostEarnings,
   HostVenueArrival,
   UpdateHostProfileInput,
 } from '@offhours/shared'
@@ -172,6 +173,105 @@ export class HostService {
       data: { arrivalGuide: next ?? Prisma.JsonNull },
     })
     return { hasGuide: !!next }
+  }
+
+  async earnings(userId: string): Promise<HostEarnings> {
+    const zeroed: HostEarnings = {
+      totals: { thisMonthNetKRW: 0, pendingNetKRW: 0, allTimeNetKRW: 0, count: 0 },
+      upcoming: [],
+      byMonth: [],
+    }
+
+    const profile = await this.prisma.hostProfile.findUnique({ where: { userId } })
+    if (!profile) return zeroed
+
+    const payoutDays = profile.payoutCycle === 'D14' ? 14 : 7
+
+    const reservations = await this.prisma.reservation.findMany({
+      where: {
+        space: { venue: { hostId: profile.id } },
+        status: { in: ['PAID', 'CHECKED_IN', 'CHECKED_OUT', 'COMPLETED'] },
+      },
+      select: {
+        id: true,
+        code: true,
+        status: true,
+        totalKRW: true,
+        feeKRW: true,
+        startAt: true,
+        endAt: true,
+        checkedOutAt: true,
+        space: { select: { title: true } },
+      },
+      orderBy: { startAt: 'desc' },
+      take: 200,
+    })
+
+    if (reservations.length === 0) return zeroed
+
+    const now = new Date()
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+
+    // Build 6-month buckets (current month - 5 .. current month)
+    const monthBuckets = new Map<string, number>()
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      monthBuckets.set(key, 0)
+    }
+
+    let allTimeNetKRW = 0
+    let thisMonthNetKRW = 0
+    let pendingNetKRW = 0
+    let completedCount = 0
+
+    const upcomingList: HostEarnings['upcoming'] = []
+
+    for (const r of reservations) {
+      const net = r.totalKRW - r.feeKRW
+      const base = r.checkedOutAt ?? r.endAt
+      const payoutAt = new Date(base.getTime() + payoutDays * 24 * 60 * 60 * 1000)
+
+      if (r.status === 'COMPLETED') {
+        allTimeNetKRW += net
+        completedCount++
+        if (r.startAt >= thisMonthStart) {
+          thisMonthNetKRW += net
+        }
+        // byMonth — use startAt month for attribution
+        const mo = `${r.startAt.getFullYear()}-${String(r.startAt.getMonth() + 1).padStart(2, '0')}`
+        if (monthBuckets.has(mo)) {
+          monthBuckets.set(mo, (monthBuckets.get(mo) ?? 0) + net)
+        }
+      } else {
+        // PAID / CHECKED_IN / CHECKED_OUT — pending
+        pendingNetKRW += net
+      }
+
+      // upcoming = payout is in the future OR status not yet COMPLETED
+      if (payoutAt > now || r.status !== 'COMPLETED') {
+        upcomingList.push({
+          reservationId: r.id,
+          code: r.code,
+          spaceTitle: r.space.title,
+          startAt: r.startAt.toISOString(),
+          netKRW: net,
+          payoutAt: payoutAt.toISOString(),
+        })
+      }
+    }
+
+    // Sort upcoming by payoutAt asc, take 8
+    upcomingList.sort((a, b) => a.payoutAt.localeCompare(b.payoutAt))
+    const upcoming = upcomingList.slice(0, 8)
+
+    const byMonth = Array.from(monthBuckets.entries()).map(([month, netKRW]) => ({ month, netKRW }))
+
+    return {
+      totals: { thisMonthNetKRW, pendingNetKRW, allTimeNetKRW, count: completedCount },
+      upcoming,
+      byMonth,
+    }
   }
 
   async getStats(userId: string) {

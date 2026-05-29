@@ -42,6 +42,11 @@ export class HostController {
     return this.host.updateProfile(user.id, body)
   }
 
+  @Get('earnings')
+  async earnings(@CurrentUser() user: RequestUser) {
+    return this.host.earnings(user.id)
+  }
+
   @Get('stats')
   async stats(@CurrentUser() user: RequestUser) {
     return this.host.getStats(user.id)

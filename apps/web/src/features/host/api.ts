@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateHostProfileInput, HostProfile } from '@offhours/shared'
+import type { CreateHostProfileInput, HostEarnings, HostProfile } from '@offhours/shared'
 
 import { api } from '../../services/api'
 import { useIsAuthed } from '../../store/auth'
@@ -7,6 +7,7 @@ import { useIsAuthed } from '../../store/auth'
 export const hostKeys = {
   profile: ['host', 'profile'] as const,
   stats: ['host', 'stats'] as const,
+  earnings: ['host', 'earnings'] as const,
 }
 
 export interface HostStats {
@@ -43,5 +44,14 @@ export function useHostStats() {
   return useQuery({
     queryKey: hostKeys.stats,
     queryFn: () => api.get<HostStats | null>('/host/stats'),
+  })
+}
+
+export function useHostEarnings() {
+  const isAuthed = useIsAuthed()
+  return useQuery({
+    queryKey: hostKeys.earnings,
+    enabled: isAuthed,
+    queryFn: () => api.get<HostEarnings>('/host/earnings'),
   })
 }
