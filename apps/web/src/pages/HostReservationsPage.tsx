@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { ReservationStatusLabel, type ReservationStatus } from '@offhours/shared'
-import { ClipboardCheck, QrCode } from 'lucide-react'
+import { ReservationStatusLabel, formatTrustTier, type ReservationStatus } from '@offhours/shared'
+import { ClipboardCheck, QrCode, ShieldCheck } from 'lucide-react'
 
 import { Tabs } from '../components/ui/Tabs'
 import { Card, CardBody } from '../components/ui/Card'
@@ -99,6 +99,17 @@ export default function HostReservationsPage() {
                       {formatDateTimeKR(r.startAt)} – {formatDateTimeKR(r.endAt)} · {r.headcount}명
                       · {r.guestName}
                     </p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                      {r.guestVerified && (
+                        <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] px-2 py-0.5 font-semibold">
+                          <ShieldCheck size={10} /> 본인 인증
+                        </span>
+                      )}
+                      <span className="text-[var(--color-fg-muted)]">
+                        게스트 신뢰 {formatTrustTier(r.guestTrustScore).label} · 이용{' '}
+                        {r.guestGuestedCount}회
+                      </span>
+                    </div>
                     {r.note && (
                       <p className="mt-2 text-sm bg-[var(--color-bg-subtle)] rounded-[var(--radius-md)] p-3">
                         {r.note}

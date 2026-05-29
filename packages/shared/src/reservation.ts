@@ -87,6 +87,10 @@ export const ReservationSchema = z.object({
   spaceThumbnailUrl: z.string().nullable(),
   guestId: z.string(),
   guestName: z.string(),
+  /** 호스트 의사결정용 게스트 신뢰 시그널 — 본인 인증·신뢰 점수·이용 횟수 */
+  guestVerified: z.boolean().default(false),
+  guestTrustScore: z.number().default(50),
+  guestGuestedCount: z.number().default(0),
   hostId: z.string(),
   hostName: z.string(),
   startAt: z.string(),

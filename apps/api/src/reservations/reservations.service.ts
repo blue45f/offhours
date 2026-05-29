@@ -422,7 +422,16 @@ export class ReservationsService {
       where,
       include: {
         space: { include: { photos: { take: 1, orderBy: { order: 'asc' } } } },
-        guest: { select: { id: true, name: true, avatarUrl: true } },
+        guest: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+            isVerified: true,
+            trustScore: true,
+            guestedCount: true,
+          },
+        },
       },
       orderBy: { startAt: 'desc' },
       take: 100,
@@ -440,7 +449,16 @@ export class ReservationsService {
             venue: { include: { host: { include: { user: true } } } },
           },
         },
-        guest: { select: { id: true, name: true, avatarUrl: true } },
+        guest: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+            isVerified: true,
+            trustScore: true,
+            guestedCount: true,
+          },
+        },
         payment: true,
         dispute: true,
       },
@@ -468,7 +486,14 @@ export class ReservationsService {
         photos: { url: string }[]
         venue?: { host?: { user?: { id: string; name: string } } }
       }
-      guest?: { id: string; name: string; avatarUrl: string | null } | null
+      guest?: {
+        id: string
+        name: string
+        avatarUrl: string | null
+        isVerified?: boolean
+        trustScore?: number
+        guestedCount?: number
+      } | null
     },
     detail = false
   ) {
@@ -480,6 +505,9 @@ export class ReservationsService {
       spaceThumbnailUrl: r.space.photos[0]?.url ?? null,
       guestId: r.guestId,
       guestName: r.guest?.name ?? '',
+      guestVerified: r.guest?.isVerified ?? false,
+      guestTrustScore: r.guest?.trustScore ?? 50,
+      guestGuestedCount: r.guest?.guestedCount ?? 0,
       hostId: r.space.venue?.host?.user?.id ?? '',
       hostName: r.space.venue?.host?.user?.name ?? '',
       startAt: r.startAt.toISOString(),
