@@ -3,10 +3,12 @@ import { useParams } from 'react-router-dom'
 import {
   AlcoholPolicyLabel,
   CateringPolicyLabel,
+  PurposeLabel,
   USE_CASE_META,
   VenueCategoryLabel,
   formatResponseTimeBadge,
   formatTrustTier,
+  type Purpose,
   type UseCase,
 } from '@offhours/shared'
 import {
@@ -21,7 +23,12 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { useNearbyBundle, useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
+import {
+  useNearbyBundle,
+  useSpaceDetail,
+  useSpaceGallery,
+  useSpaceReviews,
+} from '../features/spaces/api'
 import { useRecentlyViewedStore } from '../store/recentlyViewed'
 import { SpaceCard } from '../components/space/SpaceCard'
 import { useToggleFavorite, useFavoriteIds } from '../features/favorites/api'
@@ -37,6 +44,7 @@ export default function SpaceDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const { data, isLoading } = useSpaceDetail(slug)
   const { data: reviews } = useSpaceReviews(data?.id)
+  const { data: galleryPhotos } = useSpaceGallery(slug)
   const { data: favoriteIds = [] } = useFavoriteIds()
   const toggle = useToggleFavorite()
   const isFavorited = data ? favoriteIds.includes(data.id) : false
@@ -232,6 +240,13 @@ export default function SpaceDetailPage() {
           <Divider />
 
           <NearbyBundleSection slug={slug} />
+
+          {galleryPhotos && galleryPhotos.length > 0 && (
+            <>
+              <Divider />
+              <EventPhotoWall photos={galleryPhotos} />
+            </>
+          )}
 
           <Divider />
 
@@ -450,6 +465,43 @@ function Gallery({
         />
       ))}
     </div>
+  )
+}
+
+function EventPhotoWall({
+  photos,
+}: {
+  photos: Array<{ url: string; purpose: Purpose; completedAt: string | null }>
+}) {
+  if (!photos || photos.length === 0) return null
+  return (
+    <section>
+      <div className="mb-4">
+        <h3 className="text-title font-semibold">실제 모임 사진</h3>
+        <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
+          게스트가 직접 남긴 퇴실 사진이에요. 실제 공간 분위기를 확인해보세요.
+        </p>
+      </div>
+      <div className="columns-2 md:columns-3 gap-2 space-y-2">
+        {photos.map((photo, i) => (
+          <div
+            key={photo.url + i}
+            className="break-inside-avoid relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-bg-subtle)] group"
+          >
+            <img
+              src={photo.url}
+              alt="실제 모임 사진"
+              loading="lazy"
+              decoding="async"
+              className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+            <span className="absolute bottom-2 left-2 rounded-[var(--radius-pill)] bg-[var(--color-bg-elevated)]/85 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-[var(--color-fg-muted)]">
+              {PurposeLabel[photo.purpose]}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 

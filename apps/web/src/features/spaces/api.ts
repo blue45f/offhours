@@ -3,6 +3,7 @@ import type {
   AddonLine,
   AddonSelection,
   CreateSpaceInput,
+  GalleryPhoto,
   Paginated,
   Purpose,
   SpaceCard,
@@ -123,6 +124,15 @@ export function useForYou(seedSlugs: string[], limit = 8) {
       api.get<SpaceCard[]>('/spaces/for-you', {
         params: { seedSlugs: seedKey, limit },
       }),
+    staleTime: 60_000,
+  })
+}
+
+export function useSpaceGallery(slug?: string) {
+  return useQuery({
+    queryKey: ['spaces', 'gallery', slug] as const,
+    enabled: !!slug,
+    queryFn: () => api.get<GalleryPhoto[]>('/spaces/slug/' + slug + '/gallery'),
     staleTime: 60_000,
   })
 }

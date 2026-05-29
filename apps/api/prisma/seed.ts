@@ -1044,10 +1044,64 @@ async function main() {
     rsvpSeedCount += picks.length
   }
 
+  // ─── Event Gallery demo photos (idempotent: set, not append) ────────────────
+  const GALLERY_PHOTO_SETS = [
+    [
+      'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1280',
+      'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1280',
+    ],
+    [
+      'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1280',
+      'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1280',
+      'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=1280',
+    ],
+    [
+      'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1280',
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1280',
+    ],
+    [
+      'https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?w=1280',
+      'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1280',
+      'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=1280',
+    ],
+    [
+      'https://images.unsplash.com/photo-1543007631-283050bb3e8c?w=1280',
+      'https://images.unsplash.com/photo-1470753937643-efeb931202a9?w=1280',
+    ],
+  ]
+  const galleryTargets = await prisma.reservation.findMany({
+    where: { status: 'COMPLETED' },
+    orderBy: { checkedOutAt: 'desc' },
+    take: 5,
+    select: { id: true, checkedOutAt: true },
+  })
+  let gallerySeedCount = 0
+  for (let i = 0; i < galleryTargets.length; i++) {
+    const r = galleryTargets[i]
+    const photoUrls = GALLERY_PHOTO_SETS[i % GALLERY_PHOTO_SETS.length]
+    const completedAt = r.checkedOutAt?.toISOString() ?? new Date().toISOString()
+    await prisma.reservation.update({
+      where: { id: r.id },
+      data: {
+        checkoutChecklist: {
+          restored: true,
+          trash: true,
+          audio: true,
+          lights: true,
+          lock: true,
+          photoUrls,
+          completedAt,
+          completedBy: 'seed',
+        },
+      },
+    })
+    gallerySeedCount++
+  }
+
   console.log(
     `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
       `${hostUsers.length} host response stats, ${collectionsSeed.length} collections, ` +
-      `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides, ${addonSeedCount} addons, ${rsvpSeedCount} rsvps.`
+      `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides, ${addonSeedCount} addons, ${rsvpSeedCount} rsvps, ${gallerySeedCount} gallery photos.`
   )
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)

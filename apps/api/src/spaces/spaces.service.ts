@@ -11,6 +11,7 @@ import {
   lastMinuteDiscountRate,
   paginated,
   type CreateSpaceInput,
+  type GalleryPhoto,
   type PriceSuggestion,
   type PriceSuggestionQuery,
   type SpaceCard,
@@ -352,6 +353,38 @@ export class SpacesService {
     })
     void this.slots.regenerate(spaceId, 60).catch(() => null)
     return updated
+  }
+
+  async eventGallery(slug: string): Promise<GalleryPhoto[]> {
+    const space = await this.prisma.space.findUnique({
+      where: { slug },
+      select: { id: true, status: true },
+    })
+    if (!space || space.status !== 'ACTIVE') throw new NotFoundException('Space not found')
+
+    const reservations = await this.prisma.reservation.findMany({
+      where: {
+        spaceId: space.id,
+        status: 'COMPLETED',
+        checkoutChecklist: { not: Prisma.JsonNull },
+      },
+      orderBy: { checkedOutAt: 'desc' },
+      take: 20,
+      select: { checkoutChecklist: true, purpose: true, checkedOutAt: true },
+    })
+
+    const photos: GalleryPhoto[] = []
+    for (const r of reservations) {
+      const checklist = r.checkoutChecklist as { photoUrls?: string[] } | null
+      const urls = checklist?.photoUrls ?? []
+      for (const url of urls) {
+        photos.push({ url, purpose: r.purpose, completedAt: r.checkedOutAt?.toISOString() ?? null })
+        if (photos.length >= 12) break
+      }
+      if (photos.length >= 12) break
+    }
+
+    return photos
   }
 
   /**

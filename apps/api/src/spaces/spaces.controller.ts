@@ -69,6 +69,12 @@ export class SpacesController {
   }
 
   @Public()
+  @Get('slug/:slug/gallery')
+  async gallery(@Param('slug') slug: string) {
+    return this.spaces.eventGallery(slug)
+  }
+
+  @Public()
   @Get('slug/:slug/nearby-bundle')
   async nearbyBundle(
     @Param('slug') slug: string,
