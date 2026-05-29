@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { type NotificationType } from '@prisma/client'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { NotificationChannels } from './channels.provider'
 
 interface CreateNotificationInput {
   type: NotificationType
@@ -12,10 +13,13 @@ interface CreateNotificationInput {
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly channels: NotificationChannels
+  ) {}
 
-  create(userId: string, input: CreateNotificationInput) {
-    return this.prisma.notification.create({
+  async create(userId: string, input: CreateNotificationInput) {
+    const notification = await this.prisma.notification.create({
       data: {
         userId,
         type: input.type,
@@ -24,6 +28,17 @@ export class NotificationsService {
         data: input.data as object,
       },
     })
+    // 인앱 외 채널(이메일·알림톡) 동시 발송 — 실패해도 인앱 알림은 유지(베스트 에포트)
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, phone: true },
+    })
+    if (user) {
+      void this.channels
+        .dispatch({ email: user.email, phone: user.phone, title: input.title, body: input.body })
+        .catch(() => null)
+    }
+    return notification
   }
 
   async list(userId: string, onlyUnread = false) {
