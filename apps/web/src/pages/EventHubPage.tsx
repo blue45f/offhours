@@ -11,6 +11,7 @@ import { useEvent, useRsvp } from '../features/events/api'
 import { useCountdown, type Countdown } from '../features/events/useCountdown'
 import { getClientToken, readSavedName, saveName } from '../features/events/clientToken'
 import { RsvpControl } from '../features/events/RsvpControl'
+import { AddToCalendar } from '../features/events/AddToCalendar'
 import { getErrorMessage } from '../services/api'
 import { Avatar } from '../components/ui/Avatar'
 import { Skeleton } from '../components/ui/Skeleton'
@@ -93,11 +94,19 @@ function EventHub({ event }: { event: EventSummary }) {
   }
 
   const confirmed = CONFIRMED.has(event.reservationStatus)
+  // 종료 시각이 지났으면 "끝난 모임" — 카운트다운 카피와 캘린더 추가를 분기한다.
+  const ended = new Date(event.endAt).getTime() < Date.now()
   const rise = reduce ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } }
 
   return (
     <div className="bg-[var(--color-bg)]">
-      <Hero event={event} confirmed={confirmed} countdown={countdown} reduce={!!reduce} />
+      <Hero
+        event={event}
+        confirmed={confirmed}
+        countdown={countdown}
+        ended={ended}
+        reduce={!!reduce}
+      />
 
       <div className="mx-auto w-full max-w-[37.5rem] px-5 pb-20">
         <motion.section
@@ -127,6 +136,15 @@ function EventHub({ event }: { event: EventSummary }) {
               {event.hostName}
             </Detail>
           </dl>
+          {!ended && (
+            <AddToCalendar
+              title={event.spaceTitle}
+              startAt={event.startAt}
+              endAt={event.endAt}
+              location={`${event.region} ${event.district}`}
+              details={`${PurposeLabel[event.purpose]} · ${event.hostName}님 초대`}
+            />
+          )}
         </motion.section>
 
         <motion.section
@@ -171,11 +189,13 @@ function Hero({
   event,
   confirmed,
   countdown,
+  ended,
   reduce,
 }: {
   event: EventSummary
   confirmed: boolean
   countdown: Countdown | null
+  ended: boolean
   reduce: boolean
 }) {
   const fade = reduce ? {} : { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 } }
@@ -236,7 +256,7 @@ function Hero({
               className="inline-flex items-center rounded-[var(--radius-pill)] border border-[var(--color-fg-inverse)]/25 px-3.5 py-1.5 text-sm font-semibold text-[var(--color-fg-inverse)]"
               aria-live="polite"
             >
-              {countdownLabel(countdown)}
+              {ended ? '이미 끝난 모임이에요' : countdownLabel(countdown)}
             </span>
           )}
         </motion.div>
