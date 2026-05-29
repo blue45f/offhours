@@ -83,6 +83,9 @@ export function useQuote(spaceId?: string, startAt?: string, endAt?: string) {
         hours: number
         hourlyRate: number
         baseAmountKRW: number
+        discountRate: number
+        discountKRW: number
+        discountedBaseAmountKRW: number
         cleaningFeeKRW: number
         totalKRW: number
       }>(`/spaces/${spaceId}/slots/quote`, {
@@ -154,9 +157,21 @@ export function useCreateSpace() {
   })
 }
 
+export interface MySpace {
+  id: string
+  slug: string
+  title: string
+  basePriceKRW: number
+  status: string
+  capacityMax: number
+  venueId: string
+  photos: { url: string }[]
+  venue: { name: string; region: string; district: string }
+}
+
 export function useMySpaces() {
   return useQuery({
     queryKey: ['spaces', 'mine'],
-    queryFn: () => api.get('/spaces/mine'),
+    queryFn: () => api.get<MySpace[]>('/spaces/mine'),
   })
 }

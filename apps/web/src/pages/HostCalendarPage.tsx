@@ -12,7 +12,7 @@ import {
 import { BlockSourceLabel, type ExternalCalendar, type VenueBlock } from '@offhours/shared'
 
 import { Button } from '../components/ui/Button'
-import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
+import { Card, CardBody } from '../components/ui/Card'
 import { Dialog } from '../components/ui/Dialog'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Field, Input } from '../components/ui/Input'

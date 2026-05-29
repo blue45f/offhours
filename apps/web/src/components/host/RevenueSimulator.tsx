@@ -52,10 +52,10 @@ export function RevenueSimulator() {
     setHourly(HOURLY_BY_CATEGORY[c])
   }
 
-  const { gross, net, yearly } = useMemo(() => {
+  const { net, yearly } = useMemo(() => {
     const g = Math.round(weeklyHours * hourly * (occupancy / 100) * WEEKS_PER_MONTH)
     const n = Math.round(g * (1 - FEE_RATE))
-    return { gross: g, net: n, yearly: n * 12 }
+    return { net: n, yearly: n * 12 }
   }, [weeklyHours, hourly, occupancy])
 
   return (

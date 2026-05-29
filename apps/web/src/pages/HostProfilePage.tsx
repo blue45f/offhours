@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
 import {
@@ -53,7 +53,7 @@ export default function HostProfilePage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CreateHostProfileInput>({
-    resolver: zodResolver(CreateHostProfileSchema),
+    resolver: zodResolver(CreateHostProfileSchema) as unknown as Resolver<CreateHostProfileInput>,
     defaultValues: {
       businessName: '',
       businessNumber: '',

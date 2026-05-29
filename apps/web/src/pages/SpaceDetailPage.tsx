@@ -10,7 +10,6 @@ import {
   type UseCase,
 } from '@offhours/shared'
 import {
-  Eye,
   Flame,
   Heart,
   MapPin,

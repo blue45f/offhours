@@ -8,19 +8,8 @@ import { Badge } from '../components/ui/Badge'
 import { EmptyState } from '../components/ui/EmptyState'
 import { formatKRW } from '../utils/format'
 
-interface MySpace {
-  id: string
-  slug: string
-  title: string
-  basePriceKRW: number
-  status: string
-  capacityMax: number
-  photos: { url: string }[]
-  venue: { name: string; region: string; district: string }
-}
-
 export default function HostSpacesPage() {
-  const { data } = useMySpaces() as { data?: MySpace[] }
+  const { data } = useMySpaces()
 
   return (
     <div className="container-page py-8 md:py-12">

@@ -10,7 +10,7 @@ import {
   formatTrustTier,
   type SpaceDetail,
 } from '@offhours/shared'
-import { ArrowRight, Check, GitCompare, MessageCircle, Share2, X } from 'lucide-react'
+import { ArrowRight, Check, GitCompare, Share2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 import { api } from '../services/api'
