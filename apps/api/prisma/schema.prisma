@@ -109,6 +109,8 @@ model CorporateProfile {
   taxOfficeAddress String?
   /** 세금계산서 발행 사업자 유형 — 일반과세자/면세사업자 */
   taxPayer         CorporateTaxType @default(GENERAL)
+  /** 영업 외 크레딧 잔액 — 기업이 선충전(보너스)하고 예약에 차감하는 B2B 멤버십 */
+  creditBalanceKRW Int       @default(0)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }
@@ -467,6 +469,8 @@ model Reservation {
   /** 법인 결제 — 예약 시점 corporate 스냅샷(공급자명·사업자번호·세금계산서 이메일) */
   corporateProfileId String?
   corporateSnapshot  Json?
+  /** 법인 크레딧으로 차감한 금액 — 실 결제액 = totalKRW - creditAppliedKRW */
+  creditAppliedKRW Int             @default(0)
   /** 선택한 유료 옵션(애드온)의 합계와 스냅샷 — [{ addonId, name, unit, qty, unitPriceKRW, amountKRW }] */
   addonsAmountKRW Int             @default(0)
   addonsSnapshot  Json?

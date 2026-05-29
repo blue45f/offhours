@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Building2, ReceiptText, Trash2 } from 'lucide-react'
+import { Building2, ReceiptText, Trash2, Wallet } from 'lucide-react'
 import {
   CorporateTaxTypeLabel,
+  creditBonus,
   type CorporateTaxType,
   type UpsertCorporateProfileInput,
 } from '@offhours/shared'
@@ -14,14 +15,19 @@ import { Select } from '../components/ui/Select'
 import {
   useCorporateProfile,
   useDeleteCorporateProfile,
+  useTopupCredit,
   useUpsertCorporateProfile,
 } from '../features/corporate/api'
 import { getErrorMessage } from '../services/api'
+import { formatKRW } from '../utils/format'
+import { cn } from '../utils/cn'
 
 export default function CorporatePage() {
   const { data, isLoading } = useCorporateProfile()
   const upsert = useUpsertCorporateProfile()
   const del = useDeleteCorporateProfile()
+  const topup = useTopupCredit()
+  const [topupAmount, setTopupAmount] = useState(1_000_000)
   const [form, setForm] = useState<UpsertCorporateProfileInput>({
     companyName: '',
     businessNumber: '',
@@ -48,6 +54,17 @@ export default function CorporatePage() {
     try {
       await upsert.mutateAsync(form)
       toast.success(data ? '법인 정보를 수정했어요' : '법인 결제 활성화 완료')
+    } catch (e) {
+      toast.error(getErrorMessage(e))
+    }
+  }
+
+  async function onTopup() {
+    try {
+      const res = await topup.mutateAsync(topupAmount)
+      toast.success(
+        `${formatKRW(res.added + res.bonus)} 적립 완료 (잔액 ${formatKRW(res.creditBalanceKRW)})`
+      )
     } catch (e) {
       toast.error(getErrorMessage(e))
     }
@@ -161,6 +178,63 @@ export default function CorporatePage() {
                 }
               >
                 {data ? '수정 저장' : '등록'}
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {data && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>
+              <span className="inline-flex items-center gap-1.5">
+                <Wallet size={16} className="text-[var(--color-primary)]" />
+                영업 외 크레딧
+              </span>
+            </CardTitle>
+            <span className="font-mono font-semibold text-[var(--color-primary)]">
+              잔액 {formatKRW(data.creditBalanceKRW)}
+            </span>
+          </CardHeader>
+          <CardBody className="space-y-3">
+            <p className="text-sm text-[var(--color-fg-muted)] leading-relaxed">
+              워크샵·팀빌딩 예약용 크레딧을 미리 충전하면 충전액에 따라 보너스 크레딧을 드려요. 예약
+              시 결제액에서 자동 차감됩니다.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[1_000_000, 3_000_000, 5_000_000].map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setTopupAmount(amt)}
+                  className={cn(
+                    'rounded-[var(--radius-pill)] border px-3 py-1.5 text-sm font-medium transition-colors',
+                    topupAmount === amt
+                      ? 'border-transparent bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
+                      : 'border-[var(--color-border)] hover:border-[var(--color-border-strong)]'
+                  )}
+                >
+                  {formatKRW(amt)}
+                  {creditBonus(amt) > 0 && (
+                    <span className="ml-1 text-[11px] opacity-80">
+                      +{formatKRW(creditBonus(amt))}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center justify-between rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] p-3 text-sm">
+              <span className="text-[var(--color-fg-muted)]">
+                충전 {formatKRW(topupAmount)} + 보너스 {formatKRW(creditBonus(topupAmount))}
+              </span>
+              <span className="font-semibold">
+                = {formatKRW(topupAmount + creditBonus(topupAmount))} 적립
+              </span>
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={onTopup} loading={topup.isPending}>
+                크레딧 충전
               </Button>
             </div>
           </CardBody>

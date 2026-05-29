@@ -85,6 +85,7 @@ export class ReservationsService {
     // 법인 결제 — 현재 등록된 corporate 프로필을 스냅샷으로 동결해 첨부
     let corporateProfileId: string | null = null
     let corporateSnapshot: object | null = null
+    let creditAppliedKRW = 0
     if (input.useCorporateBilling) {
       const corp = await this.prisma.corporateProfile.findUnique({ where: { userId: guestId } })
       if (!corp) {
@@ -97,6 +98,14 @@ export class ReservationsService {
         ceoName: corp.ceoName,
         billingEmail: corp.billingEmail,
         taxPayer: corp.taxPayer,
+      }
+      // 법인 크레딧 차감 — 결제액에서 잔액만큼 선차감(B2B 선충전 멤버십)
+      if (input.useCredit && corp.creditBalanceKRW > 0) {
+        creditAppliedKRW = Math.min(corp.creditBalanceKRW, totalKRW)
+        await this.prisma.corporateProfile.update({
+          where: { id: corp.id },
+          data: { creditBalanceKRW: { decrement: creditAppliedKRW } },
+        })
       }
     }
 
@@ -125,6 +134,7 @@ export class ReservationsService {
         checkInCode,
         corporateProfileId,
         corporateSnapshot: corporateSnapshot ?? undefined,
+        creditAppliedKRW,
         recurringGroupId: input.recurringGroupId ?? null,
       },
     })
@@ -272,6 +282,13 @@ export class ReservationsService {
       where: { id: r.id },
       data: { status: next, cancelReason: reason },
     })
+    // 법인 크레딧으로 차감했으면 취소 시 크레딧 환원
+    if (r.creditAppliedKRW > 0 && r.corporateProfileId) {
+      await this.prisma.corporateProfile.update({
+        where: { id: r.corporateProfileId },
+        data: { creditBalanceKRW: { increment: r.creditAppliedKRW } },
+      })
+    }
     // 환불률이 낮을수록(=시작 임박 취소) 페널티 가중.
     const penalty = refundRate < 1 ? TRUST_SCORE.PENALTY_GUEST_CANCEL : 0
     if (penalty) await this.bumpTrust(guestId, penalty)
@@ -604,6 +621,7 @@ export class ReservationsService {
       cancellationPolicy:
         (r as { cancellationPolicy?: 'FLEXIBLE' | 'STANDARD' | 'STRICT' }).cancellationPolicy ??
         'STANDARD',
+      creditAppliedKRW: (r as { creditAppliedKRW?: number }).creditAppliedKRW ?? 0,
       totalKRW: r.totalKRW,
       feeKRW: r.feeKRW,
       cancelReason: r.cancelReason,

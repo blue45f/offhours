@@ -38,7 +38,8 @@ export class PaymentsService {
         providerKey: orderId,
         orderId,
         method,
-        amountKRW: reservation.totalKRW,
+        // 법인 크레딧 차감분을 제외한 실 결제액
+        amountKRW: reservation.totalKRW - reservation.creditAppliedKRW,
         status: 'READY',
       },
     })

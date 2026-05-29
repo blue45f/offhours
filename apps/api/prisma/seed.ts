@@ -917,8 +917,9 @@ async function main() {
       billingEmail: 'finance@example.kr',
       taxPayer: 'GENERAL',
       taxOfficeAddress: '서울 강남구 테헤란로 123',
+      creditBalanceKRW: 2_000_000,
     },
-    update: {},
+    update: { creditBalanceKRW: 2_000_000 },
   })
 
   // 데모 도착 가이드 — 호스트가 미리 입력해둔 주차·Wi-Fi·출입 등.

@@ -30,3 +30,16 @@ export function useDeleteCorporateProfile() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['me', 'corporate'] }),
   })
 }
+
+/** 영업 외 크레딧 충전 — 충전액에 따라 보너스 크레딧 적립 */
+export function useTopupCredit() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (amountKRW: number) =>
+      api.post<{ creditBalanceKRW: number; added: number; bonus: number }>(
+        '/me/corporate/credits/topup',
+        { amountKRW }
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['me', 'corporate'] }),
+  })
+}

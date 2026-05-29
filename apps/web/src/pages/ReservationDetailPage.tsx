@@ -54,6 +54,7 @@ export default function ReservationDetailPage() {
   const refundRate = calcRefundRate(reservation.startAt, new Date(), reservation.cancellationPolicy)
   const refundKRW = Math.round(reservation.totalKRW * refundRate)
   const isHost = !!me && me.id === reservation.hostId
+  const payableKRW = reservation.totalKRW - reservation.creditAppliedKRW
 
   async function onCancel() {
     if (cancelReason.trim().length < 2) {
@@ -73,7 +74,7 @@ export default function ReservationDetailPage() {
     try {
       await startPay({
         reservationId: reservation.id,
-        amount: reservation.totalKRW,
+        amount: payableKRW,
         orderName: reservation.spaceTitle,
       })
       toast.success('결제가 완료됐어요!')
@@ -221,6 +222,15 @@ export default function ReservationDetailPage() {
             )}
             <hr className="border-[var(--color-border-subtle)] my-2" />
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
+            {reservation.creditAppliedKRW > 0 && (
+              <>
+                <Row
+                  label="법인 크레딧 차감"
+                  value={`-${formatKRW(reservation.creditAppliedKRW)}`}
+                />
+                <Row label="실 결제액" value={formatKRW(payableKRW)} strong />
+              </>
+            )}
           </CardBody>
         </Card>
 
@@ -333,7 +343,7 @@ export default function ReservationDetailPage() {
           <div className="flex flex-wrap gap-2">
             {reservation.status === 'APPROVED' && (
               <Button size="lg" onClick={onPay}>
-                결제하기 ({formatKRW(reservation.totalKRW)})
+                결제하기 ({formatKRW(payableKRW)})
               </Button>
             )}
             <Link to="/chat">

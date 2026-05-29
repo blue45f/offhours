@@ -26,7 +26,7 @@ import { AddonPicker } from './AddonPicker'
 import { useCorporateProfile } from '../../features/corporate/api'
 import { useIsAuthed } from '../../store/auth'
 import { Link } from 'react-router-dom'
-import { Building2 } from 'lucide-react'
+import { Building2, Wallet } from 'lucide-react'
 import { WaitlistButton } from '../space/WaitlistButton'
 import { formatKRW } from '../../utils/format'
 import { getErrorMessage } from '../../services/api'
@@ -45,6 +45,7 @@ export function ReservationPanel({ space }: Props) {
   const [purpose, setPurpose] = useState<Purpose>('PARTY')
   const [note, setNote] = useState('')
   const [useCorporate, setUseCorporate] = useState(false)
+  const [useCredit, setUseCredit] = useState(false)
   const [addonQty, setAddonQty] = useState<Record<string, number>>({})
   const [isRecurring, setIsRecurring] = useState(false)
   const [recurringWeeks, setRecurringWeeks] = useState(4)
@@ -101,6 +102,7 @@ export function ReservationPanel({ space }: Props) {
       purpose,
       note: note || undefined,
       useCorporateBilling: useCorporate && !!corporate,
+      useCredit: useCorporate && useCredit && !!corporate,
       addons: addonSelections.length > 0 ? addonSelections : undefined,
     }
 
@@ -243,23 +245,45 @@ export function ReservationPanel({ space }: Props) {
         {isAuthed && (
           <div className="rounded-[var(--radius-lg)] hairline p-3">
             {corporate ? (
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={useCorporate}
-                  onChange={(e) => setUseCorporate(e.target.checked)}
-                  className="mt-0.5 size-4 accent-[var(--color-primary)]"
-                />
-                <span className="flex-1 text-sm">
-                  <span className="inline-flex items-center gap-1 font-semibold">
-                    <Building2 size={12} className="text-[var(--color-primary)]" />
-                    법인 결제 (세금계산서)
+              <div className="space-y-2">
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={useCorporate}
+                    onChange={(e) => setUseCorporate(e.target.checked)}
+                    className="mt-0.5 size-4 accent-[var(--color-primary)]"
+                  />
+                  <span className="flex-1 text-sm">
+                    <span className="inline-flex items-center gap-1 font-semibold">
+                      <Building2 size={12} className="text-[var(--color-primary)]" />
+                      법인 결제 (세금계산서)
+                    </span>
+                    <span className="block text-[11px] text-[var(--color-fg-muted)] mt-0.5">
+                      {corporate.companyName} ({corporate.businessNumber}) ·{' '}
+                      {corporate.billingEmail}
+                    </span>
                   </span>
-                  <span className="block text-[11px] text-[var(--color-fg-muted)] mt-0.5">
-                    {corporate.companyName} ({corporate.businessNumber}) · {corporate.billingEmail}
-                  </span>
-                </span>
-              </label>
+                </label>
+                {useCorporate && corporate.creditBalanceKRW > 0 && (
+                  <label className="flex items-center gap-2 cursor-pointer border-t border-[var(--color-border-subtle)] pt-2">
+                    <input
+                      type="checkbox"
+                      checked={useCredit}
+                      onChange={(e) => setUseCredit(e.target.checked)}
+                      className="size-4 accent-[var(--color-primary)]"
+                    />
+                    <span className="text-sm">
+                      <span className="inline-flex items-center gap-1 font-semibold">
+                        <Wallet size={12} className="text-[var(--color-primary)]" />
+                        영업 외 크레딧 사용
+                      </span>
+                      <span className="block text-[11px] text-[var(--color-fg-muted)]">
+                        잔액 {formatKRW(corporate.creditBalanceKRW)} — 결제액에서 차감
+                      </span>
+                    </span>
+                  </label>
+                )}
+              </div>
             ) : (
               <div className="text-xs text-[var(--color-fg-muted)] flex items-center justify-between">
                 <span className="inline-flex items-center gap-1">

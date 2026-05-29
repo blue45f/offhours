@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import type { CorporateProfile, UpsertCorporateProfileInput } from '@offhours/shared'
+import {
+  creditBonus,
+  type CorporateProfile,
+  type UpsertCorporateProfileInput,
+} from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -29,6 +33,18 @@ export class CorporateService {
     return { deleted: true }
   }
 
+  /** 영업 외 크레딧 충전 — 충전액에 따라 보너스 크레딧 적립(mock 결제) */
+  async topup(userId: string, amountKRW: number) {
+    const profile = await this.prisma.corporateProfile.findUnique({ where: { userId } })
+    if (!profile) throw new NotFoundException('법인 프로필이 없어요. 먼저 등록해주세요')
+    const bonus = creditBonus(amountKRW)
+    const updated = await this.prisma.corporateProfile.update({
+      where: { userId },
+      data: { creditBalanceKRW: { increment: amountKRW + bonus } },
+    })
+    return { creditBalanceKRW: updated.creditBalanceKRW, added: amountKRW, bonus }
+  }
+
   private toShape(row: {
     id: string
     companyName: string
@@ -37,6 +53,7 @@ export class CorporateService {
     billingEmail: string
     taxOfficeAddress: string | null
     taxPayer: 'GENERAL' | 'TAX_FREE'
+    creditBalanceKRW: number
     createdAt: Date
   }): CorporateProfile {
     return {
@@ -47,6 +64,7 @@ export class CorporateService {
       billingEmail: row.billingEmail,
       taxOfficeAddress: row.taxOfficeAddress ?? undefined,
       taxPayer: row.taxPayer,
+      creditBalanceKRW: row.creditBalanceKRW,
       createdAt: row.createdAt.toISOString(),
     }
   }

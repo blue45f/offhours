@@ -1,6 +1,11 @@
-import { Body, Controller, Delete, Get, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Post, Put, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UpsertCorporateProfileSchema, type UpsertCorporateProfileInput } from '@offhours/shared'
+import {
+  TopupCreditSchema,
+  UpsertCorporateProfileSchema,
+  type TopupCreditInput,
+  type UpsertCorporateProfileInput,
+} from '@offhours/shared'
 
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
@@ -30,5 +35,13 @@ export class CorporateController {
   @Delete()
   async remove(@CurrentUser() user: RequestUser) {
     return this.corporate.remove(user.id)
+  }
+
+  @Post('credits/topup')
+  async topup(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodValidationPipe(TopupCreditSchema)) body: TopupCreditInput
+  ) {
+    return this.corporate.topup(user.id, body.amountKRW)
   }
 }
