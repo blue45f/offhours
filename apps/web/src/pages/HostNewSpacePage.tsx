@@ -36,6 +36,7 @@ export default function HostNewSpacePage() {
   const [capacityMin, setCapacityMin] = useState(10)
   const [capacityMax, setCapacityMax] = useState(40)
   const [cleaningFeeKRW, setCleaningFeeKRW] = useState(30000)
+  const [depositKRW, setDepositKRW] = useState(0)
   const [cleaningMinutes, setCleaningMinutes] = useState(90)
   const [minHours, setMinHours] = useState(3)
   const [instantBook, setInstantBook] = useState(false)
@@ -74,6 +75,7 @@ export default function HostNewSpacePage() {
         capacityMin,
         capacityMax,
         cleaningFeeKRW,
+        depositKRW,
         cleaningMinutes,
         minHours,
         instantBook,
@@ -162,6 +164,13 @@ export default function HostNewSpacePage() {
                   type="number"
                   value={cleaningFeeKRW}
                   onChange={(e) => setCleaningFeeKRW(Number(e.target.value))}
+                />
+              </Field>
+              <Field label="보증금 (원)" helper="분쟁 없으면 이용 7일 후 자동 환급. 0이면 미사용">
+                <Input
+                  type="number"
+                  value={depositKRW}
+                  onChange={(e) => setDepositKRW(Number(e.target.value))}
                 />
               </Field>
               <Field label="청소 시간 (분)" helper="강제 윈도우">

@@ -38,9 +38,12 @@ export class PaymentsService {
         providerKey: orderId,
         orderId,
         method,
-        // 법인 크레딧·적립 포인트 차감분을 제외한 실 결제액
+        // 크레딧·포인트 차감 후 보증금을 더한 실 결제액(보증금은 추후 자동 환급)
         amountKRW:
-          reservation.totalKRW - reservation.creditAppliedKRW - reservation.pointsAppliedKRW,
+          reservation.totalKRW -
+          reservation.creditAppliedKRW -
+          reservation.pointsAppliedKRW +
+          reservation.depositKRW,
         status: 'READY',
       },
     })

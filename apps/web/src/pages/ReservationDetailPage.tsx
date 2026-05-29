@@ -58,7 +58,10 @@ export default function ReservationDetailPage() {
   const refundKRW = Math.round(reservation.totalKRW * refundRate)
   const isHost = !!me && me.id === reservation.hostId
   const payableKRW =
-    reservation.totalKRW - reservation.creditAppliedKRW - reservation.pointsAppliedKRW
+    reservation.totalKRW +
+    reservation.depositKRW -
+    reservation.creditAppliedKRW -
+    reservation.pointsAppliedKRW
 
   async function onCancel() {
     if (cancelReason.trim().length < 2) {
@@ -220,9 +223,6 @@ export default function ReservationDetailPage() {
             {reservation.cleaningFeeKRW > 0 && (
               <Row label="청소비" value={formatKRW(reservation.cleaningFeeKRW)} />
             )}
-            {reservation.depositKRW > 0 && (
-              <Row label="보증금" value={formatKRW(reservation.depositKRW)} />
-            )}
             {reservation.addons?.map((a) => (
               <Row
                 key={a.addonId}
@@ -235,8 +235,18 @@ export default function ReservationDetailPage() {
             )}
             <hr className="border-[var(--color-border-subtle)] my-2" />
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
-            {(reservation.creditAppliedKRW > 0 || reservation.pointsAppliedKRW > 0) && (
+            {(reservation.creditAppliedKRW > 0 ||
+              reservation.pointsAppliedKRW > 0 ||
+              reservation.depositKRW > 0) && (
               <>
+                {reservation.depositKRW > 0 && (
+                  <Row
+                    label={
+                      reservation.depositReleasedAt ? '보증금 (환급 완료)' : '보증금 (환급 예정)'
+                    }
+                    value={`+${formatKRW(reservation.depositKRW)}`}
+                  />
+                )}
                 {reservation.creditAppliedKRW > 0 && (
                   <Row
                     label="법인 크레딧 차감"

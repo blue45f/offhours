@@ -570,6 +570,8 @@ async function main() {
         areaM2: Math.floor(spec.capacity * 1.3),
         basePriceKRW: spec.basePriceKRW,
         cleaningFeeKRW: 30000,
+        // 일부 공간에 보증금 데모 — 분쟁 없으면 이용 7일 후 자동 환급
+        depositKRW: i % 3 === 0 ? 100000 : 0,
         cleaningMinutes: 90,
         minHours: 3,
         instantBook: i % 3 === 0,

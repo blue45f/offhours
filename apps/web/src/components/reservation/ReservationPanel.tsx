@@ -147,6 +147,11 @@ export function ReservationPanel({ space }: Props) {
             청소비 별도 {formatKRW(space.cleaningFeeKRW)}
           </div>
         )}
+        {space.depositKRW > 0 && (
+          <div className="mt-1 text-xs text-[var(--color-fg-muted)]">
+            보증금 {formatKRW(space.depositKRW)} · 이용 후 분쟁 없으면 7일 내 자동 환급
+          </div>
+        )}
         {space.protectionTier !== 'NONE' && (
           <div className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)]">
             <ShieldCheck size={12} />

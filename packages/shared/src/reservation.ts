@@ -113,6 +113,8 @@ export const ReservationSchema = z.object({
   baseAmountKRW: z.number(),
   cleaningFeeKRW: z.number(),
   depositKRW: z.number(),
+  /** 보증금 자동 환급 시각(ISO) — 미환급이면 null */
+  depositReleasedAt: z.string().nullable().optional(),
   /** 선택한 유료 옵션 합계 + 라인 스냅샷 */
   addonsAmountKRW: z.number().default(0),
   addons: z.array(AddonLineSchema).nullable().optional(),

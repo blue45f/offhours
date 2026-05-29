@@ -15,4 +15,11 @@ export class ReservationsScheduler {
     const { expired } = await this.reservations.expireStale()
     if (expired > 0) this.logger.log(`Auto-expired ${expired} stale reservation requests`)
   }
+
+  // 보증금 자동 환급 — 분쟁 없이 이용 완료 7일 경과 시(매일 04:00 KST)
+  @Cron(CronExpression.EVERY_DAY_AT_4AM, { timeZone: 'Asia/Seoul' })
+  async releaseDeposits() {
+    const { released } = await this.reservations.releaseDeposits()
+    if (released > 0) this.logger.log(`Released ${released} deposits`)
+  }
 }

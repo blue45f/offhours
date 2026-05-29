@@ -142,6 +142,7 @@ export class ReservationsService {
         // 라스트미닛 할인이 적용된 실제 결제 금액을 저장. 정상가는 quote.baseAmountKRW.
         baseAmountKRW: quote.discountedBaseAmountKRW,
         cleaningFeeKRW: quote.cleaningFeeKRW,
+        depositKRW: space.depositKRW,
         addonsAmountKRW: quote.addonsKRW,
         addonsSnapshot: quote.addons.length > 0 ? (quote.addons as object) : undefined,
         protectionTier: quote.protectionTier,
@@ -390,6 +391,38 @@ export class ReservationsService {
       await this.waitlist.notifyOnSlotFreed(r.spaceId).catch(() => null)
     }
     return { expired: stale.length }
+  }
+
+  /**
+   * 보증금 자동 환급 — 분쟁 없이 이용 완료 후 7일이 지난 예약의 보증금을 환급 처리한다.
+   * PRODUCT.md §8 "분쟁 없으면 7일 내 자동 해제" 정책의 구현. 게스트에게 환급 알림.
+   */
+  async releaseDeposits() {
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const due = await this.prisma.reservation.findMany({
+      where: {
+        status: 'COMPLETED',
+        depositKRW: { gt: 0 },
+        depositReleasedAt: null,
+        checkedOutAt: { lt: cutoff },
+        dispute: { is: null },
+      },
+      include: { space: { select: { title: true } } },
+      take: 200,
+    })
+    for (const r of due) {
+      await this.prisma.reservation.update({
+        where: { id: r.id },
+        data: { depositReleasedAt: new Date() },
+      })
+      await this.notifications.create(r.guestId, {
+        type: 'SYSTEM',
+        title: '보증금이 환급됐어요',
+        body: `${r.space.title} — 보증금 ${r.depositKRW.toLocaleString()}원 환급 완료`,
+        data: { reservationId: r.id },
+      })
+    }
+    return { released: due.length }
   }
 
   /**
@@ -717,6 +750,8 @@ export class ReservationsService {
       baseAmountKRW: r.baseAmountKRW,
       cleaningFeeKRW: r.cleaningFeeKRW,
       depositKRW: r.depositKRW,
+      depositReleasedAt:
+        (r as { depositReleasedAt?: Date | null }).depositReleasedAt?.toISOString() ?? null,
       addonsAmountKRW: (r as { addonsAmountKRW?: number }).addonsAmountKRW ?? 0,
       addons: (r as { addonsSnapshot?: AddonLine[] | null }).addonsSnapshot ?? null,
       protectionTier:

@@ -334,6 +334,8 @@ model Space {
   areaM2          Int?
   basePriceKRW    Int
   cleaningFeeKRW  Int            @default(0)
+  /** 선택 보증금 — 결제 시 함께 예치, 분쟁 없으면 이용 완료 7일 후 자동 환급 */
+  depositKRW      Int            @default(0)
   cleaningMinutes Int            @default(60)
   minHours        Int            @default(3)
   instantBook     Boolean        @default(false)
@@ -458,6 +460,8 @@ model Reservation {
   baseAmountKRW  Int
   cleaningFeeKRW Int               @default(0)
   depositKRW     Int               @default(0)
+  /** 보증금 자동 환급 시각 — 분쟁 없이 이용 완료 7일 경과 시 설정 */
+  depositReleasedAt DateTime?
   totalKRW       Int
   feeKRW         Int
   cancelReason   String?
