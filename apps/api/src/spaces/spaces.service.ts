@@ -83,7 +83,7 @@ export class SpacesService {
               : { viewCount: 'desc' }
 
     const baseInclude = {
-      photos: { take: 1, orderBy: { order: 'asc' } as const },
+      photos: { take: 4, orderBy: { order: 'asc' } as const },
       venue: {
         select: {
           region: true,
@@ -703,6 +703,7 @@ export class SpacesService {
       ratingCount: s.ratingCount,
       thumbnailUrl: cover?.url ?? null,
       blurhash: cover?.blurhash ?? null,
+      photoUrls: s.photos.slice(1, 4).map((p) => p.url),
       region: s.venue.region,
       district: s.venue.district,
       category: s.venue.category,

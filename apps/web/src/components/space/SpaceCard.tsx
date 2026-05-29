@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Check,
@@ -74,7 +75,7 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
   return (
     <Link to={`/spaces/${space.slug}`} className="group block focus:outline-none">
       <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-bg-subtle)] aspect-[4/3]">
-        <Thumbnail space={space} className="absolute inset-0 size-full" />
+        <HoverCarousel space={space} className="absolute inset-0 size-full" />
         <div className="absolute right-3 top-3 flex flex-col gap-2">
           <button
             type="button"
@@ -244,5 +245,67 @@ function Thumbnail({ space, className }: { space: SpaceCardType; className?: str
         className
       )}
     />
+  )
+}
+
+/**
+ * 호버 시 자동 슬라이드 캐러셀 — 카드 위에 마우스 올리면 1.6초마다 다음 사진으로.
+ * 모바일(터치)에서는 비활성. 사진 1장만 있으면 정적 Thumbnail 로 폴백.
+ */
+function HoverCarousel({ space, className }: { space: SpaceCardType; className?: string }) {
+  const urls = [space.thumbnailUrl, ...(space.photoUrls ?? [])].filter((u): u is string => !!u)
+  const [idx, setIdx] = useState(0)
+  const [hovered, setHovered] = useState(false)
+
+  useEffect(() => {
+    if (!hovered || urls.length < 2) return
+    const t = setInterval(() => setIdx((i) => (i + 1) % urls.length), 1600)
+    return () => clearInterval(t)
+  }, [hovered, urls.length])
+
+  // 호버 해제 시 첫 사진으로 복귀 (UX 안정성)
+  useEffect(() => {
+    if (!hovered) setIdx(0)
+  }, [hovered])
+
+  if (urls.length === 0) return <Thumbnail space={space} className={className} />
+
+  return (
+    <div
+      className={cn('relative', className)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {urls.map((u, i) => (
+        <img
+          key={u + i}
+          src={u}
+          alt={space.title}
+          loading={i === 0 ? 'eager' : 'lazy'}
+          className={cn(
+            'absolute inset-0 size-full object-cover transition-opacity duration-500 ease-[var(--easing-standard)]',
+            i === idx ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+      ))}
+      {urls.length > 1 && (
+        <div
+          className={cn(
+            'absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 transition-opacity duration-200',
+            hovered ? 'opacity-100' : 'opacity-0'
+          )}
+        >
+          {urls.map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                'size-1.5 rounded-full transition-all',
+                i === idx ? 'w-4 bg-white' : 'bg-white/60'
+              )}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

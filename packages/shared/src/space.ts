@@ -78,6 +78,8 @@ export const SpaceCardSchema = z.object({
   ratingCount: z.number(),
   thumbnailUrl: z.string().nullable(),
   blurhash: z.string().nullable(),
+  /** 카드 호버 자동 슬라이드용 추가 사진(최대 3장). thumbnail 외 사진. */
+  photoUrls: z.array(z.string()).default([]),
   region: z.string(),
   district: z.string(),
   category: VenueCategorySchema,

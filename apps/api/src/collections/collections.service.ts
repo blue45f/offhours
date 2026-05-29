@@ -141,6 +141,7 @@ export class CollectionsService {
           ratingCount: f.space.ratingCount,
           thumbnailUrl: f.space.photos[0]?.url ?? null,
           blurhash: f.space.photos[0]?.blurhash ?? null,
+          photoUrls: f.space.photos.slice(1, 4).map((p) => p.url),
           region: f.space.venue.region,
           district: f.space.venue.district,
           category: f.space.venue.category,

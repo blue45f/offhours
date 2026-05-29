@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -117,10 +118,67 @@ export default function HomePage() {
   )
 }
 
+const HERO_ROTATING_NOUNS = [
+  '파티장',
+  '스몰웨딩',
+  '워크샵',
+  '촬영장',
+  '북클럽',
+  '돌잔치',
+  '팝업',
+  '연습실',
+]
+
+function RotatingNoun() {
+  const [idx, setIdx] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % HERO_ROTATING_NOUNS.length), 2200)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <span className="relative inline-flex h-[1.1em] overflow-hidden align-bottom">
+      <motion.span
+        key={idx}
+        initial={{ y: '100%', opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: '-100%', opacity: 0 }}
+        transition={{ duration: 0.5, ease: [0.2, 0, 0, 1] }}
+        className="inline-block bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-accent)] to-[#d97757] bg-clip-text text-transparent"
+      >
+        {HERO_ROTATING_NOUNS[idx]}
+      </motion.span>
+    </span>
+  )
+}
+
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--color-primary-soft)]/40 via-transparent to-transparent" />
+      {/* 화사한 그라데이션 메쉬 — 모던 라이브 느낌 */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-primary-soft)]/50 via-transparent to-transparent" />
+        <div
+          className="absolute -top-32 -right-32 size-[500px] rounded-full opacity-60 blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle at center, oklch(0.78 0.14 35 / 0.55), transparent 60%)',
+          }}
+        />
+        <div
+          className="absolute top-20 -left-40 size-[420px] rounded-full opacity-55 blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle at center, oklch(0.75 0.12 280 / 0.4), transparent 70%)',
+          }}
+        />
+        <div
+          className="absolute top-1/2 left-1/3 size-[360px] rounded-full opacity-40 blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle at center, oklch(0.82 0.13 150 / 0.45), transparent 70%)',
+          }}
+        />
+      </div>
       <div className="container-page pt-16 pb-12 md:pt-24 md:pb-20">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -128,13 +186,13 @@ function Hero() {
           transition={{ duration: 0.6, ease: [0.2, 0, 0, 1] }}
           className="max-w-3xl"
         >
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm hairline px-3 py-1 text-xs font-semibold text-[var(--color-primary)]">
             <Clock size={12} /> 영업 외 시간 전문 공간 대여
           </span>
-          <h1 className="mt-5 text-display serif">
+          <h1 className="mt-5 text-display serif leading-[1.1]">
             비어 있던 그 시간,
             <br />
-            가장 멋진 공간이 됩니다.
+            가장 멋진 <RotatingNoun />이 됩니다.
           </h1>
           <p className="mt-5 text-lg text-[var(--color-fg-muted)] max-w-2xl leading-relaxed">
             카페·바·레스토랑·갤러리의 휴무일과 영업 종료 후. 평소엔 만날 수 없던 감성 공간을

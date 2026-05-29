@@ -24,7 +24,7 @@ export class FavoritesService {
       include: {
         space: {
           include: {
-            photos: { take: 1, orderBy: { order: 'asc' } },
+            photos: { take: 4, orderBy: { order: 'asc' } },
             venue: { select: { region: true, district: true, category: true } },
           },
         },
@@ -43,6 +43,7 @@ export class FavoritesService {
       ratingCount: f.space.ratingCount,
       thumbnailUrl: f.space.photos[0]?.url ?? null,
       blurhash: f.space.photos[0]?.blurhash ?? null,
+      photoUrls: f.space.photos.slice(1, 4).map((p) => p.url),
       region: f.space.venue.region,
       district: f.space.venue.district,
       category: f.space.venue.category,
