@@ -34,19 +34,19 @@ import { Button } from '../components/ui/Button'
 import { Skeleton } from '../components/ui/Skeleton'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 
-const categories: { value: VenueCategory; icon: typeof Coffee }[] = [
-  { value: 'CAFE', icon: Coffee },
-  { value: 'BAR', icon: Wine },
-  { value: 'RESTAURANT', icon: UtensilsCrossed },
-  { value: 'FITNESS', icon: Dumbbell },
-  { value: 'DANCE', icon: Music },
-  { value: 'PRACTICE', icon: Music2 },
-  { value: 'WORKSHOP', icon: Hammer },
-  { value: 'MEETING', icon: Users },
-  { value: 'STUDIO', icon: Camera },
-  { value: 'GALLERY', icon: Image },
-  { value: 'ROOFTOP', icon: Sun },
-  { value: 'HOUSE', icon: Home },
+const categories: { value: VenueCategory; icon: typeof Coffee; hue: number }[] = [
+  { value: 'CAFE', icon: Coffee, hue: 40 },
+  { value: 'BAR', icon: Wine, hue: 350 },
+  { value: 'RESTAURANT', icon: UtensilsCrossed, hue: 25 },
+  { value: 'FITNESS', icon: Dumbbell, hue: 150 },
+  { value: 'DANCE', icon: Music, hue: 320 },
+  { value: 'PRACTICE', icon: Music2, hue: 280 },
+  { value: 'WORKSHOP', icon: Hammer, hue: 60 },
+  { value: 'MEETING', icon: Users, hue: 230 },
+  { value: 'STUDIO', icon: Camera, hue: 200 },
+  { value: 'GALLERY', icon: Image, hue: 10 },
+  { value: 'ROOFTOP', icon: Sun, hue: 90 },
+  { value: 'HOUSE', icon: Home, hue: 130 },
 ]
 
 export default function HomePage() {
@@ -217,13 +217,19 @@ function CategoryRow() {
   return (
     <section className="container-page py-8 md:py-12">
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-        {categories.map(({ value, icon: Icon }) => (
+        {categories.map(({ value, icon: Icon, hue }) => (
           <Link
             key={value}
             to={`/spaces?category=${value}`}
             className="group shrink-0 flex flex-col items-center gap-2 rounded-[var(--radius-xl)] hairline bg-[var(--color-bg-elevated)] px-6 py-4 min-w-[120px] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
           >
-            <span className="inline-flex size-10 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] group-hover:scale-110 transition-transform">
+            <span
+              className="inline-flex size-10 items-center justify-center rounded-full group-hover:scale-110 transition-transform"
+              style={{
+                background: `oklch(0.93 0.07 ${hue})`,
+                color: `oklch(0.45 0.12 ${hue})`,
+              }}
+            >
               <Icon size={18} />
             </span>
             <span className="text-sm font-medium">{VenueCategoryLabel[value]}</span>
