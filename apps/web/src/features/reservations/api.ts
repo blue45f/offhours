@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type {
   ArrivalGuide,
+  CreateRecurringInput,
   CreateReservationInput,
+  RecurringResult,
   Reservation,
   ReservationStatus,
 } from '@offhours/shared'
@@ -41,6 +43,15 @@ export function useCreateReservation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (input: CreateReservationInput) => api.post<Reservation>('/reservations', input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
+  })
+}
+
+export function useCreateRecurring() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: CreateRecurringInput) =>
+      api.post<RecurringResult>('/reservations/recurring', input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
   })
 }

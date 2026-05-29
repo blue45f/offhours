@@ -4,10 +4,12 @@ import { ReservationStatus } from '@prisma/client'
 import {
   CancelReservationSchema,
   CheckOutSchema,
+  CreateRecurringSchema,
   CreateReservationSchema,
   RejectReservationSchema,
   type CancelReservationInput,
   type CheckOutInput,
+  type CreateRecurringInput,
   type CreateReservationInput,
   type RejectReservationInput,
 } from '@offhours/shared'
@@ -30,6 +32,14 @@ export class ReservationsController {
     @Body(new ZodValidationPipe(CreateReservationSchema)) body: CreateReservationInput
   ) {
     return this.reservations.create(user.id, body)
+  }
+
+  @Post('recurring')
+  async createRecurring(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodValidationPipe(CreateRecurringSchema)) body: CreateRecurringInput
+  ) {
+    return this.reservations.createRecurring(user.id, body)
   }
 
   @Get('mine')

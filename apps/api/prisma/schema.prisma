@@ -451,6 +451,8 @@ model Reservation {
   /** 선택한 유료 옵션(애드온)의 합계와 스냅샷 — [{ addonId, name, unit, qty, unitPriceKRW, amountKRW }] */
   addonsAmountKRW Int             @default(0)
   addonsSnapshot  Json?
+  /** 반복 예약 그룹 식별자 — 같은 정기 예약의 여러 occurrence 를 묶는 UUID */
+  recurringGroupId String?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -463,6 +465,7 @@ model Reservation {
 
   @@index([guestId, status])
   @@index([spaceId, startAt])
+  @@index([recurringGroupId])
 }
 
 model EventRsvp {

@@ -2,23 +2,31 @@ import { z } from 'zod'
 import { PurposeSchema, ReservationStatusSchema } from './enums'
 import { AddonLineSchema, AddonSelectionSchema } from './addon'
 
-export const CreateReservationSchema = z
-  .object({
-    spaceId: z.string().min(1),
-    startAt: z.string(),
-    endAt: z.string(),
-    headcount: z.number().int().min(1).max(500),
-    purpose: PurposeSchema,
-    note: z.string().trim().max(500).optional(),
-    /** true 면 corporateProfile 을 동결해 예약에 첨부, 세금계산서 발행 워크플로우 진입 */
-    useCorporateBilling: z.boolean().optional(),
-    /** 게스트가 선택한 유료 옵션(애드온) */
-    addons: z.array(AddonSelectionSchema).max(20).optional(),
-  })
-  .refine((v) => new Date(v.endAt).getTime() > new Date(v.startAt).getTime(), {
-    message: '종료 시간은 시작 시간 이후여야 해요',
-    path: ['endAt'],
-  })
+// 베이스 오브젝트(미정제) — refine 이 붙은 스키마에는 .omit()/.extend() 를 쓸 수 없으므로
+// (Zod v4 런타임 가드) 파생 스키마는 이 오브젝트에서 만든 뒤 각자 refine 을 다시 적용한다.
+const CreateReservationObject = z.object({
+  spaceId: z.string().min(1),
+  startAt: z.string(),
+  endAt: z.string(),
+  headcount: z.number().int().min(1).max(500),
+  purpose: PurposeSchema,
+  note: z.string().trim().max(500).optional(),
+  /** true 면 corporateProfile 을 동결해 예약에 첨부, 세금계산서 발행 워크플로우 진입 */
+  useCorporateBilling: z.boolean().optional(),
+  /** 게스트가 선택한 유료 옵션(애드온) */
+  addons: z.array(AddonSelectionSchema).max(20).optional(),
+  /** 반복 예약 그룹 식별자 — createRecurring 내부에서만 주입, 일반 단건 예약에서는 무시 */
+  recurringGroupId: z.string().optional(),
+})
+
+const endAfterStart = (v: { startAt: string; endAt: string }) =>
+  new Date(v.endAt).getTime() > new Date(v.startAt).getTime()
+const endAfterStartIssue = { message: '종료 시간은 시작 시간 이후여야 해요', path: ['endAt'] }
+
+export const CreateReservationSchema = CreateReservationObject.refine(
+  endAfterStart,
+  endAfterStartIssue
+)
 export type CreateReservationInput = z.infer<typeof CreateReservationSchema>
 
 export const CancelReservationSchema = z.object({
@@ -107,6 +115,20 @@ export const ReservationSchema = z.object({
     .optional(),
 })
 export type Reservation = z.infer<typeof ReservationSchema>
+
+/** 정기·반복 예약 생성 요청 — weeks 회 만큼 매주 같은 요일·시간대로 반복 예약 */
+export const CreateRecurringSchema = CreateReservationObject.omit({ recurringGroupId: true })
+  .extend({ weeks: z.number().int().min(2).max(12) })
+  .refine(endAfterStart, endAfterStartIssue)
+export type CreateRecurringInput = z.infer<typeof CreateRecurringSchema>
+
+/** 반복 예약 생성 결과 — 성공·건너뜀 목록 반환 */
+export const RecurringResultSchema = z.object({
+  groupId: z.string(),
+  created: z.array(ReservationSchema),
+  skipped: z.array(z.object({ startAt: z.string(), reason: z.string() })),
+})
+export type RecurringResult = z.infer<typeof RecurringResultSchema>
 
 export function calcReservationFee(totalKRW: number): number {
   return Math.round(totalKRW * 0.12)

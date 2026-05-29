@@ -4,15 +4,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
+import { randomUUID } from 'crypto'
 import { Prisma, type Reservation, type ReservationStatus } from '@prisma/client'
 import {
+  ReservationSchema,
   TRUST_SCORE,
   calcReservationFee,
   calcRefundRate,
   clampTrust,
   type AddonLine,
   type CheckOutInput,
+  type CreateRecurringInput,
   type CreateReservationInput,
+  type RecurringResult,
 } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
@@ -108,6 +112,7 @@ export class ReservationsService {
         checkInCode,
         corporateProfileId,
         corporateSnapshot: corporateSnapshot ?? undefined,
+        recurringGroupId: input.recurringGroupId ?? null,
       },
     })
 
@@ -119,6 +124,41 @@ export class ReservationsService {
     })
 
     return reservation
+  }
+
+  async createRecurring(guestId: string, input: CreateRecurringInput): Promise<RecurringResult> {
+    const groupId = randomUUID()
+    const { weeks, ...baseInput } = input
+    const baseStart = new Date(baseInput.startAt)
+    const baseEnd = new Date(baseInput.endAt)
+    const durationMs = baseEnd.getTime() - baseStart.getTime()
+
+    const created: RecurringResult['created'] = []
+    const skipped: RecurringResult['skipped'] = []
+
+    for (let i = 0; i < weeks; i++) {
+      const occStart = new Date(baseStart.getTime() + i * 7 * 24 * 60 * 60 * 1000)
+      const occEnd = new Date(occStart.getTime() + durationMs)
+      const occInput: CreateReservationInput = {
+        ...baseInput,
+        startAt: occStart.toISOString(),
+        endAt: occEnd.toISOString(),
+        recurringGroupId: groupId,
+      }
+      try {
+        const r = await this.create(guestId, occInput)
+        const detail = await this.getOne(guestId, r.id)
+        // getOne returns extra fields (venueAddressRoad, arrivalGuide); parse to ReservationSchema shape.
+        created.push(ReservationSchema.parse(detail))
+      } catch (e) {
+        skipped.push({
+          startAt: occStart.toISOString(),
+          reason: e instanceof Error ? e.message : '예약할 수 없는 시간',
+        })
+      }
+    }
+
+    return { groupId, created, skipped }
   }
 
   async approve(hostUserId: string, reservationId: string) {

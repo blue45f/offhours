@@ -11,13 +11,13 @@ import {
   type SpaceDetail,
 } from '@offhours/shared'
 import toast from 'react-hot-toast'
-import { Clock, Users } from 'lucide-react'
+import { Clock, RefreshCw, Users } from 'lucide-react'
 
 import { Button } from '../ui/Button'
 import { Field, Input, Textarea } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Card } from '../ui/Card'
-import { useCreateReservation } from '../../features/reservations/api'
+import { useCreateReservation, useCreateRecurring } from '../../features/reservations/api'
 import { useQuote } from '../../features/spaces/api'
 import { AvailabilityCalendar } from './AvailabilityCalendar'
 import { AddonPicker } from './AddonPicker'
@@ -44,6 +44,8 @@ export function ReservationPanel({ space }: Props) {
   const [note, setNote] = useState('')
   const [useCorporate, setUseCorporate] = useState(false)
   const [addonQty, setAddonQty] = useState<Record<string, number>>({})
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [recurringWeeks, setRecurringWeeks] = useState(4)
   const { data: corporate } = useCorporateProfile()
 
   const { startAt, endAt } = useMemo(() => {
@@ -70,6 +72,7 @@ export function ReservationPanel({ space }: Props) {
 
   const { data: quote } = useQuote(space.id, startAt, endAt, addonSelections)
   const createMutation = useCreateReservation()
+  const recurringMutation = useCreateRecurring()
 
   const {
     handleSubmit,
@@ -87,17 +90,35 @@ export function ReservationPanel({ space }: Props) {
       toast.error('이용 시간을 선택해주세요')
       return
     }
+
+    const baseInput = {
+      spaceId: space.id,
+      startAt,
+      endAt,
+      headcount,
+      purpose,
+      note: note || undefined,
+      useCorporateBilling: useCorporate && !!corporate,
+      addons: addonSelections.length > 0 ? addonSelections : undefined,
+    }
+
+    if (isRecurring) {
+      try {
+        const result = await recurringMutation.mutateAsync({ ...baseInput, weeks: recurringWeeks })
+        const { created, skipped } = result
+        const msg = `${created.length}주 예약 요청 완료${skipped.length ? `, ${skipped.length}주는 이미 예약돼 건너뛰었어요` : ''}`
+        toast.success(msg)
+        if (created.length > 0) {
+          navigate(`/me/reservations/${created[0].id}`)
+        }
+      } catch (e) {
+        toast.error(getErrorMessage(e, '반복 예약에 실패했어요'))
+      }
+      return
+    }
+
     try {
-      const reservation = await createMutation.mutateAsync({
-        spaceId: space.id,
-        startAt,
-        endAt,
-        headcount,
-        purpose,
-        note: note || undefined,
-        useCorporateBilling: useCorporate && !!corporate,
-        addons: addonSelections.length > 0 ? addonSelections : undefined,
-      })
+      const reservation = await createMutation.mutateAsync(baseInput)
       toast.success(space.instantBook ? '예약이 확정됐어요!' : '예약 요청을 보냈어요')
       navigate(`/me/reservations/${reservation.id}`)
     } catch (e) {
@@ -151,6 +172,35 @@ export function ReservationPanel({ space }: Props) {
             />
           </Field>
         </div>
+
+        {/* 매주 반복 예약 */}
+        <div className="rounded-[var(--radius-lg)] hairline p-3 space-y-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={isRecurring}
+              onChange={(e) => setIsRecurring(e.target.checked)}
+              className="size-4 accent-[var(--color-primary)]"
+            />
+            <span className="inline-flex items-center gap-1 text-sm font-semibold">
+              <RefreshCw size={12} className="text-[var(--color-primary)]" />
+              매주 반복 예약
+            </span>
+          </label>
+          {isRecurring && (
+            <Field label="반복 횟수">
+              <Select
+                value={String(recurringWeeks)}
+                onValueChange={(v) => setRecurringWeeks(Number(v))}
+                options={Array.from({ length: 11 }, (_, i) => i + 2).map((w) => ({
+                  value: String(w),
+                  label: `${w}주`,
+                }))}
+              />
+            </Field>
+          )}
+        </div>
+
         <Field label="인원" required>
           <Input
             type="number"
@@ -252,8 +302,12 @@ export function ReservationPanel({ space }: Props) {
           </div>
         )}
 
-        <Button type="submit" size="lg" full loading={isSubmitting}>
-          {space.instantBook ? '즉시 예약하기' : '예약 요청하기'}
+        <Button type="submit" size="lg" full loading={isSubmitting || recurringMutation.isPending}>
+          {isRecurring
+            ? `${recurringWeeks}주 반복 예약 요청하기`
+            : space.instantBook
+              ? '즉시 예약하기'
+              : '예약 요청하기'}
         </Button>
         <p className="text-xs text-[var(--color-fg-subtle)] text-center">
           취소·환불 정책은 결제 전에 확인할 수 있어요.
