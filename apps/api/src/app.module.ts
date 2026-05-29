@@ -11,6 +11,7 @@ import { HostModule } from './host/host.module'
 import { VenuesModule } from './venues/venues.module'
 import { SpacesModule } from './spaces/spaces.module'
 import { SlotsModule } from './slots/slots.module'
+import { AddonsModule } from './addons/addons.module'
 import { ReservationsModule } from './reservations/reservations.module'
 import { PaymentsModule } from './payments/payments.module'
 import { ReviewsModule } from './reviews/reviews.module'
@@ -40,6 +41,7 @@ import { HealthController } from './common/health.controller'
     VenuesModule,
     SpacesModule,
     SlotsModule,
+    AddonsModule,
     ReservationsModule,
     PaymentsModule,
     ReviewsModule,

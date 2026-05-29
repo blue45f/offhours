@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { PurposeSchema, ReservationStatusSchema } from './enums'
+import { AddonLineSchema, AddonSelectionSchema } from './addon'
 
 export const CreateReservationSchema = z
   .object({
@@ -11,6 +12,8 @@ export const CreateReservationSchema = z
     note: z.string().trim().max(500).optional(),
     /** true 면 corporateProfile 을 동결해 예약에 첨부, 세금계산서 발행 워크플로우 진입 */
     useCorporateBilling: z.boolean().optional(),
+    /** 게스트가 선택한 유료 옵션(애드온) */
+    addons: z.array(AddonSelectionSchema).max(20).optional(),
   })
   .refine((v) => new Date(v.endAt).getTime() > new Date(v.startAt).getTime(), {
     message: '종료 시간은 시작 시간 이후여야 해요',
@@ -81,6 +84,9 @@ export const ReservationSchema = z.object({
   baseAmountKRW: z.number(),
   cleaningFeeKRW: z.number(),
   depositKRW: z.number(),
+  /** 선택한 유료 옵션 합계 + 라인 스냅샷 */
+  addonsAmountKRW: z.number().default(0),
+  addons: z.array(AddonLineSchema).nullable().optional(),
   totalKRW: z.number(),
   feeKRW: z.number(),
   cancelReason: z.string().nullable(),

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type {
+  AddonLine,
+  AddonSelection,
   CreateSpaceInput,
   Paginated,
   Purpose,
@@ -74,9 +76,15 @@ export function useSpaceSlots(spaceId?: string, from?: string, to?: string) {
   })
 }
 
-export function useQuote(spaceId?: string, startAt?: string, endAt?: string) {
+export function useQuote(
+  spaceId?: string,
+  startAt?: string,
+  endAt?: string,
+  addons: AddonSelection[] = []
+) {
+  const addonsParam = addons.map((a) => `${a.addonId}:${a.qty}`).join(',')
   return useQuery({
-    queryKey: ['spaces', spaceId, 'quote', startAt, endAt],
+    queryKey: ['spaces', spaceId, 'quote', startAt, endAt, addonsParam],
     enabled: !!spaceId && !!startAt && !!endAt,
     queryFn: () =>
       api.get<{
@@ -87,9 +95,11 @@ export function useQuote(spaceId?: string, startAt?: string, endAt?: string) {
         discountKRW: number
         discountedBaseAmountKRW: number
         cleaningFeeKRW: number
+        addonsKRW: number
+        addons: AddonLine[]
         totalKRW: number
       }>(`/spaces/${spaceId}/slots/quote`, {
-        params: { startAt, endAt },
+        params: { startAt, endAt, ...(addonsParam ? { addons: addonsParam } : {}) },
       }),
     staleTime: 30_000,
   })

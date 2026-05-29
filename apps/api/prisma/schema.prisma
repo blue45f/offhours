@@ -339,6 +339,7 @@ model Space {
   reviews      Review[]
   favorites    Favorite[]
   waitlist     SpaceWaitlist[]
+  addons       SpaceAddon[]
 
   @@index([status, createdAt])
   @@index([venueId])
@@ -441,6 +442,9 @@ model Reservation {
   /** 법인 결제 — 예약 시점 corporate 스냅샷(공급자명·사업자번호·세금계산서 이메일) */
   corporateProfileId String?
   corporateSnapshot  Json?
+  /** 선택한 유료 옵션(애드온)의 합계와 스냅샷 — [{ addonId, name, unit, qty, unitPriceKRW, amountKRW }] */
+  addonsAmountKRW Int             @default(0)
+  addonsSnapshot  Json?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -807,4 +811,40 @@ model AuditLog {
 
   @@index([actorId, createdAt])
   @@index([targetType, targetId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// SpaceAddon — 호스트가 영업 외 대관에 끼워 파는 유료 옵션.
+// 같은 짜투리 시간에 공간 + 장비·케이터링·세팅까지 팔아 객단가를 올린다.
+// ─────────────────────────────────────────────────────────────
+
+enum AddonUnit {
+  PER_BOOKING // 건당
+  PER_HOUR // 시간당
+  PER_PERSON // 인당
+}
+
+enum AddonCategory {
+  EQUIPMENT // 장비
+  CATERING // 케이터링·음식
+  SETUP // 데코·세팅
+  STAFF // 인력
+  CLEANING // 청소·정리
+  OTHER
+}
+
+model SpaceAddon {
+  id          String        @id @default(cuid())
+  spaceId     String
+  space       Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  priceKRW    Int
+  unit        AddonUnit     @default(PER_BOOKING)
+  category    AddonCategory @default(OTHER)
+  isActive    Boolean       @default(true)
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+
+  @@index([spaceId, isActive, order])
 }

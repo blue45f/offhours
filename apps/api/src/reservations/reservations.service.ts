@@ -10,6 +10,7 @@ import {
   calcReservationFee,
   calcRefundRate,
   clampTrust,
+  type AddonLine,
   type CheckOutInput,
   type CreateReservationInput,
 } from '@offhours/shared'
@@ -61,7 +62,7 @@ export class ReservationsService {
     })
     if (conflict) throw new BadRequestException('이미 예약된 시간이에요')
 
-    const quote = await this.slots.calcAmount(space.id, startAt, endAt)
+    const quote = await this.slots.calcAmount(space.id, startAt, endAt, input.addons ?? [])
     const totalKRW = quote.totalKRW
     const feeKRW = calcReservationFee(totalKRW)
     const code = randomCode('OFH')
@@ -100,6 +101,8 @@ export class ReservationsService {
         // 라스트미닛 할인이 적용된 실제 결제 금액을 저장. 정상가는 quote.baseAmountKRW.
         baseAmountKRW: quote.discountedBaseAmountKRW,
         cleaningFeeKRW: quote.cleaningFeeKRW,
+        addonsAmountKRW: quote.addonsKRW,
+        addonsSnapshot: quote.addons.length > 0 ? (quote.addons as object) : undefined,
         totalKRW,
         feeKRW,
         checkInCode,
@@ -375,6 +378,8 @@ export class ReservationsService {
       baseAmountKRW: r.baseAmountKRW,
       cleaningFeeKRW: r.cleaningFeeKRW,
       depositKRW: r.depositKRW,
+      addonsAmountKRW: (r as { addonsAmountKRW?: number }).addonsAmountKRW ?? 0,
+      addons: (r as { addonsSnapshot?: AddonLine[] | null }).addonsSnapshot ?? null,
       totalKRW: r.totalKRW,
       feeKRW: r.feeKRW,
       cancelReason: r.cancelReason,

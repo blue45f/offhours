@@ -134,6 +134,13 @@ export default function ReservationDetailPage() {
             {reservation.depositKRW > 0 && (
               <Row label="보증금" value={formatKRW(reservation.depositKRW)} />
             )}
+            {reservation.addons?.map((a) => (
+              <Row
+                key={a.addonId}
+                label={`${a.name}${a.qty > 1 ? ` × ${a.qty}` : ''}`}
+                value={formatKRW(a.amountKRW)}
+              />
+            ))}
             <hr className="border-[var(--color-border-subtle)] my-2" />
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
           </CardBody>

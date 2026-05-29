@@ -1,6 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Logger } from '@nestjs/common'
-import { lastMinuteDiscountRate } from '@offhours/shared'
+import {
+  addonAmount,
+  lastMinuteDiscountRate,
+  type AddonLine,
+  type AddonSelection,
+} from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { generateOffhoursPlans, pricePerHour } from './slots.engine'
@@ -122,7 +127,12 @@ export class SlotsService {
     return slot
   }
 
-  async calcAmount(spaceId: string, startAt: Date, endAt: Date) {
+  async calcAmount(
+    spaceId: string,
+    startAt: Date,
+    endAt: Date,
+    addonSelections: AddonSelection[] = []
+  ) {
     const space = await this.prisma.space.findUnique({
       where: { id: spaceId },
       include: { pricingRules: true },
@@ -135,6 +145,32 @@ export class SlotsService {
     const discountRate = lastMinuteDiscountRate(startAt)
     const discountKRW = Math.round(base * discountRate)
     const discountedBase = base - discountKRW
+
+    // 유료 옵션(애드온) — 같은 영업 외 시간에 장비·케이터링·세팅까지 팔아 객단가를 올린다.
+    // 할인은 공간 본가에만 적용하고 옵션·청소비에는 적용하지 않는다.
+    const addons: AddonLine[] = []
+    let addonsKRW = 0
+    if (addonSelections.length > 0) {
+      const records = await this.prisma.spaceAddon.findMany({
+        where: { spaceId, isActive: true, id: { in: addonSelections.map((s) => s.addonId) } },
+      })
+      const byId = new Map(records.map((a) => [a.id, a]))
+      for (const sel of addonSelections) {
+        const a = byId.get(sel.addonId)
+        if (!a) continue
+        const amountKRW = addonAmount(a.unit, a.priceKRW, sel.qty, hours)
+        addonsKRW += amountKRW
+        addons.push({
+          addonId: a.id,
+          name: a.name,
+          unit: a.unit,
+          qty: sel.qty,
+          unitPriceKRW: a.priceKRW,
+          amountKRW,
+        })
+      }
+    }
+
     return {
       hours,
       hourlyRate,
@@ -143,7 +179,9 @@ export class SlotsService {
       discountKRW,
       discountedBaseAmountKRW: discountedBase,
       cleaningFeeKRW: space.cleaningFeeKRW,
-      totalKRW: discountedBase + space.cleaningFeeKRW,
+      addonsKRW,
+      addons,
+      totalKRW: discountedBase + space.cleaningFeeKRW + addonsKRW,
     }
   }
 }

@@ -71,6 +71,79 @@ const DEFAULT_USE_CASES_BY_CATEGORY: Record<SeedSpaceSpec['category'], string[]>
   MEETING: ['CORPORATE_WORKSHOP', 'NETWORKING', 'CLASS'],
 }
 
+type AddonSeed = {
+  name: string
+  priceKRW: number
+  unit: 'PER_BOOKING' | 'PER_HOUR' | 'PER_PERSON'
+  category: 'EQUIPMENT' | 'CATERING' | 'SETUP' | 'STAFF' | 'CLEANING' | 'OTHER'
+}
+
+// 모든 공간에 공통으로 붙는 옵션 — 청소 SLA 와 맞물려 추가 수입원이 된다.
+const UNIVERSAL_ADDONS: AddonSeed[] = [
+  { name: '추가 청소·원상복구 대행', priceKRW: 30000, unit: 'PER_BOOKING', category: 'CLEANING' },
+]
+
+// 영업 외 대관에 끼워 파는 카테고리별 유료 옵션 — 같은 짜투리 시간의 객단가를 올린다.
+const ADDONS_BY_CATEGORY: Record<string, AddonSeed[]> = {
+  CAFE: [
+    { name: '빔프로젝터 + 스크린', priceKRW: 30000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '웰컴 드링크 바', priceKRW: 6000, unit: 'PER_PERSON', category: 'CATERING' },
+    { name: '파티 데코 세팅', priceKRW: 50000, unit: 'PER_BOOKING', category: 'SETUP' },
+  ],
+  BAR: [
+    { name: '칵테일 패키지', priceKRW: 12000, unit: 'PER_PERSON', category: 'CATERING' },
+    { name: '사운드 엔지니어', priceKRW: 40000, unit: 'PER_HOUR', category: 'STAFF' },
+    { name: '무드 조명 세팅', priceKRW: 40000, unit: 'PER_BOOKING', category: 'SETUP' },
+  ],
+  RESTAURANT: [
+    { name: '코스 케이터링', priceKRW: 25000, unit: 'PER_PERSON', category: 'CATERING' },
+    { name: '와인 페어링', priceKRW: 18000, unit: 'PER_PERSON', category: 'CATERING' },
+    { name: '플로럴 테이블 세팅', priceKRW: 60000, unit: 'PER_BOOKING', category: 'SETUP' },
+  ],
+  STUDIO: [
+    { name: '조명 추가 세트', priceKRW: 40000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '촬영 어시스턴트', priceKRW: 35000, unit: 'PER_HOUR', category: 'STAFF' },
+    { name: '배경지 교체', priceKRW: 20000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+  ],
+  GALLERY: [
+    { name: '전시 집기 대여', priceKRW: 50000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '도슨트·운영 인력', priceKRW: 30000, unit: 'PER_HOUR', category: 'STAFF' },
+    { name: '핑거푸드 케이터링', priceKRW: 9000, unit: 'PER_PERSON', category: 'CATERING' },
+  ],
+  ROOFTOP: [
+    { name: '야외 난방 히터', priceKRW: 30000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: 'BGM·음향 세팅', priceKRW: 40000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '파티 데코 세팅', priceKRW: 50000, unit: 'PER_BOOKING', category: 'SETUP' },
+  ],
+  HOUSE: [
+    { name: '홈파티 데코', priceKRW: 50000, unit: 'PER_BOOKING', category: 'SETUP' },
+    { name: '홈 케이터링', priceKRW: 15000, unit: 'PER_PERSON', category: 'CATERING' },
+    { name: '추가 어메니티 세트', priceKRW: 20000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+  ],
+  FITNESS: [
+    { name: '매트·소도구 세트', priceKRW: 20000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '퍼스널 트레이너', priceKRW: 50000, unit: 'PER_HOUR', category: 'STAFF' },
+  ],
+  DANCE: [
+    { name: '촬영 조명 세트', priceKRW: 30000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '안무 강사', priceKRW: 45000, unit: 'PER_HOUR', category: 'STAFF' },
+  ],
+  PRACTICE: [
+    { name: '악기 추가 대여', priceKRW: 30000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '녹음 엔지니어', priceKRW: 40000, unit: 'PER_HOUR', category: 'STAFF' },
+  ],
+  WORKSHOP: [
+    { name: '원데이 재료 키트', priceKRW: 12000, unit: 'PER_PERSON', category: 'OTHER' },
+    { name: '전문 강사', priceKRW: 50000, unit: 'PER_HOUR', category: 'STAFF' },
+    { name: '다과 세트', priceKRW: 7000, unit: 'PER_PERSON', category: 'CATERING' },
+  ],
+  MEETING: [
+    { name: '다과·커피 바', priceKRW: 8000, unit: 'PER_PERSON', category: 'CATERING' },
+    { name: '화상회의 장비', priceKRW: 30000, unit: 'PER_BOOKING', category: 'EQUIPMENT' },
+    { name: '회의 서기·운영', priceKRW: 30000, unit: 'PER_HOUR', category: 'STAFF' },
+  ],
+}
+
 const SPACE_SEEDS: SeedSpaceSpec[] = [
   {
     title: '망원동 햇살가득 카페 통대관',
@@ -918,10 +991,32 @@ async function main() {
     blockSeedCount += 2
   }
 
+  // 유료 옵션(애드온) 시드 — 기존 활성 공간에 카테고리별 옵션을 멱등하게 부여.
+  const spacesForAddons = await prisma.space.findMany({
+    where: { status: 'ACTIVE' },
+    select: { id: true, venue: { select: { category: true } } },
+  })
+  let addonSeedCount = 0
+  for (const s of spacesForAddons) {
+    await prisma.spaceAddon.deleteMany({ where: { spaceId: s.id } })
+    const specs = [...(ADDONS_BY_CATEGORY[s.venue.category] ?? []), ...UNIVERSAL_ADDONS]
+    await prisma.spaceAddon.createMany({
+      data: specs.map((ad, order) => ({
+        spaceId: s.id,
+        name: ad.name,
+        priceKRW: ad.priceKRW,
+        unit: ad.unit,
+        category: ad.category,
+        order,
+      })),
+    })
+    addonSeedCount += specs.length
+  }
+
   console.log(
     `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
       `${hostUsers.length} host response stats, ${collectionsSeed.length} collections, ` +
-      `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides.`
+      `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides, ${addonSeedCount} addons.`
   )
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)

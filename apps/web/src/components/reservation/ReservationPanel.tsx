@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   CreateReservationSchema,
   PurposeLabel,
+  type AddonSelection,
   type CreateReservationInput,
   type Purpose,
   type SpaceDetail,
@@ -19,6 +20,7 @@ import { Card } from '../ui/Card'
 import { useCreateReservation } from '../../features/reservations/api'
 import { useQuote } from '../../features/spaces/api'
 import { AvailabilityCalendar } from './AvailabilityCalendar'
+import { AddonPicker } from './AddonPicker'
 import { useCorporateProfile } from '../../features/corporate/api'
 import { useIsAuthed } from '../../store/auth'
 import { Link } from 'react-router-dom'
@@ -41,6 +43,7 @@ export function ReservationPanel({ space }: Props) {
   const [purpose, setPurpose] = useState<Purpose>('PARTY')
   const [note, setNote] = useState('')
   const [useCorporate, setUseCorporate] = useState(false)
+  const [addonQty, setAddonQty] = useState<Record<string, number>>({})
   const { data: corporate } = useCorporateProfile()
 
   const { startAt, endAt } = useMemo(() => {
@@ -52,7 +55,20 @@ export function ReservationPanel({ space }: Props) {
     return { startAt: start.toISOString(), endAt: end.toISOString() }
   }, [date, startTime, endTime])
 
-  const { data: quote } = useQuote(space.id, startAt, endAt)
+  const hours = useMemo(() => {
+    if (!startAt || !endAt) return 1
+    return Math.max(
+      1,
+      Math.ceil((new Date(endAt).getTime() - new Date(startAt).getTime()) / 3_600_000)
+    )
+  }, [startAt, endAt])
+
+  const addonSelections = useMemo<AddonSelection[]>(
+    () => Object.entries(addonQty).map(([addonId, qty]) => ({ addonId, qty })),
+    [addonQty]
+  )
+
+  const { data: quote } = useQuote(space.id, startAt, endAt, addonSelections)
   const createMutation = useCreateReservation()
 
   const {
@@ -80,6 +96,7 @@ export function ReservationPanel({ space }: Props) {
         purpose,
         note: note || undefined,
         useCorporateBilling: useCorporate && !!corporate,
+        addons: addonSelections.length > 0 ? addonSelections : undefined,
       })
       toast.success(space.instantBook ? '예약이 확정됐어요!' : '예약 요청을 보냈어요')
       navigate(`/me/reservations/${reservation.id}`)
@@ -163,6 +180,8 @@ export function ReservationPanel({ space }: Props) {
           />
         </Field>
 
+        <AddonPicker spaceId={space.id} hours={hours} value={addonQty} onChange={setAddonQty} />
+
         {isAuthed && (
           <div className="rounded-[var(--radius-lg)] hairline p-3">
             {corporate ? (
@@ -215,6 +234,13 @@ export function ReservationPanel({ space }: Props) {
             {quote.cleaningFeeKRW > 0 && (
               <Row label="청소비" value={formatKRW(quote.cleaningFeeKRW)} />
             )}
+            {quote.addons?.map((a) => (
+              <Row
+                key={a.addonId}
+                label={`${a.name}${a.qty > 1 ? ` × ${a.qty}` : ''}`}
+                value={formatKRW(a.amountKRW)}
+              />
+            ))}
             <div className="h-px bg-[var(--color-border)] my-2" />
             <Row label="총 결제 금액" value={formatKRW(quote.totalKRW)} strong />
             {quote.discountRate > 0 && (
