@@ -86,6 +86,16 @@ export function clampTrust(score: number): number {
   return Math.max(TRUST_SCORE.MIN, Math.min(TRUST_SCORE.MAX, score))
 }
 
+/**
+ * 오프아워스 우수 호스트 — 높은 신뢰점수 + 충분한 운영 이력을 동시에 만족하는 호스트.
+ * Airbnb Superhost / Peerspace Power Host 류의 프레스티지 시그널을 검색 카드에 노출한다.
+ */
+export const SUPER_HOST_MIN_TRUST = 85
+export const SUPER_HOST_MIN_HOSTED = 10
+export function isSuperHost(trustScore: number, hostedCount: number): boolean {
+  return trustScore >= SUPER_HOST_MIN_TRUST && hostedCount >= SUPER_HOST_MIN_HOSTED
+}
+
 export type TrustTier = {
   key: 'top' | 'excellent' | 'good' | 'normal' | 'caution'
   label: string

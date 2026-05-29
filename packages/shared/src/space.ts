@@ -111,6 +111,8 @@ export const SpaceCardSchema = z.object({
   verifiedBusiness: z.boolean().optional(),
   /** 호스트 책임보험 가입 */
   hostInsured: z.boolean().optional(),
+  /** 오프아워스 우수 호스트(높은 신뢰점수 + 운영 이력) — 카드 프레스티지 뱃지 */
+  superHost: z.boolean().optional(),
 })
 export type SpaceCard = z.infer<typeof SpaceCardSchema>
 

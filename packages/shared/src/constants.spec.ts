@@ -5,6 +5,7 @@ import {
   earnedPoints,
   formatKRW,
   HHmmToMinutes,
+  isSuperHost,
   minutesToHHmm,
   PLATFORM_FEE_RATE,
   purposeMultiplier,
@@ -68,6 +69,15 @@ describe('earnedPoints', () => {
     expect(earnedPoints(0)).toBe(0)
     expect(earnedPoints(300_000)).toBe(6_000)
     expect(earnedPoints(125_000)).toBe(2_500)
+  })
+})
+
+describe('isSuperHost', () => {
+  it('높은 신뢰점수 + 운영 이력 동시 충족 시에만 우수 호스트', () => {
+    expect(isSuperHost(90, 20)).toBe(true)
+    expect(isSuperHost(85, 10)).toBe(true) // 경계
+    expect(isSuperHost(84, 50)).toBe(false) // 신뢰점수 부족
+    expect(isSuperHost(99, 9)).toBe(false) // 운영 이력 부족
   })
 })
 

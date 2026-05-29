@@ -8,6 +8,7 @@ import {
 import { Prisma, type Space, type SpacePhoto, type Venue } from '@prisma/client'
 import {
   haversineKm,
+  isSuperHost,
   lastMinuteDiscountRate,
   paginated,
   type CreateSpaceInput,
@@ -101,6 +102,8 @@ export class SpacesService {
                   responseMedianMin: true,
                   responseRate24h: true,
                   responseSampleCount: true,
+                  trustScore: true,
+                  hostedCount: true,
                 },
               },
             },
@@ -727,6 +730,8 @@ export class SpacesService {
             responseMedianMin: number | null
             responseRate24h: number | null
             responseSampleCount: number | null
+            trustScore?: number
+            hostedCount?: number
           }
         }
       }
@@ -767,6 +772,7 @@ export class SpacesService {
       responseSampleCount: hostUser?.responseSampleCount ?? null,
       verifiedBusiness: !!s.venue.host?.approvedAt,
       hostInsured: !!s.venue.host?.isInsured,
+      superHost: isSuperHost(hostUser?.trustScore ?? 0, hostUser?.hostedCount ?? 0),
     }
   }
 }

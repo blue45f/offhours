@@ -137,6 +137,15 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
               <Check size={11} className="mr-0.5 inline" /> 검증 사업장
             </Badge>
           )}
+          {space.superHost && (
+            <Badge
+              tone="accent"
+              soft={false}
+              className="!bg-[var(--color-bg-elevated)] !text-[var(--color-accent)] !shadow-[var(--shadow-sm)]"
+            >
+              ⭐ 우수 호스트
+            </Badge>
+          )}
         </div>
       </div>
       <div className="mt-3 space-y-1.5">
