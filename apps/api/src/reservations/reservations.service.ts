@@ -331,6 +331,44 @@ export class ReservationsService {
   }
 
   /**
+   * 미응답 예약 요청 자동 만료 — 호스트가 응답하지 않은 REQUESTED 예약을 정리한다.
+   * 영업 외 대관은 라스트미닛 비중이 커 게스트가 한없이 대기하면 다른 공간을 못 잡는다.
+   * 이용 시작 시각이 지났거나 48시간 응답이 없으면 자동 취소하고, 대기자에게 빈자리를 알린다.
+   */
+  async expireStale() {
+    const now = new Date()
+    const cutoff = new Date(now.getTime() - 48 * 60 * 60 * 1000)
+    const stale = await this.prisma.reservation.findMany({
+      where: {
+        status: 'REQUESTED',
+        OR: [{ startAt: { lt: now } }, { createdAt: { lt: cutoff } }],
+      },
+      include: { space: { include: { venue: { include: { host: true } } } } },
+      take: 200,
+    })
+    for (const r of stale) {
+      await this.prisma.reservation.update({
+        where: { id: r.id },
+        data: { status: 'CANCELED', cancelReason: '호스트 미응답으로 자동 만료' },
+      })
+      await this.notifications.create(r.guestId, {
+        type: 'RESERVATION_REJECTED',
+        title: '예약 요청이 만료됐어요',
+        body: `${r.space.title} — 호스트 미응답으로 자동 취소됐어요`,
+        data: { reservationId: r.id },
+      })
+      await this.notifications.create(r.space.venue.host.userId, {
+        type: 'SYSTEM',
+        title: '미응답 예약 자동 만료',
+        body: `${r.code} 요청이 자동 취소됐어요`,
+        data: { reservationId: r.id },
+      })
+      await this.waitlist.notifyOnSlotFreed(r.spaceId).catch(() => null)
+    }
+    return { expired: stale.length }
+  }
+
+  /**
    * 이용 시간 연장 — "파티가 무르익었는데 1시간만 더" 수요를 잡는다. 단, 영업 외 대관의
    * 핵심 제약을 지킨다: 예약이 속한 자동 슬롯의 끝(= 다음 영업 준비 + 청소 버퍼를 남긴
    * 안전 경계)을 넘길 수 없다. 일반 공간대여 플랫폼은 "다음 영업"을 모델링하지 않아 못 하는
