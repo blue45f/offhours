@@ -18,6 +18,7 @@ import {
   useReservationDetail,
 } from '../features/reservations/api'
 import { useMe } from '../store/auth'
+import { useOpenChat } from '../features/chat/api'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
@@ -40,6 +41,7 @@ export default function ReservationDetailPage() {
   const startPay = useTossPayment()
   const fileClaim = useFileClaim()
   const extend = useExtendReservation()
+  const openChat = useOpenChat()
   const me = useMe()
   const [claimOpen, setClaimOpen] = useState(false)
   const [claimAmount, setClaimAmount] = useState(0)
@@ -105,6 +107,15 @@ export default function ReservationDetailPage() {
       })
       toast.success('파손 청구가 접수됐어요')
       setClaimOpen(false)
+    } catch (e) {
+      toast.error(getErrorMessage(e))
+    }
+  }
+
+  async function onOpenChat() {
+    try {
+      const chat = await openChat.mutateAsync(reservation.id)
+      navigate(`/chat?c=${chat.id}`)
     } catch (e) {
       toast.error(getErrorMessage(e))
     }
@@ -346,11 +357,15 @@ export default function ReservationDetailPage() {
                 결제하기 ({formatKRW(payableKRW)})
               </Button>
             )}
-            <Link to="/chat">
-              <Button variant="secondary" size="lg" leading={<MessageCircle size={14} />}>
-                호스트와 채팅
-              </Button>
-            </Link>
+            <Button
+              variant="secondary"
+              size="lg"
+              leading={<MessageCircle size={14} />}
+              loading={openChat.isPending}
+              onClick={onOpenChat}
+            >
+              {isHost ? '게스트와 채팅' : '호스트와 채팅'}
+            </Button>
             <Button
               variant="ghost"
               size="lg"

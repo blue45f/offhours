@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Send } from 'lucide-react'
 import type { ChatMessage, ChatSummary } from '@offhours/shared'
@@ -14,7 +15,8 @@ import { formatDateTimeKR } from '../utils/format'
 
 export default function ChatPage() {
   const me = useMe()
-  const [active, setActive] = useState<string | null>(null)
+  const [sp] = useSearchParams()
+  const [active, setActive] = useState<string | null>(sp.get('c'))
   const [text, setText] = useState('')
   const qc = useQueryClient()
 
