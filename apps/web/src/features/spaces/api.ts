@@ -82,17 +82,20 @@ export function useQuote(
   spaceId?: string,
   startAt?: string,
   endAt?: string,
-  addons: AddonSelection[] = []
+  addons: AddonSelection[] = [],
+  purpose?: Purpose
 ) {
   const addonsParam = addons.map((a) => `${a.addonId}:${a.qty}`).join(',')
   return useQuery({
-    queryKey: ['spaces', spaceId, 'quote', startAt, endAt, addonsParam],
+    queryKey: ['spaces', spaceId, 'quote', startAt, endAt, addonsParam, purpose],
     enabled: !!spaceId && !!startAt && !!endAt,
     queryFn: () =>
       api.get<{
         hours: number
         hourlyRate: number
         baseAmountKRW: number
+        purposeMultiplier: number
+        purposeSurchargeKRW: number
         discountRate: number
         discountKRW: number
         discountedBaseAmountKRW: number
@@ -105,7 +108,12 @@ export function useQuote(
         subtotalKRW: number
         totalKRW: number
       }>(`/spaces/${spaceId}/slots/quote`, {
-        params: { startAt, endAt, ...(addonsParam ? { addons: addonsParam } : {}) },
+        params: {
+          startAt,
+          endAt,
+          ...(addonsParam ? { addons: addonsParam } : {}),
+          ...(purpose ? { purpose } : {}),
+        },
       }),
     staleTime: 30_000,
   })

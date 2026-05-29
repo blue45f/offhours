@@ -5,8 +5,10 @@ import {
   lastMinuteDiscountRate,
   protectionCoverage,
   protectionFee,
+  purposeMultiplier,
   type AddonLine,
   type AddonSelection,
+  type Purpose,
 } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
@@ -133,7 +135,8 @@ export class SlotsService {
     spaceId: string,
     startAt: Date,
     endAt: Date,
-    addonSelections: AddonSelection[] = []
+    addonSelections: AddonSelection[] = [],
+    purpose: Purpose = 'OTHER'
   ) {
     const space = await this.prisma.space.findUnique({
       where: { id: spaceId },
@@ -143,10 +146,14 @@ export class SlotsService {
     const hours = Math.max(1, Math.ceil((endAt.getTime() - startAt.getTime()) / (60 * 60 * 1000)))
     const hourlyRate = pricePerHour(space.basePriceKRW, space.pricingRules, startAt, endAt)
     const base = hourlyRate * hours
+    // 용도별 가격 — 파티·웨딩은 청소·기물 리스크가 커 합리적 할증, 조용한 미팅·촬영은 기본가.
+    const purposeMult = purposeMultiplier(purpose)
+    const purposeSurchargeKRW = Math.round(base * (purposeMult - 1))
+    const adjustedBase = base + purposeSurchargeKRW
     // 라스트미닛 자동 할인 — 시작 6h 이내 슬롯은 5/10/15% 차감.
     const discountRate = lastMinuteDiscountRate(startAt)
-    const discountKRW = Math.round(base * discountRate)
-    const discountedBase = base - discountKRW
+    const discountKRW = Math.round(adjustedBase * discountRate)
+    const discountedBase = adjustedBase - discountKRW
 
     // 유료 옵션(애드온) — 같은 영업 외 시간에 장비·케이터링·세팅까지 팔아 객단가를 올린다.
     // 할인은 공간 본가에만 적용하고 옵션·청소비에는 적용하지 않는다.
@@ -183,6 +190,8 @@ export class SlotsService {
       hours,
       hourlyRate,
       baseAmountKRW: base,
+      purposeMultiplier: purposeMult,
+      purposeSurchargeKRW,
       discountRate,
       discountKRW,
       discountedBaseAmountKRW: discountedBase,

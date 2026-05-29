@@ -72,7 +72,7 @@ export function ReservationPanel({ space }: Props) {
     [addonQty]
   )
 
-  const { data: quote } = useQuote(space.id, startAt, endAt, addonSelections)
+  const { data: quote } = useQuote(space.id, startAt, endAt, addonSelections, purpose)
   const createMutation = useCreateReservation()
   const recurringMutation = useCreateRecurring()
 
@@ -282,6 +282,12 @@ export function ReservationPanel({ space }: Props) {
               label={`${formatKRW(quote.hourlyRate)} × ${quote.hours}시간`}
               value={formatKRW(quote.baseAmountKRW)}
             />
+            {quote.purposeSurchargeKRW > 0 && (
+              <Row
+                label={`${PurposeLabel[purpose]} 할증 +${Math.round((quote.purposeMultiplier - 1) * 100)}%`}
+                value={`+${formatKRW(quote.purposeSurchargeKRW)}`}
+              />
+            )}
             {quote.discountRate > 0 && (
               <Row
                 label={`라스트미닛 할인 -${Math.round(quote.discountRate * 100)}%`}

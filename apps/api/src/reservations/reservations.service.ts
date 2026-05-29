@@ -67,7 +67,13 @@ export class ReservationsService {
     })
     if (conflict) throw new BadRequestException('이미 예약된 시간이에요')
 
-    const quote = await this.slots.calcAmount(space.id, startAt, endAt, input.addons ?? [])
+    const quote = await this.slots.calcAmount(
+      space.id,
+      startAt,
+      endAt,
+      input.addons ?? [],
+      input.purpose
+    )
     const totalKRW = quote.totalKRW
     // 보장료는 게스트 부담·보장 풀 적립이므로 수수료(12%)는 호스트 매출 소계에만 적용한다.
     const feeKRW = calcReservationFee(quote.subtotalKRW)

@@ -6,6 +6,7 @@ import {
   HHmmToMinutes,
   minutesToHHmm,
   PLATFORM_FEE_RATE,
+  purposeMultiplier,
 } from './constants'
 
 describe('calcRefundRate', () => {
@@ -58,5 +59,15 @@ describe('formatKRW', () => {
 describe('PLATFORM_FEE_RATE', () => {
   it('수수료율은 12%', () => {
     expect(PLATFORM_FEE_RATE).toBe(0.12)
+  })
+})
+
+describe('purposeMultiplier', () => {
+  it('파티·웨딩·팝업은 할증, 미팅·기타는 기본가', () => {
+    expect(purposeMultiplier('PARTY')).toBe(1.15)
+    expect(purposeMultiplier('WEDDING')).toBe(1.2)
+    expect(purposeMultiplier('POPUP')).toBe(1.1)
+    expect(purposeMultiplier('MEETING')).toBe(1.0)
+    expect(purposeMultiplier('OTHER')).toBe(1.0)
   })
 })

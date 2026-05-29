@@ -1,4 +1,4 @@
-import type { CancellationPolicy } from './enums'
+import type { CancellationPolicy, Purpose } from './enums'
 
 export const PLATFORM_FEE_RATE = 0.12
 
@@ -175,6 +175,24 @@ export function lastMinuteDiscountRate(startAt: Date | string, now: Date = new D
   if (diffH <= 1) return 0.15
   if (diffH <= 3) return 0.1
   return 0.05
+}
+
+/**
+ * 용도별 가격 배수 — 같은 영업 외 슬롯도 파티·웨딩은 청소·기물 리스크가 커 합리적 할증,
+ * 조용한 미팅·촬영은 기본가. Peerspace 의 activity-based pricing 을 영업 외 대관에 맞춤.
+ * 리스크를 가격에 반영해 호스트가 파티 수요를 더 열도록(= 영업 외 개방 동기↑) 한다.
+ */
+export const PURPOSE_PRICE_MULTIPLIER: Record<Purpose, number> = {
+  PARTY: 1.15,
+  WEDDING: 1.2,
+  POPUP: 1.1,
+  SHOOT: 1.05,
+  MEETING: 1.0,
+  OTHER: 1.0,
+}
+
+export function purposeMultiplier(purpose: Purpose): number {
+  return PURPOSE_PRICE_MULTIPLIER[purpose] ?? 1.0
 }
 
 /**

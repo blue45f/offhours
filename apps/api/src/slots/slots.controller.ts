@@ -1,6 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
+import type { Purpose } from '@offhours/shared'
+
 import { SlotsService } from './slots.service'
 import { Public } from '../common/decorators/public.decorator'
 
@@ -27,13 +29,15 @@ export class SlotsController {
     @Param('spaceId') spaceId: string,
     @Query('startAt') startAt: string,
     @Query('endAt') endAt: string,
-    @Query('addons') addons?: string
+    @Query('addons') addons?: string,
+    @Query('purpose') purpose?: string
   ) {
     return this.slots.calcAmount(
       spaceId,
       new Date(startAt),
       new Date(endAt),
-      parseAddonsParam(addons)
+      parseAddonsParam(addons),
+      purpose ? (purpose as Purpose) : 'OTHER'
     )
   }
 }
