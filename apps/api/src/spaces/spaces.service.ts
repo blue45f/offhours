@@ -453,6 +453,149 @@ export class SpacesService {
   }
 
   /**
+   * 슬러그 여러 개로 카드 한 번에 조회 — 클라이언트 localStorage 의 최근 본 공간 표시용.
+   * 입력 순서를 유지해 반환해서 "최근 본 순서대로" 가 보존되도록.
+   */
+  async getBySlugs(slugs: string[]): Promise<SpaceCard[]> {
+    if (slugs.length === 0) return []
+    const rows = await this.prisma.space.findMany({
+      where: { slug: { in: slugs }, status: 'ACTIVE' },
+      include: {
+        photos: { take: 1, orderBy: { order: 'asc' } },
+        venue: {
+          select: {
+            region: true,
+            district: true,
+            category: true,
+            lat: true,
+            lng: true,
+            host: {
+              select: {
+                user: {
+                  select: {
+                    responseMedianMin: true,
+                    responseRate24h: true,
+                    responseSampleCount: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+    const bySlug = new Map(rows.map((r) => [r.slug, r]))
+    return slugs
+      .map((s) => bySlug.get(s))
+      .filter((r): r is NonNullable<typeof r> => !!r)
+      .map((r) => this.toCard(r))
+  }
+
+  /**
+   * 시드 슬러그(최근 본 공간)들의 카테고리·use-case 분포로 추천 카드 반환.
+   * 시드가 없으면 인기 순 fallback. 시드와 같은 공간은 제외.
+   */
+  async forYou(seedSlugs: string[], limit = 8): Promise<SpaceCard[]> {
+    if (seedSlugs.length === 0) {
+      const popular = await this.prisma.space.findMany({
+        where: { status: 'ACTIVE' },
+        orderBy: { viewCount: 'desc' },
+        take: limit,
+        include: {
+          photos: { take: 1, orderBy: { order: 'asc' } },
+          venue: {
+            select: {
+              region: true,
+              district: true,
+              category: true,
+              host: {
+                select: {
+                  user: {
+                    select: {
+                      responseMedianMin: true,
+                      responseRate24h: true,
+                      responseSampleCount: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      return popular.map((s) => this.toCard(s))
+    }
+
+    const seeds = await this.prisma.space.findMany({
+      where: { slug: { in: seedSlugs }, status: 'ACTIVE' },
+      select: { id: true, venue: { select: { category: true } }, useCases: true },
+    })
+    // 카테고리·use-case 빈도 집계
+    const catCount = new Map<string, number>()
+    const useCount = new Map<string, number>()
+    for (const s of seeds) {
+      catCount.set(s.venue.category, (catCount.get(s.venue.category) ?? 0) + 1)
+      for (const u of s.useCases ?? []) {
+        useCount.set(u, (useCount.get(u) ?? 0) + 1)
+      }
+    }
+    const topCats = Array.from(catCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([c]) => c)
+    const topUses = Array.from(useCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([u]) => u)
+
+    const seedIds = new Set(seeds.map((s) => s.id))
+    const candidates = await this.prisma.space.findMany({
+      where: {
+        status: 'ACTIVE',
+        id: { notIn: Array.from(seedIds) },
+        OR: [
+          topCats.length > 0 ? { venue: { category: { in: topCats as never[] } } } : undefined,
+          topUses.length > 0 ? { useCases: { hasSome: topUses } } : undefined,
+        ].filter(Boolean) as never[],
+      },
+      include: {
+        photos: { take: 1, orderBy: { order: 'asc' } },
+        venue: {
+          select: {
+            region: true,
+            district: true,
+            category: true,
+            host: {
+              select: {
+                user: {
+                  select: {
+                    responseMedianMin: true,
+                    responseRate24h: true,
+                    responseSampleCount: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      take: limit * 3,
+    })
+    // 점수: cat 매칭(2) + use-case 매칭(1) + 평점 보너스(0~1)
+    const scored = candidates.map((c) => {
+      let score = 0
+      if (topCats.includes(c.venue.category)) score += 2
+      for (const u of c.useCases ?? []) {
+        if (topUses.includes(u)) score += 1
+      }
+      score += Math.max(0, Math.min(1, (c.ratingAvg - 4) / 1))
+      return { c, score }
+    })
+    scored.sort((a, b) => b.score - a.score)
+    return scored.slice(0, limit).map((x) => this.toCard(x.c))
+  }
+
+  /**
    * 동선 추천(번들) — 이 공간 1km 내 다른 venue 공간을
    * "다른 카테고리 우선"으로 정렬해 최대 max개 반환한다.
    * "1차 다이닝 → 2차 통대관" 같은 회식·송년 시나리오의 핵심 차별점.

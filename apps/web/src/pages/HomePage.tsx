@@ -27,6 +27,7 @@ import { HeroSearch } from '../components/space/HeroSearch'
 import { SpaceCard } from '../components/space/SpaceCard'
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { UseCaseDiscovery } from '../components/space/UseCaseDiscovery'
+import { ForYouSection } from '../components/space/ForYouSection'
 import { useSpacesSearch } from '../features/spaces/api'
 import { Button } from '../components/ui/Button'
 import { Skeleton } from '../components/ui/Skeleton'
@@ -66,6 +67,8 @@ export default function HomePage() {
       <Hero />
 
       <UseCaseDiscovery />
+
+      <ForYouSection />
 
       <NowNearbySection
         usingMyLocation={geo.status === 'granted'}

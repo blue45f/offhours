@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   AlcoholPolicyLabel,
@@ -22,6 +23,7 @@ import {
 import { Link } from 'react-router-dom'
 
 import { useNearbyBundle, useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
+import { useRecentlyViewedStore } from '../store/recentlyViewed'
 import { SpaceCard } from '../components/space/SpaceCard'
 import { useToggleFavorite, useFavoriteIds } from '../features/favorites/api'
 import { StarRating } from '../components/ui/StarRating'
@@ -39,6 +41,10 @@ export default function SpaceDetailPage() {
   const { data: favoriteIds = [] } = useFavoriteIds()
   const toggle = useToggleFavorite()
   const isFavorited = data ? favoriteIds.includes(data.id) : false
+  const pushRecent = useRecentlyViewedStore((s) => s.push)
+  useEffect(() => {
+    if (data?.slug) pushRecent(data.slug)
+  }, [data?.slug, pushRecent])
 
   if (isLoading || !data) return <DetailSkeleton />
 

@@ -92,6 +92,28 @@ export function useQuote(spaceId?: string, startAt?: string, endAt?: string) {
   })
 }
 
+export function useSpacesBySlugs(slugs: string[]) {
+  const sortedKey = slugs.join(',')
+  return useQuery({
+    queryKey: ['spaces', 'by-slugs', sortedKey] as const,
+    enabled: slugs.length > 0,
+    queryFn: () => api.get<SpaceCard[]>('/spaces/by-slugs', { params: { slugs: sortedKey } }),
+    staleTime: 60_000,
+  })
+}
+
+export function useForYou(seedSlugs: string[], limit = 8) {
+  const seedKey = seedSlugs.join(',')
+  return useQuery({
+    queryKey: ['spaces', 'for-you', seedKey, limit] as const,
+    queryFn: () =>
+      api.get<SpaceCard[]>('/spaces/for-you', {
+        params: { seedSlugs: seedKey, limit },
+      }),
+    staleTime: 60_000,
+  })
+}
+
 export function useNearbyBundle(slug?: string, radiusKm = 1, max = 4) {
   return useQuery({
     queryKey: ['spaces', 'nearby-bundle', slug, radiusKm, max] as const,

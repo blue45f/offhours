@@ -35,6 +35,31 @@ export class SpacesController {
   }
 
   @Public()
+  @Get('by-slugs')
+  async getBySlugs(@Query('slugs') slugs: string | undefined) {
+    if (!slugs) return []
+    const list = slugs
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 24)
+    return this.spaces.getBySlugs(list)
+  }
+
+  @Public()
+  @Get('for-you')
+  async forYou(@Query('seedSlugs') seedSlugs: string | undefined, @Query('limit') limit?: string) {
+    const seeds = seedSlugs
+      ? seedSlugs
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .slice(0, 8)
+      : []
+    return this.spaces.forYou(seeds, Number(limit) || 8)
+  }
+
+  @Public()
   @Public()
   @Get('price-suggestion')
   async priceSuggestion(

@@ -5,6 +5,7 @@ import { useMe } from '../store/auth'
 import { Avatar } from '../components/ui/Avatar'
 import { Card, CardBody } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
+import { RecentlyViewedRow } from '../components/space/RecentlyViewedRow'
 
 export default function MePage() {
   const me = useMe()
@@ -60,6 +61,10 @@ export default function MePage() {
             </Card>
           </Link>
         ))}
+      </div>
+
+      <div className="mt-12">
+        <RecentlyViewedRow />
       </div>
 
       <div className="mt-10 rounded-[var(--radius-xl)] hairline bg-[var(--color-bg-elevated)] p-6">
