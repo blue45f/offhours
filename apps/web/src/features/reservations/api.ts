@@ -1,5 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateReservationInput, ReservationStatus, Reservation } from '@offhours/shared'
+import type {
+  ArrivalGuide,
+  CreateReservationInput,
+  Reservation,
+  ReservationStatus,
+} from '@offhours/shared'
+
+export type ReservationDetail = Reservation & {
+  venueAddressRoad: string | null
+  arrivalGuide: ArrivalGuide | null
+}
 
 import { api } from '../../services/api'
 
@@ -23,7 +33,7 @@ export function useReservationDetail(id?: string) {
   return useQuery({
     queryKey: reservationKeys.detail(id ?? ''),
     enabled: !!id,
-    queryFn: () => api.get<Reservation>(`/reservations/${id}`),
+    queryFn: () => api.get<ReservationDetail>(`/reservations/${id}`),
   })
 }
 

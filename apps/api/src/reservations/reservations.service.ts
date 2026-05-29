@@ -310,7 +310,14 @@ export class ReservationsService {
     const isGuest = r.guestId === userId
     const isHost = r.space.venue.host.userId === userId
     if (!isGuest && !isHost) throw new ForbiddenException()
-    return this.toRow(r, true)
+    const row = this.toRow(r, true)
+    // 결제 완료된 게스트에게만 호스트의 도착 가이드 노출 (PAID/CHECKED_IN/COMPLETED).
+    const showArrival = ['PAID', 'CHECKED_IN', 'CHECKED_OUT', 'COMPLETED'].includes(r.status)
+    return {
+      ...row,
+      venueAddressRoad: showArrival ? r.space.venue.addressRoad : null,
+      arrivalGuide: showArrival ? (r.space.venue.arrivalGuide as object | null) : null,
+    }
   }
 
   private toRow(

@@ -14,6 +14,7 @@ import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 import { getErrorMessage } from '../services/api'
 import { useTossPayment } from '../features/payments/useTossPayment'
 import { SplitPaymentPanel } from '../components/reservation/SplitPaymentPanel'
+import { ArrivalKitCard } from '../components/reservation/ArrivalKitCard'
 
 export default function ReservationDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -130,6 +131,13 @@ export default function ReservationDetailPage() {
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
           </CardBody>
         </Card>
+
+        {reservation.arrivalGuide && (
+          <ArrivalKitCard
+            guide={reservation.arrivalGuide}
+            venueAddressRoad={reservation.venueAddressRoad}
+          />
+        )}
 
         {['APPROVED', 'PAID', 'CHECKED_IN', 'COMPLETED'].includes(reservation.status) && (
           <SplitPaymentPanel

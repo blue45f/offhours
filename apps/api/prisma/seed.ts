@@ -828,6 +828,41 @@ async function main() {
     }
   }
 
+  // 데모 도착 가이드 — 호스트가 미리 입력해둔 주차·Wi-Fi·출입 등.
+  // 결제된 게스트 예약 디테일에 자동 노출.
+  const venuesForGuide = await prisma.venue.findMany({
+    select: { id: true, name: true },
+    take: 8,
+  })
+  const guideSeeds = [
+    {
+      parkingNote: '건물 지하 1층 4·5번 칸, 무료. 만차 시 인근 망원역 공영(시간당 1,500원).',
+      entryCode: '정문 도어락 #1234*, 22시 이후 후문 이용',
+      wifiSsid: 'offhours-guest',
+      wifiPassword: 'wakanda1!',
+      sortingNote: '캔/병/플라스틱 분리, 종량제 봉투(45L) 주방 싱크대 옆',
+      emergencyContact: '010-1234-5678',
+      extraNotes: '음향 22시 이후 70dB 이하 부탁드려요. 음식 반입 OK, 흡연은 외부 지정구역.',
+    },
+    {
+      parkingNote: '발렛 가능 (1만원/회). 자체 주차장 5대.',
+      entryCode: '키패드 0809',
+      wifiSsid: 'rooftop-bar-5g',
+      wifiPassword: 'sunset2024',
+      sortingNote: '플라스틱·일반쓰레기만 분리, 음식물은 호스트가 다음 날 처리',
+      extraNotes: '루프탑 음향 23시까지 OK. 22시 이후엔 인테리어 조명만 사용 부탁드려요.',
+    },
+  ]
+  let guideSeedCount = 0
+  for (let i = 0; i < Math.min(venuesForGuide.length, 4); i++) {
+    const g = guideSeeds[i % guideSeeds.length]
+    await prisma.venue.update({
+      where: { id: venuesForGuide[i].id },
+      data: { arrivalGuide: g },
+    })
+    guideSeedCount++
+  }
+
   // 데모 캘린더 차단 — 호스트가 "카톡으로 받은 외부 예약" 등을 등록한 시나리오.
   // 호스트 페이지에서 차단 시간이 슬롯 검색에 반영되는 걸 보여줌.
   await prisma.venueBlock.deleteMany({})
@@ -871,7 +906,7 @@ async function main() {
   console.log(
     `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
       `${hostUsers.length} host response stats, ${collectionsSeed.length} collections, ` +
-      `${blockSeedCount} venue blocks.`
+      `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides.`
   )
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)

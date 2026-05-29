@@ -1,6 +1,16 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
-import { Role } from '@prisma/client'
-import type { CreateHostProfileInput, UpdateHostProfileInput } from '@offhours/shared'
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
+import { Prisma, Role } from '@prisma/client'
+import type {
+  ArrivalGuide,
+  CreateHostProfileInput,
+  HostVenueArrival,
+  UpdateHostProfileInput,
+} from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -115,6 +125,53 @@ export class HostService {
       topSlots,
       totalBookings: reservations.length,
     }
+  }
+
+  async listVenueArrivalGuides(userId: string): Promise<HostVenueArrival[]> {
+    const profile = await this.prisma.hostProfile.findUnique({ where: { userId } })
+    if (!profile) return []
+    const venues = await this.prisma.venue.findMany({
+      where: { hostId: profile.id },
+      select: {
+        id: true,
+        name: true,
+        arrivalGuide: true,
+        _count: { select: { spaces: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+    return venues.map((v) => {
+      const guide = (v.arrivalGuide as ArrivalGuide | null) ?? null
+      const hasGuide =
+        !!guide && Object.values(guide).some((x) => typeof x === 'string' && x.trim().length > 0)
+      return {
+        venueId: v.id,
+        venueName: v.name,
+        hasGuide,
+        guide,
+        spaceCount: v._count.spaces,
+      }
+    })
+  }
+
+  async upsertArrivalGuide(userId: string, venueId: string, guide: ArrivalGuide) {
+    const venue = await this.prisma.venue.findUnique({
+      where: { id: venueId },
+      include: { host: true },
+    })
+    if (!venue) throw new NotFoundException('Venue not found')
+    if (venue.host.userId !== userId) throw new ForbiddenException()
+    // 빈 문자열은 잘라내고 저장 — 모두 비면 null 로
+    const cleaned: Record<string, string> = {}
+    for (const [k, v] of Object.entries(guide)) {
+      if (typeof v === 'string' && v.trim().length > 0) cleaned[k] = v.trim()
+    }
+    const next = Object.keys(cleaned).length > 0 ? (cleaned as Prisma.InputJsonValue) : null
+    await this.prisma.venue.update({
+      where: { id: venueId },
+      data: { arrivalGuide: next ?? Prisma.JsonNull },
+    })
+    return { hasGuide: !!next }
   }
 
   async getStats(userId: string) {

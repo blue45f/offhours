@@ -161,6 +161,8 @@ model Venue {
   description   String
   status        VenueStatus   @default(DRAFT)
   approvedAt    DateTime?
+  /** 결제 완료 게스트에게 자동 노출되는 도착 가이드(JSON) — 주차·Wi-Fi·출입·분리수거 등 */
+  arrivalGuide  Json?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

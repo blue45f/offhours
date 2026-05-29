@@ -7,6 +7,7 @@ import { Card, CardBody } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { formatKRW } from '../utils/format'
 import { DemandHeatmap } from '../components/host/DemandHeatmap'
+import { ArrivalGuideEditor } from '../components/host/ArrivalGuideEditor'
 
 interface HostStats {
   venues: number
@@ -50,8 +51,9 @@ export default function HostDashboardPage() {
         />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
         <DemandHeatmap />
+        <ArrivalGuideEditor />
       </div>
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">

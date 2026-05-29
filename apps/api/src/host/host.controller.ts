@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
+  ArrivalGuideSchema,
   CreateHostProfileSchema,
   UpdateHostProfileSchema,
+  type ArrivalGuide,
   type CreateHostProfileInput,
   type UpdateHostProfileInput,
 } from '@offhours/shared'
@@ -48,5 +50,19 @@ export class HostController {
   @Get('demand-heatmap')
   async demandHeatmap(@CurrentUser() user: RequestUser) {
     return this.host.getDemandHeatmap(user.id)
+  }
+
+  @Get('arrival-guides')
+  async listArrivalGuides(@CurrentUser() user: RequestUser) {
+    return this.host.listVenueArrivalGuides(user.id)
+  }
+
+  @Patch('venues/:venueId/arrival-guide')
+  async upsertArrivalGuide(
+    @CurrentUser() user: RequestUser,
+    @Param('venueId') venueId: string,
+    @Body(new ZodValidationPipe(ArrivalGuideSchema)) body: ArrivalGuide
+  ) {
+    return this.host.upsertArrivalGuide(user.id, venueId, body)
   }
 }
