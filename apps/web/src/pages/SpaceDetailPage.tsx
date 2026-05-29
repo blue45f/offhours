@@ -10,6 +10,7 @@ import {
   VenueCategoryLabel,
   formatResponseTimeBadge,
   formatTrustTier,
+  isSuperHost,
   type ProtectionTier,
   type Purpose,
   type UseCase,
@@ -57,6 +58,8 @@ export default function SpaceDetailPage() {
   }, [data?.slug, pushRecent])
 
   if (isLoading || !data) return <DetailSkeleton />
+
+  const superHost = isSuperHost(data.venue.host.trustScore, data.venue.host.hostedCount)
 
   return (
     <div className="container-page py-8 md:py-12">
@@ -142,8 +145,13 @@ export default function SpaceDetailPage() {
                 <p className="text-sm text-[var(--color-fg-muted)]">
                   운영 {data.venue.host.hostedCount}회
                 </p>
-                {(data.venue.host.isVerifiedBusiness || data.venue.host.isInsured) && (
+                {(superHost || data.venue.host.isVerifiedBusiness || data.venue.host.isInsured) && (
                   <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    {superHost && (
+                      <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 text-[11px] font-semibold">
+                        ⭐ 우수 호스트
+                      </span>
+                    )}
                     {data.venue.host.isVerifiedBusiness && (
                       <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] px-2 py-0.5 text-[11px] font-semibold">
                         <ShieldCheck size={11} /> 검증된 사업장
