@@ -3,11 +3,13 @@ import { useParams } from 'react-router-dom'
 import {
   AlcoholPolicyLabel,
   CateringPolicyLabel,
+  PROTECTION_PLANS,
   PurposeLabel,
   USE_CASE_META,
   VenueCategoryLabel,
   formatResponseTimeBadge,
   formatTrustTier,
+  type ProtectionTier,
   type Purpose,
   type UseCase,
 } from '@offhours/shared'
@@ -38,7 +40,7 @@ import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
 import { ReservationPanel } from '../components/reservation/ReservationPanel'
 import { Skeleton } from '../components/ui/Skeleton'
-import { formatDateKR } from '../utils/format'
+import { formatDateKR, formatKRW } from '../utils/format'
 
 export default function SpaceDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -207,6 +209,13 @@ export default function SpaceDetailPage() {
               </p>
             )}
           </section>
+
+          {data.protectionTier !== 'NONE' && (
+            <>
+              <Divider />
+              <ProtectionSection tier={data.protectionTier} />
+            </>
+          )}
 
           <Divider />
 
@@ -526,6 +535,29 @@ function Rule({ label, value }: { label: string; value: string }) {
       </div>
       <div className="mt-1 text-sm">{value}</div>
     </div>
+  )
+}
+
+function ProtectionSection({ tier }: { tier: ProtectionTier }) {
+  const plan = PROTECTION_PLANS[tier]
+  return (
+    <section>
+      <h3 className="text-title font-semibold mb-3">안심 보장</h3>
+      <div className="rounded-[var(--radius-xl)] hairline bg-[var(--color-bg-elevated)] p-5 flex items-start gap-4">
+        <div className="shrink-0 size-10 rounded-full bg-[var(--color-primary-soft)] grid place-items-center">
+          <ShieldCheck size={20} className="text-[var(--color-primary)]" />
+        </div>
+        <div>
+          <div className="font-semibold">
+            {plan.label} · 최대 {formatKRW(plan.coverageKRW)} 보장
+          </div>
+          <p className="mt-1 text-sm text-[var(--color-fg-muted)] leading-relaxed">
+            모든 예약에 자동 적용돼요. 이용 중 기물 파손·도난이 생기면 보장 한도 안에서 처리되고,
+            체크아웃 사진이 증빙으로 함께 남아 호스트도 게스트도 안심할 수 있어요.
+          </p>
+        </div>
+      </div>
+    </section>
   )
 }
 

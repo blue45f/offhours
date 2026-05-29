@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   CreateReservationSchema,
+  PROTECTION_PLANS,
   PurposeLabel,
   type AddonSelection,
   type CreateReservationInput,
@@ -11,7 +12,7 @@ import {
   type SpaceDetail,
 } from '@offhours/shared'
 import toast from 'react-hot-toast'
-import { Clock, RefreshCw, Users } from 'lucide-react'
+import { Clock, RefreshCw, ShieldCheck, Users } from 'lucide-react'
 
 import { Button } from '../ui/Button'
 import { Field, Input, Textarea } from '../ui/Input'
@@ -138,6 +139,12 @@ export function ReservationPanel({ space }: Props) {
         {space.cleaningFeeKRW > 0 && (
           <div className="mt-1 text-xs text-[var(--color-fg-muted)]">
             청소비 별도 {formatKRW(space.cleaningFeeKRW)}
+          </div>
+        )}
+        {space.protectionTier !== 'NONE' && (
+          <div className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)]">
+            <ShieldCheck size={12} />
+            {PROTECTION_PLANS[space.protectionTier].blurb}
           </div>
         )}
       </div>
@@ -291,6 +298,12 @@ export function ReservationPanel({ space }: Props) {
                 value={formatKRW(a.amountKRW)}
               />
             ))}
+            {quote.protectionFeeKRW > 0 && (
+              <Row
+                label={`안심 보장 (최대 ${formatKRW(quote.protectionCoverageKRW)})`}
+                value={formatKRW(quote.protectionFeeKRW)}
+              />
+            )}
             <div className="h-px bg-[var(--color-border)] my-2" />
             <Row label="총 결제 금액" value={formatKRW(quote.totalKRW)} strong />
             {quote.discountRate > 0 && (

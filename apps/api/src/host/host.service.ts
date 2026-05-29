@@ -198,6 +198,7 @@ export class HostService {
         status: true,
         totalKRW: true,
         feeKRW: true,
+        protectionFeeKRW: true,
         startAt: true,
         endAt: true,
         checkedOutAt: true,
@@ -228,7 +229,8 @@ export class HostService {
     const upcomingList: HostEarnings['upcoming'] = []
 
     for (const r of reservations) {
-      const net = r.totalKRW - r.feeKRW
+      // 보장료는 게스트 부담·보장 풀 적립이므로 호스트 순수입에서 제외
+      const net = r.totalKRW - r.feeKRW - r.protectionFeeKRW
       const base = r.checkedOutAt ?? r.endAt
       const payoutAt = new Date(base.getTime() + payoutDays * 24 * 60 * 60 * 1000)
 

@@ -337,3 +337,17 @@ export const DisputeStatusSchema = z.enum([
   'DISMISSED',
 ])
 export type DisputeStatus = z.infer<typeof DisputeStatusSchema>
+export const DisputeStatusLabel: Record<DisputeStatus, string> = {
+  OPEN: '접수됨',
+  UNDER_REVIEW: '검토 중',
+  RESOLVED_FAVOR_GUEST: '게스트 인정',
+  RESOLVED_FAVOR_HOST: '호스트 인정',
+  DISMISSED: '기각',
+}
+
+export const DisputeKindSchema = z.enum(['GENERAL', 'DAMAGE'])
+export type DisputeKind = z.infer<typeof DisputeKindSchema>
+
+/** 안심 보장 등급 — 영업 외 통대관의 #1 진입장벽(파손·도난)을 해소하는 게스트 부담 보장. */
+export const ProtectionTierSchema = z.enum(['NONE', 'STANDARD', 'PREMIUM'])
+export type ProtectionTier = z.infer<typeof ProtectionTierSchema>

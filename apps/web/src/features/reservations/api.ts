@@ -3,6 +3,7 @@ import type {
   ArrivalGuide,
   CreateRecurringInput,
   CreateReservationInput,
+  FileClaimInput,
   RecurringResult,
   Reservation,
   ReservationStatus,
@@ -78,6 +79,16 @@ export function useCancelReservation() {
   return useMutation({
     mutationFn: (vars: { id: string; reason: string }) =>
       api.patch(`/reservations/${vars.id}/cancel`, { reason: vars.reason }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
+  })
+}
+
+/** 안심 보장 파손 청구 — 호스트가 보장 적용·이용 완료 예약에 기물 파손·도난을 청구 */
+export function useFileClaim() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (vars: { id: string; input: FileClaimInput }) =>
+      api.post(`/reservations/${vars.id}/claim`, vars.input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
   })
 }

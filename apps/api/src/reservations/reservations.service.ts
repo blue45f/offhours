@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { randomUUID } from 'crypto'
-import { Prisma, type Reservation, type ReservationStatus } from '@prisma/client'
+import { Prisma, type Dispute, type Reservation, type ReservationStatus } from '@prisma/client'
 import {
   ReservationSchema,
   TRUST_SCORE,
@@ -16,6 +16,7 @@ import {
   type CheckOutInput,
   type CreateRecurringInput,
   type CreateReservationInput,
+  type FileClaimInput,
   type RecurringResult,
 } from '@offhours/shared'
 
@@ -68,7 +69,8 @@ export class ReservationsService {
 
     const quote = await this.slots.calcAmount(space.id, startAt, endAt, input.addons ?? [])
     const totalKRW = quote.totalKRW
-    const feeKRW = calcReservationFee(totalKRW)
+    // 보장료는 게스트 부담·보장 풀 적립이므로 수수료(12%)는 호스트 매출 소계에만 적용한다.
+    const feeKRW = calcReservationFee(quote.subtotalKRW)
     const code = randomCode('OFH')
     const status: ReservationStatus = space.instantBook ? 'APPROVED' : 'REQUESTED'
     const checkInCode = Math.random().toString(36).slice(2, 8).toUpperCase()
@@ -107,6 +109,9 @@ export class ReservationsService {
         cleaningFeeKRW: quote.cleaningFeeKRW,
         addonsAmountKRW: quote.addonsKRW,
         addonsSnapshot: quote.addons.length > 0 ? (quote.addons as object) : undefined,
+        protectionTier: quote.protectionTier,
+        protectionFeeKRW: quote.protectionFeeKRW,
+        protectionCoverageKRW: quote.protectionCoverageKRW,
         totalKRW,
         feeKRW,
         checkInCode,
@@ -327,6 +332,65 @@ export class ReservationsService {
     return updated
   }
 
+  /**
+   * 안심 보장 파손 청구 — 보장 적용 + 이용 완료된 예약에 호스트가 기물 파손·도난을 청구한다.
+   * 체크아웃 사진(checkoutChecklist.photoUrls)이 증빙으로 자동 첨부돼 "before/after" 근거가
+   * 남고, 보장 한도 안에서만 청구 가능. Dispute(kind=DAMAGE)로 적재돼 운영팀이 중재한다.
+   * 영업 중인 가게를 빌려주는 호스트의 #1 진입장벽(파손 공포)을 실제 보장으로 닫는 표면.
+   */
+  async fileClaim(hostUserId: string, reservationId: string, input: FileClaimInput) {
+    const r = await this.ensureHost(hostUserId, reservationId)
+    if (r.protectionTier === 'NONE') {
+      throw new BadRequestException('안심 보장이 적용되지 않은 예약이에요')
+    }
+    if (!['CHECKED_OUT', 'COMPLETED'].includes(r.status)) {
+      throw new BadRequestException('이용이 끝난 예약에만 파손을 청구할 수 있어요')
+    }
+    if (input.amountClaimedKRW > r.protectionCoverageKRW) {
+      throw new BadRequestException(
+        `보장 한도(${r.protectionCoverageKRW.toLocaleString()}원)를 초과했어요`
+      )
+    }
+    const existing = await this.prisma.dispute.findUnique({ where: { reservationId: r.id } })
+    if (existing) throw new BadRequestException('이미 접수된 청구가 있어요')
+
+    // 청소 SLA 체크아웃이 남긴 퇴실 사진을 증빙으로 자동 첨부
+    const checklist = r.checkoutChecklist as { photoUrls?: string[] } | null
+    const checkoutPhotos = checklist?.photoUrls ?? []
+    const dispute = await this.prisma.dispute.create({
+      data: {
+        reservationId: r.id,
+        raisedById: hostUserId,
+        kind: 'DAMAGE',
+        reason: input.reason,
+        description: input.description,
+        evidence: { photoUrls: [...(input.evidenceUrls ?? []), ...checkoutPhotos] } as object,
+        amountClaimedKRW: input.amountClaimedKRW,
+        coverageKRW: r.protectionCoverageKRW,
+        status: 'OPEN',
+      },
+    })
+    await this.notifications.create(r.guestId, {
+      type: 'SYSTEM',
+      title: '파손 보장 청구가 접수됐어요',
+      body: `${r.space.title} — 운영팀 검토 후 안내드릴게요`,
+      data: { reservationId: r.id, disputeId: dispute.id },
+    })
+    return dispute
+  }
+
+  private toDisputeSummary(d: Dispute) {
+    return {
+      id: d.id,
+      kind: d.kind,
+      status: d.status,
+      reason: d.reason,
+      amountClaimedKRW: d.amountClaimedKRW,
+      coverageKRW: d.coverageKRW,
+      createdAt: d.createdAt.toISOString(),
+    }
+  }
+
   async listMineAsGuest(guestId: string, status?: ReservationStatus) {
     const where: Prisma.ReservationWhereInput = { guestId, ...(status ? { status } : {}) }
     const reservations = await this.prisma.reservation.findMany({
@@ -371,6 +435,7 @@ export class ReservationsService {
         },
         guest: { select: { id: true, name: true, avatarUrl: true } },
         payment: true,
+        dispute: true,
       },
     })
     if (!r) throw new NotFoundException()
@@ -382,6 +447,7 @@ export class ReservationsService {
     const showArrival = ['PAID', 'CHECKED_IN', 'CHECKED_OUT', 'COMPLETED'].includes(r.status)
     return {
       ...row,
+      dispute: r.dispute ? this.toDisputeSummary(r.dispute) : null,
       venueAddressRoad: showArrival ? r.space.venue.addressRoad : null,
       arrivalGuide: showArrival ? (r.space.venue.arrivalGuide as object | null) : null,
     }
@@ -420,6 +486,10 @@ export class ReservationsService {
       depositKRW: r.depositKRW,
       addonsAmountKRW: (r as { addonsAmountKRW?: number }).addonsAmountKRW ?? 0,
       addons: (r as { addonsSnapshot?: AddonLine[] | null }).addonsSnapshot ?? null,
+      protectionTier:
+        (r as { protectionTier?: 'NONE' | 'STANDARD' | 'PREMIUM' }).protectionTier ?? 'NONE',
+      protectionFeeKRW: (r as { protectionFeeKRW?: number }).protectionFeeKRW ?? 0,
+      protectionCoverageKRW: (r as { protectionCoverageKRW?: number }).protectionCoverageKRW ?? 0,
       totalKRW: r.totalKRW,
       feeKRW: r.feeKRW,
       cancelReason: r.cancelReason,

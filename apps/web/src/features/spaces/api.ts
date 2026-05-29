@@ -5,6 +5,7 @@ import type {
   CreateSpaceInput,
   GalleryPhoto,
   Paginated,
+  ProtectionTier,
   Purpose,
   SpaceCard,
   SpaceDetail,
@@ -98,6 +99,10 @@ export function useQuote(
         cleaningFeeKRW: number
         addonsKRW: number
         addons: AddonLine[]
+        protectionTier: ProtectionTier
+        protectionFeeKRW: number
+        protectionCoverageKRW: number
+        subtotalKRW: number
         totalKRW: number
       }>(`/spaces/${spaceId}/slots/quote`, {
         params: { startAt, endAt, ...(addonsParam ? { addons: addonsParam } : {}) },

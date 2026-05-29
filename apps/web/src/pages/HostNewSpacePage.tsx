@@ -5,9 +5,11 @@ import {
   AlcoholPolicyLabel,
   AMENITY_OPTIONS,
   CateringPolicyLabel,
+  PROTECTION_PLANS,
   USE_CASE_META,
   type AlcoholPolicy,
   type CateringPolicy,
+  type ProtectionTier,
   type UseCase,
 } from '@offhours/shared'
 
@@ -37,6 +39,7 @@ export default function HostNewSpacePage() {
   const [instantBook, setInstantBook] = useState(false)
   const [alcoholPolicy, setAlcoholPolicy] = useState<AlcoholPolicy>('BYOB')
   const [cateringPolicy, setCateringPolicy] = useState<CateringPolicy>('EXTERNAL_OK')
+  const [protectionTier, setProtectionTier] = useState<ProtectionTier>('STANDARD')
   const [amenities, setAmenities] = useState<string[]>(['wifi', 'speaker'])
   const [useCases, setUseCases] = useState<UseCase[]>(['BIRTHDAY', 'GATHERING'])
   const [rules, setRules] = useState('실내 흡연 금지, 23시 이후 음향 70dB 이하, 원상복구 의무.')
@@ -73,6 +76,7 @@ export default function HostNewSpacePage() {
         instantBook,
         alcoholPolicy,
         cateringPolicy,
+        protectionTier,
         amenities,
         useCases,
         rules,
@@ -216,6 +220,19 @@ export default function HostNewSpacePage() {
                 />
               </Field>
             </div>
+            <Field
+              label="안심 보장"
+              helper="게스트가 보장료를 부담하고, 호스트는 기물 파손·도난을 보장 한도까지 보호받아요. 영업 외 통대관의 가장 큰 진입장벽을 해소합니다."
+            >
+              <Select
+                value={protectionTier}
+                onValueChange={(v) => setProtectionTier(v as ProtectionTier)}
+                options={(Object.keys(PROTECTION_PLANS) as ProtectionTier[]).map((t) => ({
+                  value: t,
+                  label: PROTECTION_PLANS[t].blurb,
+                }))}
+              />
+            </Field>
             <Field label="이용 규칙">
               <Textarea value={rules} onChange={(e) => setRules(e.target.value)} rows={3} />
             </Field>

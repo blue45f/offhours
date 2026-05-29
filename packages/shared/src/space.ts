@@ -2,6 +2,7 @@ import { z } from 'zod'
 import {
   AlcoholPolicySchema,
   CateringPolicySchema,
+  ProtectionTierSchema,
   PurposeSchema,
   SpaceStatusSchema,
   UseCaseSchema,
@@ -56,6 +57,7 @@ export const CreateSpaceSchema = z.object({
   instantBook: z.boolean().default(false),
   alcoholPolicy: AlcoholPolicySchema,
   cateringPolicy: CateringPolicySchema,
+  protectionTier: ProtectionTierSchema.default('NONE'),
   amenities: z.array(z.string()).default([]),
   useCases: z.array(UseCaseSchema).max(12).default([]),
   rules: z.string().trim().max(2000).default(''),
@@ -113,6 +115,7 @@ export const SpaceDetailSchema = SpaceCardSchema.extend({
   minHours: z.number(),
   alcoholPolicy: AlcoholPolicySchema,
   cateringPolicy: CateringPolicySchema,
+  protectionTier: ProtectionTierSchema.default('NONE'),
   amenities: z.array(z.string()),
   rules: z.string(),
   status: SpaceStatusSchema,

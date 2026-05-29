@@ -6,11 +6,13 @@ import {
   CheckOutSchema,
   CreateRecurringSchema,
   CreateReservationSchema,
+  FileClaimSchema,
   RejectReservationSchema,
   type CancelReservationInput,
   type CheckOutInput,
   type CreateRecurringInput,
   type CreateReservationInput,
+  type FileClaimInput,
   type RejectReservationInput,
 } from '@offhours/shared'
 
@@ -96,5 +98,14 @@ export class ReservationsController {
     @Body(new ZodValidationPipe(CheckOutSchema)) body: CheckOutInput
   ) {
     return this.reservations.checkOut(user.id, id, body)
+  }
+
+  @Post(':id/claim')
+  async claim(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(FileClaimSchema)) body: FileClaimInput
+  ) {
+    return this.reservations.fileClaim(user.id, id, body)
   }
 }

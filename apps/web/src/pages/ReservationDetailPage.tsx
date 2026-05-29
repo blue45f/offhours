@@ -1,16 +1,26 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { ReservationStatusLabel, calcRefundRate } from '@offhours/shared'
-import { Building2, MessageCircle, Share2, X } from 'lucide-react'
+import {
+  DisputeStatusLabel,
+  PurposeLabel,
+  ReservationStatusLabel,
+  calcRefundRate,
+} from '@offhours/shared'
+import { Building2, MessageCircle, ShieldCheck, Share2, X } from 'lucide-react'
 import { CorporateTaxTypeLabel } from '@offhours/shared'
 
-import { useCancelReservation, useReservationDetail } from '../features/reservations/api'
+import {
+  useCancelReservation,
+  useFileClaim,
+  useReservationDetail,
+} from '../features/reservations/api'
+import { useMe } from '../store/auth'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { Dialog } from '../components/ui/Dialog'
-import { Field, Textarea } from '../components/ui/Input'
+import { Field, Input, Textarea } from '../components/ui/Input'
 import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 import { getErrorMessage } from '../services/api'
 import { useTossPayment } from '../features/payments/useTossPayment'
@@ -25,12 +35,19 @@ export default function ReservationDetailPage() {
   const [cancelOpen, setCancelOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
   const startPay = useTossPayment()
+  const fileClaim = useFileClaim()
+  const me = useMe()
+  const [claimOpen, setClaimOpen] = useState(false)
+  const [claimAmount, setClaimAmount] = useState(0)
+  const [claimReason, setClaimReason] = useState('')
+  const [claimDesc, setClaimDesc] = useState('')
 
   if (isLoading || !data) return <div className="container-page py-12">불러오는 중...</div>
 
   const reservation = data
   const refundRate = calcRefundRate(reservation.startAt)
   const refundKRW = Math.round(reservation.totalKRW * refundRate)
+  const isHost = !!me && me.id === reservation.hostId
 
   async function onCancel() {
     if (cancelReason.trim().length < 2) {
@@ -66,6 +83,23 @@ export default function ReservationDetailPage() {
       toast.success('초대 링크를 복사했어요')
     } catch {
       toast.error('링크 복사에 실패했어요')
+    }
+  }
+
+  async function onClaim() {
+    if (claimReason.trim().length < 2 || claimDesc.trim().length < 10) {
+      toast.error('사유(2자 이상)와 상세 설명(10자 이상)을 입력해주세요')
+      return
+    }
+    try {
+      await fileClaim.mutateAsync({
+        id: reservation.id,
+        input: { amountClaimedKRW: claimAmount, reason: claimReason, description: claimDesc },
+      })
+      toast.success('파손 청구가 접수됐어요')
+      setClaimOpen(false)
+    } catch (e) {
+      toast.error(getErrorMessage(e))
     }
   }
 
@@ -121,7 +155,7 @@ export default function ReservationDetailPage() {
               value={`${formatDateTimeKR(reservation.startAt)} ${formatTimeRange(reservation.startAt, reservation.endAt)}`}
             />
             <Row label="인원" value={`${reservation.headcount}명`} />
-            <Row label="용도" value={reservation.purpose} />
+            <Row label="용도" value={PurposeLabel[reservation.purpose]} />
             {reservation.note && <Row label="요청 메시지" value={reservation.note} />}
             {reservation.checkInCode && reservation.status === 'PAID' && (
               <div className="rounded-[var(--radius-lg)] bg-[var(--color-primary-soft)] p-4 flex flex-col sm:flex-row gap-4 items-center">
@@ -166,6 +200,9 @@ export default function ReservationDetailPage() {
                 value={formatKRW(a.amountKRW)}
               />
             ))}
+            {reservation.protectionFeeKRW > 0 && (
+              <Row label="안심 보장" value={formatKRW(reservation.protectionFeeKRW)} />
+            )}
             <hr className="border-[var(--color-border-subtle)] my-2" />
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
           </CardBody>
@@ -193,6 +230,59 @@ export default function ReservationDetailPage() {
                 결제 완료 시점에 등록된 법인 정보로 세금계산서가 자동 발행돼요. 정보 수정은 새
                 예약부터 적용됩니다.
               </p>
+            </CardBody>
+          </Card>
+        )}
+
+        {reservation.protectionTier !== 'NONE' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <span className="inline-flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-[var(--color-primary)]" />
+                  안심 보장
+                </span>
+              </CardTitle>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-primary)]">
+                최대 {formatKRW(reservation.protectionCoverageKRW)}
+              </span>
+            </CardHeader>
+            <CardBody className="space-y-3 text-sm">
+              <p className="text-[var(--color-fg-muted)] leading-relaxed">
+                이 예약은 기물 파손·도난을 최대 {formatKRW(reservation.protectionCoverageKRW)}까지
+                보장해요. 체크아웃 사진이 증빙으로 함께 보관됩니다.
+              </p>
+              {reservation.dispute ? (
+                <div className="rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">파손 보장 청구</span>
+                    <Badge
+                      tone={
+                        reservation.dispute.status === 'RESOLVED_FAVOR_HOST'
+                          ? 'primary'
+                          : reservation.dispute.status === 'RESOLVED_FAVOR_GUEST' ||
+                              reservation.dispute.status === 'DISMISSED'
+                            ? 'neutral'
+                            : 'accent'
+                      }
+                    >
+                      {DisputeStatusLabel[reservation.dispute.status]}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-[var(--color-fg-muted)]">
+                    {reservation.dispute.reason}
+                    {reservation.dispute.amountClaimedKRW != null &&
+                      ` · ${formatKRW(reservation.dispute.amountClaimedKRW)} 청구`}
+                  </p>
+                </div>
+              ) : (
+                isHost &&
+                ['CHECKED_OUT', 'COMPLETED'].includes(reservation.status) && (
+                  <Button variant="secondary" size="sm" onClick={() => setClaimOpen(true)}>
+                    파손 청구하기
+                  </Button>
+                )
+              )}
             </CardBody>
           </Card>
         )}
@@ -260,6 +350,48 @@ export default function ReservationDetailPage() {
             onChange={(e) => setCancelReason(e.target.value)}
           />
         </Field>
+      </Dialog>
+
+      <Dialog
+        open={claimOpen}
+        onOpenChange={setClaimOpen}
+        title="파손 보장 청구"
+        description={`보장 한도 ${formatKRW(reservation.protectionCoverageKRW)} 안에서 청구할 수 있어요. 체크아웃 사진이 증빙으로 자동 첨부됩니다.`}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setClaimOpen(false)}>
+              닫기
+            </Button>
+            <Button onClick={onClaim} loading={fileClaim.isPending}>
+              청구 접수
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <Field label="청구 금액 (원)">
+            <Input
+              type="number"
+              value={claimAmount}
+              onChange={(e) => setClaimAmount(Number(e.target.value))}
+            />
+          </Field>
+          <Field label="사유">
+            <Input
+              value={claimReason}
+              onChange={(e) => setClaimReason(e.target.value)}
+              placeholder="예: 테이블 상판 파손"
+            />
+          </Field>
+          <Field label="상세 설명">
+            <Textarea
+              value={claimDesc}
+              onChange={(e) => setClaimDesc(e.target.value)}
+              rows={3}
+              placeholder="파손 경위와 상태를 적어주세요 (10자 이상)"
+            />
+          </Field>
+        </div>
       </Dialog>
     </div>
   )

@@ -1,6 +1,7 @@
 import { z } from 'zod'
-import { PurposeSchema, ReservationStatusSchema } from './enums'
+import { ProtectionTierSchema, PurposeSchema, ReservationStatusSchema } from './enums'
 import { AddonLineSchema, AddonSelectionSchema } from './addon'
+import { DisputeSummarySchema } from './protection'
 
 // 베이스 오브젝트(미정제) — refine 이 붙은 스키마에는 .omit()/.extend() 를 쓸 수 없으므로
 // (Zod v4 런타임 가드) 파생 스키마는 이 오브젝트에서 만든 뒤 각자 refine 을 다시 적용한다.
@@ -95,6 +96,12 @@ export const ReservationSchema = z.object({
   /** 선택한 유료 옵션 합계 + 라인 스냅샷 */
   addonsAmountKRW: z.number().default(0),
   addons: z.array(AddonLineSchema).nullable().optional(),
+  /** 안심 보장 — 등급·게스트 부담 보장료·보장 한도 스냅샷 */
+  protectionTier: ProtectionTierSchema.default('NONE'),
+  protectionFeeKRW: z.number().default(0),
+  protectionCoverageKRW: z.number().default(0),
+  /** 파손 보장 청구(있으면) — 호스트가 넣은 청구의 상태 요약 */
+  dispute: DisputeSummarySchema.nullable().optional(),
   totalKRW: z.number(),
   feeKRW: z.number(),
   cancelReason: z.string().nullable(),

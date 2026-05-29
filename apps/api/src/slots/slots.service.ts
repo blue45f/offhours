@@ -3,6 +3,8 @@ import { Logger } from '@nestjs/common'
 import {
   addonAmount,
   lastMinuteDiscountRate,
+  protectionCoverage,
+  protectionFee,
   type AddonLine,
   type AddonSelection,
 } from '@offhours/shared'
@@ -171,6 +173,12 @@ export class SlotsService {
       }
     }
 
+    // 호스트 매출 기준 소계 — 플랫폼 수수료(12%)는 이 소계에만 적용된다.
+    const subtotalKRW = discountedBase + space.cleaningFeeKRW + addonsKRW
+    // 안심 보장료 — 게스트가 별도로 부담하고 보장 풀을 적립(수수료 대상 아님).
+    const protectionFeeKRW = protectionFee(space.protectionTier, discountedBase)
+    const protectionCoverageKRW = protectionCoverage(space.protectionTier)
+
     return {
       hours,
       hourlyRate,
@@ -181,7 +189,11 @@ export class SlotsService {
       cleaningFeeKRW: space.cleaningFeeKRW,
       addonsKRW,
       addons,
-      totalKRW: discountedBase + space.cleaningFeeKRW + addonsKRW,
+      protectionTier: space.protectionTier,
+      protectionFeeKRW,
+      protectionCoverageKRW,
+      subtotalKRW,
+      totalKRW: subtotalKRW + protectionFeeKRW,
     }
   }
 }

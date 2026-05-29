@@ -302,6 +302,15 @@ enum SpaceStatus {
   REJECTED
 }
 
+// 안심 보장 등급 — 영업 중인 가게를 통째로 빌려주는 영업 외 대관의 #1 진입장벽(파손·도난 공포)을
+// 해소. 게스트가 건당 보장료를 부담하고(하이브리드 모델), 호스트는 보장 한도까지 파손을 보장받는다.
+// 보장료는 보장 풀을 적립하므로 호스트 매출/수수료(12%) 대상이 아니다.
+enum ProtectionTier {
+  NONE
+  STANDARD
+  PREMIUM
+}
+
 model Space {
   id              String         @id @default(cuid())
   venueId         String
@@ -320,6 +329,7 @@ model Space {
   instantBook     Boolean        @default(false)
   alcoholPolicy   AlcoholPolicy
   cateringPolicy  CateringPolicy
+  protectionTier  ProtectionTier @default(NONE)
   amenities       String[]
   /** use-case tags (PARTY/WEDDING_SMALL/CORPORATE_WORKSHOP…). 게스트의 멘탈모델 분류. */
   useCases        String[]
@@ -451,6 +461,10 @@ model Reservation {
   /** 선택한 유료 옵션(애드온)의 합계와 스냅샷 — [{ addonId, name, unit, qty, unitPriceKRW, amountKRW }] */
   addonsAmountKRW Int             @default(0)
   addonsSnapshot  Json?
+  /** 안심 보장 — 예약 시점 등급·게스트 부담 보장료(수수료 대상 아님)·보장 한도 스냅샷 */
+  protectionTier        ProtectionTier @default(NONE)
+  protectionFeeKRW      Int            @default(0)
+  protectionCoverageKRW Int            @default(0)
   /** 반복 예약 그룹 식별자 — 같은 정기 예약의 여러 occurrence 를 묶는 UUID */
   recurringGroupId String?
   createdAt      DateTime          @default(now())
@@ -804,15 +818,25 @@ enum DisputeStatus {
   DISMISSED
 }
 
+// 분쟁 유형 — DAMAGE 는 안심 보장 청구(파손·도난). 체크아웃 사진이 증빙으로 자동 첨부된다.
+enum DisputeKind {
+  GENERAL
+  DAMAGE
+}
+
 model Dispute {
   id            String        @id @default(cuid())
   reservationId String        @unique
   reservation   Reservation   @relation(fields: [reservationId], references: [id])
   raisedById    String
   raisedBy      User          @relation("DisputeRaiser", fields: [raisedById], references: [id])
+  kind             DisputeKind @default(GENERAL)
   reason        String
   description   String
   evidence      Json?
+  /** 청구 금액(DAMAGE) 과 예약 보장 한도 스냅샷 */
+  amountClaimedKRW Int?
+  coverageKRW      Int?
   status        DisputeStatus @default(OPEN)
   resolution    String?
   resolvedAt    DateTime?
