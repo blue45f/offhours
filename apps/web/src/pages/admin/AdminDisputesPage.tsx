@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { DisputeStatusLabel, type DisputeRow, type ResolveDisputeInput } from '@offhours/shared'
@@ -7,10 +8,19 @@ import { AdminShell } from '../../components/admin/AdminShell'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card, CardBody } from '../../components/ui/Card'
+import { Dialog } from '../../components/ui/Dialog'
+import { Field, Textarea } from '../../components/ui/Input'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { formatDateTimeKR, formatKRW } from '../../utils/format'
 
 type ResolveStatus = ResolveDisputeInput['status']
+
+const VERDICT_LABEL: Record<ResolveStatus, string> = {
+  RESOLVED_FAVOR_HOST: '호스트 인정',
+  RESOLVED_FAVOR_GUEST: '게스트 인정',
+  DISMISSED: '기각',
+  UNDER_REVIEW: '검토중으로 전환',
+}
 
 export default function AdminDisputesPage() {
   const qc = useQueryClient()
@@ -24,12 +34,25 @@ export default function AdminDisputesPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'disputes'] }),
   })
 
-  async function onResolve(id: string, status: ResolveStatus) {
-    const resolution = prompt('처리 내용 / 사유') ?? ''
-    if (!resolution) return
+  // 처리 다이얼로그 — 청구 맥락을 유지한 채 사유를 입력받는다(native prompt 대체)
+  const [acting, setActing] = useState<{ dispute: DisputeRow; status: ResolveStatus } | null>(null)
+  const [note, setNote] = useState('')
+
+  function start(dispute: DisputeRow, status: ResolveStatus) {
+    setNote('')
+    setActing({ dispute, status })
+  }
+
+  async function submit() {
+    if (!acting) return
+    if (note.trim().length < 2) {
+      toast.error('처리 사유를 입력해주세요')
+      return
+    }
     try {
-      await resolve.mutateAsync({ id, status, resolution })
+      await resolve.mutateAsync({ id: acting.dispute.id, status: acting.status, resolution: note })
       toast.success('처리 완료')
+      setActing(null)
     } catch {
       toast.error('처리에 실패했어요')
     }
@@ -98,28 +121,24 @@ export default function AdminDisputesPage() {
                     )}
                     {open && (
                       <div className="flex flex-wrap gap-2 pt-1">
-                        <Button size="sm" onClick={() => onResolve(d.id, 'RESOLVED_FAVOR_HOST')}>
+                        <Button size="sm" onClick={() => start(d, 'RESOLVED_FAVOR_HOST')}>
                           호스트 인정
                         </Button>
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => onResolve(d.id, 'RESOLVED_FAVOR_GUEST')}
+                          onClick={() => start(d, 'RESOLVED_FAVOR_GUEST')}
                         >
                           게스트 인정
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => onResolve(d.id, 'DISMISSED')}
-                        >
+                        <Button size="sm" variant="ghost" onClick={() => start(d, 'DISMISSED')}>
                           기각
                         </Button>
                         {d.status === 'OPEN' && (
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => onResolve(d.id, 'UNDER_REVIEW')}
+                            onClick={() => start(d, 'UNDER_REVIEW')}
                           >
                             검토중으로
                           </Button>
@@ -133,6 +152,36 @@ export default function AdminDisputesPage() {
           })}
         </ul>
       )}
+
+      <Dialog
+        open={!!acting}
+        onOpenChange={(o) => !o && setActing(null)}
+        title={acting ? `${VERDICT_LABEL[acting.status]} 처리` : ''}
+        description={
+          acting
+            ? `${acting.dispute.reservationCode} · ${acting.dispute.spaceTitle}${acting.dispute.amountClaimedKRW != null ? ` · 청구 ${formatKRW(acting.dispute.amountClaimedKRW)}` : ''}`
+            : undefined
+        }
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setActing(null)}>
+              닫기
+            </Button>
+            <Button onClick={submit} loading={resolve.isPending}>
+              {acting ? VERDICT_LABEL[acting.status] : '확정'}
+            </Button>
+          </>
+        }
+      >
+        <Field label="처리 사유" helper="양측에 통지되고 감사 로그에 기록됩니다">
+          <Textarea
+            placeholder="판단 근거·조치 내용을 적어주세요"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={4}
+          />
+        </Field>
+      </Dialog>
     </AdminShell>
   )
 }
