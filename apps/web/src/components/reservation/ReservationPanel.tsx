@@ -10,14 +10,15 @@ import {
   type SpaceDetail,
 } from '@offhours/shared'
 import toast from 'react-hot-toast'
-import { Calendar, Clock, Users } from 'lucide-react'
+import { Clock, Users } from 'lucide-react'
 
 import { Button } from '../ui/Button'
 import { Field, Input, Textarea } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Card } from '../ui/Card'
 import { useCreateReservation } from '../../features/reservations/api'
-import { useQuote, useSpaceSlots } from '../../features/spaces/api'
+import { useQuote } from '../../features/spaces/api'
+import { AvailabilityCalendar } from './AvailabilityCalendar'
 import { useCorporateProfile } from '../../features/corporate/api'
 import { useIsAuthed } from '../../store/auth'
 import { Link } from 'react-router-dom'
@@ -44,18 +45,14 @@ export function ReservationPanel({ space }: Props) {
 
   const { startAt, endAt } = useMemo(() => {
     if (!date || !startTime || !endTime) return { startAt: undefined, endAt: undefined }
-    return {
-      startAt: new Date(`${date}T${startTime}:00+09:00`).toISOString(),
-      endAt: new Date(`${date}T${endTime}:00+09:00`).toISOString(),
-    }
+    const start = new Date(`${date}T${startTime}:00+09:00`)
+    let end = new Date(`${date}T${endTime}:00+09:00`)
+    // 영업 외 슬롯은 자정을 넘기는 경우가 많다 (예: 23:00→06:00). 종료가 시작 이하면 익일로 본다.
+    if (end <= start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000)
+    return { startAt: start.toISOString(), endAt: end.toISOString() }
   }, [date, startTime, endTime])
 
   const { data: quote } = useQuote(space.id, startAt, endAt)
-  const { data: slots } = useSpaceSlots(
-    space.id,
-    date ? `${date}T00:00:00Z` : undefined,
-    date ? `${date}T23:59:59Z` : undefined
-  )
   const createMutation = useCreateReservation()
 
   const {
@@ -108,13 +105,15 @@ export function ReservationPanel({ space }: Props) {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
-        <Field label="날짜" required>
-          <Input
-            type="date"
-            leading={<Calendar size={14} />}
+        <Field label="가능한 날짜" required>
+          <AvailabilityCalendar
+            spaceId={space.id}
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            min={new Date().toISOString().slice(0, 10)}
+            onPickDate={(d) => setDate(d)}
+            onPickSlot={(s, e) => {
+              setStartTime(s)
+              setEndTime(e)
+            }}
           />
         </Field>
         <div className="grid grid-cols-2 gap-2">
@@ -135,11 +134,6 @@ export function ReservationPanel({ space }: Props) {
             />
           </Field>
         </div>
-        {slots && slots.length > 0 && (
-          <div className="rounded-[var(--radius-md)] bg-[var(--color-primary-soft)] p-3 text-xs text-[var(--color-primary)]">
-            오늘 가능한 슬롯: {slots.filter((s) => s.isOpen && !s.isReserved).length}개
-          </div>
-        )}
         <Field label="인원" required>
           <Input
             type="number"
