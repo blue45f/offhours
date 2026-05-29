@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
+  CANCELLATION_POLICIES,
   DisputeStatusLabel,
   PurposeLabel,
   ReservationStatusLabel,
@@ -45,7 +46,7 @@ export default function ReservationDetailPage() {
   if (isLoading || !data) return <div className="container-page py-12">불러오는 중...</div>
 
   const reservation = data
-  const refundRate = calcRefundRate(reservation.startAt)
+  const refundRate = calcRefundRate(reservation.startAt, new Date(), reservation.cancellationPolicy)
   const refundKRW = Math.round(reservation.totalKRW * refundRate)
   const isHost = !!me && me.id === reservation.hostId
 
@@ -331,7 +332,7 @@ export default function ReservationDetailPage() {
         open={cancelOpen}
         onOpenChange={setCancelOpen}
         title="예약을 취소할까요?"
-        description={`현재 시점 환불률은 ${Math.round(refundRate * 100)}% (${formatKRW(refundKRW)}) 입니다.`}
+        description={`${CANCELLATION_POLICIES[reservation.cancellationPolicy].label} 취소 정책 — 현재 시점 환불률은 ${Math.round(refundRate * 100)}% (${formatKRW(refundKRW)}) 입니다.`}
         footer={
           <>
             <Button variant="ghost" onClick={() => setCancelOpen(false)}>

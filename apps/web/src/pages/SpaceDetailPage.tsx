@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   AlcoholPolicyLabel,
+  CANCELLATION_POLICIES,
   CateringPolicyLabel,
   PROTECTION_PLANS,
   PurposeLabel,
@@ -202,6 +203,10 @@ export default function SpaceDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <Rule label="주류" value={AlcoholPolicyLabel[data.alcoholPolicy]} />
               <Rule label="식음료" value={CateringPolicyLabel[data.cateringPolicy]} />
+              <Rule
+                label="취소 정책"
+                value={`${CANCELLATION_POLICIES[data.cancellationPolicy].label} — ${CANCELLATION_POLICIES[data.cancellationPolicy].blurb}`}
+              />
             </div>
             {data.rules && (
               <p className="mt-4 whitespace-pre-line rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-4 text-sm text-[var(--color-fg-muted)] leading-relaxed">

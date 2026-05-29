@@ -26,6 +26,16 @@ describe('calcRefundRate', () => {
   it('당일 취소는 환불 없음', () => {
     expect(calcRefundRate(new Date('2026-06-01T06:00:00Z'), now)).toBe(0)
   })
+
+  it('FLEXIBLE: 24시간 전 100%, 이내 50%', () => {
+    expect(calcRefundRate(new Date('2026-06-03T00:00:00Z'), now, 'FLEXIBLE')).toBe(1)
+    expect(calcRefundRate(new Date('2026-06-01T12:00:00Z'), now, 'FLEXIBLE')).toBe(0.5)
+  })
+
+  it('STRICT: 3일 이내 환불 불가, 3일 전은 50%', () => {
+    expect(calcRefundRate(new Date('2026-06-03T00:00:00Z'), now, 'STRICT')).toBe(0)
+    expect(calcRefundRate(new Date('2026-06-05T00:00:00Z'), now, 'STRICT')).toBe(0.5)
+  })
 })
 
 describe('time helpers', () => {

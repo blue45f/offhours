@@ -311,6 +311,14 @@ enum ProtectionTier {
   PREMIUM
 }
 
+// 취소·환불 정책 티어 — 호스트가 공간별로 선택. 영업 외 라스트미닛엔 FLEXIBLE 이 전환 레버,
+// 인기 주말 공간엔 STRICT 로 노쇼 방어. 스페이스클라우드·아워플레이스의 단일 고정 정책과 차별.
+enum CancellationPolicy {
+  FLEXIBLE
+  STANDARD
+  STRICT
+}
+
 model Space {
   id              String         @id @default(cuid())
   venueId         String
@@ -330,6 +338,7 @@ model Space {
   alcoholPolicy   AlcoholPolicy
   cateringPolicy  CateringPolicy
   protectionTier  ProtectionTier @default(NONE)
+  cancellationPolicy CancellationPolicy @default(STANDARD)
   amenities       String[]
   /** use-case tags (PARTY/WEDDING_SMALL/CORPORATE_WORKSHOP…). 게스트의 멘탈모델 분류. */
   useCases        String[]
@@ -465,6 +474,8 @@ model Reservation {
   protectionTier        ProtectionTier @default(NONE)
   protectionFeeKRW      Int            @default(0)
   protectionCoverageKRW Int            @default(0)
+  /** 취소 정책 스냅샷 — 예약 시점 공간 정책을 동결(호스트가 정책을 바꿔도 기존 예약은 보존) */
+  cancellationPolicy    CancellationPolicy @default(STANDARD)
   /** 반복 예약 그룹 식별자 — 같은 정기 예약의 여러 occurrence 를 묶는 UUID */
   recurringGroupId String?
   createdAt      DateTime          @default(now())

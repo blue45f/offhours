@@ -576,6 +576,8 @@ async function main() {
         cateringPolicy: spec.catering,
         // 안심 보장 데모 분포 — 약 1/4은 미적용, 나머지는 프리미엄/기본 교차
         protectionTier: i % 4 === 3 ? 'NONE' : i % 2 === 0 ? 'PREMIUM' : 'STANDARD',
+        // 취소 정책 데모 분포 — 유연/일반/엄격 순환
+        cancellationPolicy: i % 3 === 0 ? 'FLEXIBLE' : i % 3 === 1 ? 'STANDARD' : 'STRICT',
         amenities: spec.amenities,
         useCases: spec.useCases ?? DEFAULT_USE_CASES_BY_CATEGORY[spec.category] ?? [],
         rules: '실내 흡연 금지, 23시 이후 음향 70dB 이하, 원상복구 의무.',

@@ -1,18 +1,59 @@
+import type { CancellationPolicy } from './enums'
+
 export const PLATFORM_FEE_RATE = 0.12
 
-export const CANCEL_POLICY = [
-  { hoursBefore: 168, refundRate: 1.0, label: '7일 전' },
-  { hoursBefore: 72, refundRate: 0.5, label: '3일 전' },
-  { hoursBefore: 24, refundRate: 0.2, label: '1일 전' },
-  { hoursBefore: 0, refundRate: 0, label: '당일' },
-] as const
+/**
+ * 취소·환불 정책 티어 — 호스트가 공간별로 선택. 영업 외 대관은 라스트미닛 비중이 커서
+ * 유연(FLEXIBLE) 정책이 전환 레버가 되고, 인기 주말·성수기 공간은 엄격(STRICT)으로
+ * 노쇼를 방어한다. Splacer/Giggster/Airbnb 의 Flexible·Moderate·Strict 한국화.
+ * 각 schedule 은 hoursBefore 내림차순 — diffH 가 처음 충족하는 구간의 refundRate 적용.
+ */
+export const CANCELLATION_POLICIES: Record<
+  CancellationPolicy,
+  {
+    label: string
+    blurb: string
+    schedule: { hoursBefore: number; refundRate: number; label: string }[]
+  }
+> = {
+  FLEXIBLE: {
+    label: '유연',
+    blurb: '이용 24시간 전까지 100% 환불, 이후 50%',
+    schedule: [
+      { hoursBefore: 24, refundRate: 1.0, label: '24시간 전' },
+      { hoursBefore: 0, refundRate: 0.5, label: '24시간 이내' },
+    ],
+  },
+  STANDARD: {
+    label: '일반',
+    blurb: '7일 전 100% · 3일 전 50% · 1일 전 20%',
+    schedule: [
+      { hoursBefore: 168, refundRate: 1.0, label: '7일 전' },
+      { hoursBefore: 72, refundRate: 0.5, label: '3일 전' },
+      { hoursBefore: 24, refundRate: 0.2, label: '1일 전' },
+      { hoursBefore: 0, refundRate: 0, label: '당일' },
+    ],
+  },
+  STRICT: {
+    label: '엄격',
+    blurb: '7일 전 100% · 3일 전 50% · 이후 환불 불가',
+    schedule: [
+      { hoursBefore: 168, refundRate: 1.0, label: '7일 전' },
+      { hoursBefore: 72, refundRate: 0.5, label: '3일 전' },
+      { hoursBefore: 0, refundRate: 0, label: '3일 이내' },
+    ],
+  },
+}
 
-export function calcRefundRate(startAt: Date | string, now: Date = new Date()): number {
-  const startMs = new Date(startAt).getTime()
-  const diffH = (startMs - now.getTime()) / (1000 * 60 * 60)
-  if (diffH >= 168) return 1.0
-  if (diffH >= 72) return 0.5
-  if (diffH >= 24) return 0.2
+export function calcRefundRate(
+  startAt: Date | string,
+  now: Date = new Date(),
+  policy: CancellationPolicy = 'STANDARD'
+): number {
+  const diffH = (new Date(startAt).getTime() - now.getTime()) / (1000 * 60 * 60)
+  for (const tier of CANCELLATION_POLICIES[policy].schedule) {
+    if (diffH >= tier.hoursBefore) return tier.refundRate
+  }
   return 0
 }
 

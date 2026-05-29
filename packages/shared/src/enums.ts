@@ -351,3 +351,12 @@ export type DisputeKind = z.infer<typeof DisputeKindSchema>
 /** 안심 보장 등급 — 영업 외 통대관의 #1 진입장벽(파손·도난)을 해소하는 게스트 부담 보장. */
 export const ProtectionTierSchema = z.enum(['NONE', 'STANDARD', 'PREMIUM'])
 export type ProtectionTier = z.infer<typeof ProtectionTierSchema>
+
+/** 취소·환불 정책 티어 — 호스트가 공간별로 선택(유연/일반/엄격). */
+export const CancellationPolicySchema = z.enum(['FLEXIBLE', 'STANDARD', 'STRICT'])
+export type CancellationPolicy = z.infer<typeof CancellationPolicySchema>
+export const CancellationPolicyLabel: Record<CancellationPolicy, string> = {
+  FLEXIBLE: '유연',
+  STANDARD: '일반',
+  STRICT: '엄격',
+}

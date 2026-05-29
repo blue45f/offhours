@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { ProtectionTierSchema, PurposeSchema, ReservationStatusSchema } from './enums'
+import {
+  CancellationPolicySchema,
+  ProtectionTierSchema,
+  PurposeSchema,
+  ReservationStatusSchema,
+} from './enums'
 import { AddonLineSchema, AddonSelectionSchema } from './addon'
 import { DisputeSummarySchema } from './protection'
 
@@ -100,6 +105,8 @@ export const ReservationSchema = z.object({
   protectionTier: ProtectionTierSchema.default('NONE'),
   protectionFeeKRW: z.number().default(0),
   protectionCoverageKRW: z.number().default(0),
+  /** 취소 정책 스냅샷 — 예약 시점 공간 정책 */
+  cancellationPolicy: CancellationPolicySchema.default('STANDARD'),
   /** 파손 보장 청구(있으면) — 호스트가 넣은 청구의 상태 요약 */
   dispute: DisputeSummarySchema.nullable().optional(),
   totalKRW: z.number(),

@@ -4,10 +4,12 @@ import toast from 'react-hot-toast'
 import {
   AlcoholPolicyLabel,
   AMENITY_OPTIONS,
+  CancellationPolicyLabel,
   CateringPolicyLabel,
   PROTECTION_PLANS,
   USE_CASE_META,
   type AlcoholPolicy,
+  type CancellationPolicy,
   type CateringPolicy,
   type ProtectionTier,
   type UseCase,
@@ -40,6 +42,7 @@ export default function HostNewSpacePage() {
   const [alcoholPolicy, setAlcoholPolicy] = useState<AlcoholPolicy>('BYOB')
   const [cateringPolicy, setCateringPolicy] = useState<CateringPolicy>('EXTERNAL_OK')
   const [protectionTier, setProtectionTier] = useState<ProtectionTier>('STANDARD')
+  const [cancellationPolicy, setCancellationPolicy] = useState<CancellationPolicy>('STANDARD')
   const [amenities, setAmenities] = useState<string[]>(['wifi', 'speaker'])
   const [useCases, setUseCases] = useState<UseCase[]>(['BIRTHDAY', 'GATHERING'])
   const [rules, setRules] = useState('실내 흡연 금지, 23시 이후 음향 70dB 이하, 원상복구 의무.')
@@ -77,6 +80,7 @@ export default function HostNewSpacePage() {
         alcoholPolicy,
         cateringPolicy,
         protectionTier,
+        cancellationPolicy,
         amenities,
         useCases,
         rules,
@@ -231,6 +235,21 @@ export default function HostNewSpacePage() {
                   value: t,
                   label: PROTECTION_PLANS[t].blurb,
                 }))}
+              />
+            </Field>
+            <Field
+              label="취소 정책"
+              helper="라스트미닛이 많은 영업 외 대관은 '유연'이 전환에 유리하고, 인기 주말 공간은 '엄격'으로 노쇼를 방어해요."
+            >
+              <Select
+                value={cancellationPolicy}
+                onValueChange={(v) => setCancellationPolicy(v as CancellationPolicy)}
+                options={(Object.keys(CancellationPolicyLabel) as CancellationPolicy[]).map(
+                  (p) => ({
+                    value: p,
+                    label: CancellationPolicyLabel[p],
+                  })
+                )}
               />
             </Field>
             <Field label="이용 규칙">

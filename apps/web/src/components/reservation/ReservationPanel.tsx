@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  CANCELLATION_POLICIES,
   CreateReservationSchema,
   PROTECTION_PLANS,
   PurposeLabel,
@@ -323,7 +324,10 @@ export function ReservationPanel({ space }: Props) {
               : '예약 요청하기'}
         </Button>
         <p className="text-xs text-[var(--color-fg-subtle)] text-center">
-          취소·환불 정책은 결제 전에 확인할 수 있어요.
+          <span className="font-semibold">
+            {CANCELLATION_POLICIES[space.cancellationPolicy].label}
+          </span>{' '}
+          취소 정책 · {CANCELLATION_POLICIES[space.cancellationPolicy].blurb}
         </p>
 
         <WaitlistButton spaceId={space.id} />

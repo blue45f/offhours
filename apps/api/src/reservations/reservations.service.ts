@@ -112,6 +112,7 @@ export class ReservationsService {
         protectionTier: quote.protectionTier,
         protectionFeeKRW: quote.protectionFeeKRW,
         protectionCoverageKRW: quote.protectionCoverageKRW,
+        cancellationPolicy: space.cancellationPolicy,
         totalKRW,
         feeKRW,
         checkInCode,
@@ -257,7 +258,7 @@ export class ReservationsService {
     if (!['REQUESTED', 'APPROVED', 'PAID'].includes(r.status)) {
       throw new BadRequestException('취소할 수 없는 상태에요')
     }
-    const refundRate = calcRefundRate(r.startAt)
+    const refundRate = calcRefundRate(r.startAt, new Date(), r.cancellationPolicy)
     const refundKRW = Math.round(r.totalKRW * refundRate)
     const next: ReservationStatus = r.status === 'PAID' ? 'REFUNDED' : 'CANCELED'
     const updated = await this.prisma.reservation.update({
@@ -490,6 +491,9 @@ export class ReservationsService {
         (r as { protectionTier?: 'NONE' | 'STANDARD' | 'PREMIUM' }).protectionTier ?? 'NONE',
       protectionFeeKRW: (r as { protectionFeeKRW?: number }).protectionFeeKRW ?? 0,
       protectionCoverageKRW: (r as { protectionCoverageKRW?: number }).protectionCoverageKRW ?? 0,
+      cancellationPolicy:
+        (r as { cancellationPolicy?: 'FLEXIBLE' | 'STANDARD' | 'STRICT' }).cancellationPolicy ??
+        'STANDARD',
       totalKRW: r.totalKRW,
       feeKRW: r.feeKRW,
       cancelReason: r.cancelReason,
