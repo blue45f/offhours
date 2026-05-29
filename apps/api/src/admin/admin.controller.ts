@@ -3,10 +3,12 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Role } from '@prisma/client'
 import {
   BroadcastNotificationSchema,
+  ResolveDisputeSchema,
   ResolveReportSchema,
   SetRoleSchema,
   SetSuspendedSchema,
   type BroadcastNotificationInput,
+  type ResolveDisputeInput,
   type ResolveReportInput,
   type SetRoleInput,
   type SetSuspendedInput,
@@ -102,6 +104,20 @@ export class AdminController {
     @Body(new ZodValidationPipe(ResolveReportSchema)) body: ResolveReportInput
   ) {
     return this.admin.resolveReport(actor.id, id, body)
+  }
+
+  @Get('disputes')
+  async disputes(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
+    return this.admin.listDisputes(Number(page) || 1, Number(pageSize) || 20)
+  }
+
+  @Patch('disputes/:id/resolve')
+  async resolveDispute(
+    @CurrentUser() actor: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(ResolveDisputeSchema)) body: ResolveDisputeInput
+  ) {
+    return this.admin.resolveDispute(actor.id, id, body)
   }
 
   @Get('audit')

@@ -36,6 +36,7 @@ const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'
 const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'))
 const AdminSpacesPage = lazy(() => import('../pages/admin/AdminSpacesPage'))
 const AdminReportsPage = lazy(() => import('../pages/admin/AdminReportsPage'))
+const AdminDisputesPage = lazy(() => import('../pages/admin/AdminDisputesPage'))
 const AdminAuditPage = lazy(() => import('../pages/admin/AdminAuditPage'))
 const AdminBroadcastPage = lazy(() => import('../pages/admin/AdminBroadcastPage'))
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
@@ -206,6 +207,7 @@ export const router = createBrowserRouter([
           { path: 'users', element: lazyEl(<AdminUsersPage />) },
           { path: 'spaces', element: lazyEl(<AdminSpacesPage />) },
           { path: 'reports', element: lazyEl(<AdminReportsPage />) },
+          { path: 'disputes', element: lazyEl(<AdminDisputesPage />) },
           { path: 'audit', element: lazyEl(<AdminAuditPage />) },
           { path: 'broadcast', element: lazyEl(<AdminBroadcastPage />) },
         ],

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma, type Role } from '@prisma/client'
 import type {
   BroadcastNotificationInput,
+  ResolveDisputeInput,
   ResolveReportInput,
   SetSuspendedInput,
 } from '@offhours/shared'
@@ -229,6 +230,83 @@ export class AdminService {
       },
     })
     await this.audit(actorId, 'REPORT_RESOLVE', 'REPORT', reportId, before, after)
+    return after
+  }
+
+  async listDisputes(page = 1, pageSize = 20) {
+    const [items, total] = await Promise.all([
+      this.prisma.dispute.findMany({
+        include: {
+          raisedBy: { select: { name: true } },
+          reservation: { select: { code: true, space: { select: { title: true } } } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.dispute.count(),
+    ])
+    return {
+      items: items.map((d) => ({
+        id: d.id,
+        reservationId: d.reservationId,
+        reservationCode: d.reservation.code,
+        spaceTitle: d.reservation.space.title,
+        kind: d.kind,
+        reason: d.reason,
+        description: d.description,
+        amountClaimedKRW: d.amountClaimedKRW,
+        coverageKRW: d.coverageKRW,
+        status: d.status,
+        resolution: d.resolution,
+        raisedByName: d.raisedBy.name,
+        evidencePhotoUrls: (d.evidence as { photoUrls?: string[] } | null)?.photoUrls ?? [],
+        createdAt: d.createdAt.toISOString(),
+      })),
+      total,
+      page,
+      pageSize,
+    }
+  }
+
+  async resolveDispute(actorId: string, disputeId: string, input: ResolveDisputeInput) {
+    const before = await this.prisma.dispute.findUnique({ where: { id: disputeId } })
+    if (!before) throw new NotFoundException()
+    const closed = ['RESOLVED_FAVOR_GUEST', 'RESOLVED_FAVOR_HOST', 'DISMISSED'].includes(
+      input.status
+    )
+    const after = await this.prisma.dispute.update({
+      where: { id: disputeId },
+      data: {
+        status: input.status,
+        resolution: input.resolution ?? null,
+        resolvedAt: closed ? new Date() : null,
+      },
+    })
+    // 분쟁 종결 시 양측에 결과 알림
+    if (closed) {
+      const r = await this.prisma.reservation.findUnique({
+        where: { id: before.reservationId },
+        include: { space: { include: { venue: { include: { host: true } } } } },
+      })
+      if (r) {
+        const verdict =
+          input.status === 'RESOLVED_FAVOR_HOST'
+            ? '호스트 인정'
+            : input.status === 'RESOLVED_FAVOR_GUEST'
+              ? '게스트 인정'
+              : '기각'
+        for (const uid of [r.guestId, r.space.venue.host.userId]) {
+          await this.notifications.create(uid, {
+            type: 'SYSTEM',
+            title: '분쟁이 종결됐어요',
+            body: `${r.space.title} — ${verdict}`,
+            data: { reservationId: r.id },
+          })
+        }
+      }
+    }
+    await this.audit(actorId, 'DISPUTE_RESOLVE', 'DISPUTE', disputeId, before, after)
     return after
   }
 

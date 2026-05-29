@@ -1,5 +1,13 @@
 import { NavLink } from 'react-router-dom'
-import { AlertTriangle, Building2, Megaphone, ScrollText, Settings, Users } from 'lucide-react'
+import {
+  AlertTriangle,
+  Building2,
+  Megaphone,
+  ScrollText,
+  Settings,
+  ShieldAlert,
+  Users,
+} from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { cn } from '../../utils/cn'
@@ -9,6 +17,7 @@ const items = [
   { to: '/admin/users', icon: Users, label: '사용자' },
   { to: '/admin/spaces', icon: Building2, label: '공간' },
   { to: '/admin/reports', icon: AlertTriangle, label: '신고' },
+  { to: '/admin/disputes', icon: ShieldAlert, label: '분쟁·청구' },
   { to: '/admin/audit', icon: ScrollText, label: '감사 로그' },
   { to: '/admin/broadcast', icon: Megaphone, label: '공지 발송' },
 ]

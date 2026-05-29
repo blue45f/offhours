@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { RoleSchema } from './enums'
+import { DisputeKindSchema, DisputeStatusSchema, RoleSchema } from './enums'
 
 export const DashboardKpiSchema = z.object({
   gmvTodayKRW: z.number(),
@@ -69,3 +69,28 @@ export const BroadcastNotificationSchema = z.object({
   body: z.string().trim().min(1).max(2000),
 })
 export type BroadcastNotificationInput = z.infer<typeof BroadcastNotificationSchema>
+
+/** 관리자 분쟁·보장 청구 큐 행 — 파손 청구(DAMAGE) 포함, 증빙 사진은 체크아웃 사진. */
+export const DisputeRowSchema = z.object({
+  id: z.string(),
+  reservationId: z.string(),
+  reservationCode: z.string(),
+  spaceTitle: z.string(),
+  kind: DisputeKindSchema,
+  reason: z.string(),
+  description: z.string(),
+  amountClaimedKRW: z.number().nullable(),
+  coverageKRW: z.number().nullable(),
+  status: DisputeStatusSchema,
+  resolution: z.string().nullable(),
+  raisedByName: z.string(),
+  evidencePhotoUrls: z.array(z.string()).default([]),
+  createdAt: z.string(),
+})
+export type DisputeRow = z.infer<typeof DisputeRowSchema>
+
+export const ResolveDisputeSchema = z.object({
+  status: z.enum(['UNDER_REVIEW', 'RESOLVED_FAVOR_GUEST', 'RESOLVED_FAVOR_HOST', 'DISMISSED']),
+  resolution: z.string().trim().max(1000).optional(),
+})
+export type ResolveDisputeInput = z.infer<typeof ResolveDisputeSchema>

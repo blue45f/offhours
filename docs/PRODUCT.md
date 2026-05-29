@@ -488,22 +488,23 @@ user        → 게스트 기본 권한
 
 ### 10.2 관리자 화면 인벤토리
 
-| 영역              | 화면                   | 핵심 액션                                                          |
-| ----------------- | ---------------------- | ------------------------------------------------------------------ |
-| **Dashboard**     | `/admin`               | 오늘/주/월 KPI 카드, GMV·MAU·CR 차트, 최근 액티비티 피드           |
-| **Users**         | `/admin/users`         | 검색·필터·페이지네이션 테이블, 정지/해제, 역할 변경, 강제 로그아웃 |
-| **Users Detail**  | `/admin/users/:id`     | 프로필, 예약 이력, 결제 이력, 신고/분쟁 기록, 노트                 |
-| **Spaces**        | `/admin/spaces`        | 등록 대기 큐, 활성/비활성, 강제 비공개, 카테고리 재분류            |
-| **Spaces Detail** | `/admin/spaces/:id`    | 모든 슬롯·가격·룰 검토, 사진 모더레이션, 호스트 본인 확인          |
-| **Reservations**  | `/admin/reservations`  | 상태별 필터, 분쟁 표시, 강제 취소/환불                             |
-| **Payments**      | `/admin/payments`      | 결제 내역, Webhook 로그, 환불 처리, 세금계산서                     |
-| **Reviews**       | `/admin/reviews`       | 신고된 리뷰 큐, 숨김/삭제, 호스트 응답 검토                        |
-| **Reports**       | `/admin/reports`       | 사용자/공간/리뷰 신고 큐 → 검토 → 조치                             |
-| **Categories**    | `/admin/categories`    | 카테고리·태그·편의시설 마스터                                      |
-| **Notifications** | `/admin/notifications` | 전체/세그먼트 알림 발송(인앱·이메일·알림톡)                        |
-| **Settlements**   | `/admin/settlements`   | 호스트 정산 큐, 7/14일 자동 정산 시뮬레이션                        |
-| **Audit Log**     | `/admin/audit`         | 모든 관리자 액션 (who, when, what, before/after)                   |
-| **Settings**      | `/admin/settings`      | 수수료율, 취소/환불 정책, Feature Flag                             |
+| 영역              | 화면                   | 핵심 액션                                                                   |
+| ----------------- | ---------------------- | --------------------------------------------------------------------------- |
+| **Dashboard**     | `/admin`               | 오늘/주/월 KPI 카드, GMV·MAU·CR 차트, 최근 액티비티 피드                    |
+| **Users**         | `/admin/users`         | 검색·필터·페이지네이션 테이블, 정지/해제, 역할 변경, 강제 로그아웃          |
+| **Users Detail**  | `/admin/users/:id`     | 프로필, 예약 이력, 결제 이력, 신고/분쟁 기록, 노트                          |
+| **Spaces**        | `/admin/spaces`        | 등록 대기 큐, 활성/비활성, 강제 비공개, 카테고리 재분류                     |
+| **Spaces Detail** | `/admin/spaces/:id`    | 모든 슬롯·가격·룰 검토, 사진 모더레이션, 호스트 본인 확인                   |
+| **Reservations**  | `/admin/reservations`  | 상태별 필터, 분쟁 표시, 강제 취소/환불                                      |
+| **Payments**      | `/admin/payments`      | 결제 내역, Webhook 로그, 환불 처리, 세금계산서                              |
+| **Reviews**       | `/admin/reviews`       | 신고된 리뷰 큐, 숨김/삭제, 호스트 응답 검토                                 |
+| **Reports**       | `/admin/reports`       | 사용자/공간/리뷰 신고 큐 → 검토 → 조치                                      |
+| **Disputes**      | `/admin/disputes`      | 파손 보장 청구·분쟁 큐 → 증빙(체크아웃 사진) 검토 → 호스트/게스트 인정·기각 |
+| **Categories**    | `/admin/categories`    | 카테고리·태그·편의시설 마스터                                               |
+| **Notifications** | `/admin/notifications` | 전체/세그먼트 알림 발송(인앱·이메일·알림톡)                                 |
+| **Settlements**   | `/admin/settlements`   | 호스트 정산 큐, 7/14일 자동 정산 시뮬레이션                                 |
+| **Audit Log**     | `/admin/audit`         | 모든 관리자 액션 (who, when, what, before/after)                            |
+| **Settings**      | `/admin/settings`      | 수수료율, 취소/환불 정책, Feature Flag                                      |
 
 ### 10.3 대시보드 KPI 카드 (실시간)
 
