@@ -828,6 +828,21 @@ async function main() {
     }
   }
 
+  // 데모 법인 결제 프로필 — 게스트 user 가 사내 워크샵 시나리오로 사용
+  await prisma.corporateProfile.upsert({
+    where: { userId: guest.id },
+    create: {
+      userId: guest.id,
+      companyName: '(주)예시컴퍼니',
+      businessNumber: '123-45-67890',
+      ceoName: '지은',
+      billingEmail: 'finance@example.kr',
+      taxPayer: 'GENERAL',
+      taxOfficeAddress: '서울 강남구 테헤란로 123',
+    },
+    update: {},
+  })
+
   // 데모 도착 가이드 — 호스트가 미리 입력해둔 주차·Wi-Fi·출입 등.
   // 결제된 게스트 예약 디테일에 자동 노출.
   const venuesForGuide = await prisma.venue.findMany({

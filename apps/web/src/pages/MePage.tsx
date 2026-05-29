@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Calendar, Heart, MessageCircle, Sparkles } from 'lucide-react'
+import { Building2, Calendar, Heart, MessageCircle, Sparkles } from 'lucide-react'
 
 import { useMe } from '../store/auth'
 import { Avatar } from '../components/ui/Avatar'
@@ -15,6 +15,12 @@ export default function MePage() {
     { to: '/me/reservations', icon: Calendar, label: '예약 내역', desc: '이전·진행 중인 예약' },
     { to: '/favorites', icon: Heart, label: '찜한 공간', desc: '관심 공간 모아보기' },
     { to: '/chat', icon: MessageCircle, label: '채팅', desc: '호스트와 대화' },
+    {
+      to: '/me/corporate',
+      icon: Building2,
+      label: '법인 결제·세금계산서',
+      desc: '사내 워크샵·팀빌딩 예약',
+    },
     { to: '/notifications', icon: Sparkles, label: '알림', desc: '최근 활동' },
   ]
 

@@ -9,6 +9,8 @@ export const CreateReservationSchema = z
     headcount: z.number().int().min(1).max(500),
     purpose: PurposeSchema,
     note: z.string().trim().max(500).optional(),
+    /** true 면 corporateProfile 을 동결해 예약에 첨부, 세금계산서 발행 워크플로우 진입 */
+    useCorporateBilling: z.boolean().optional(),
   })
   .refine((v) => new Date(v.endAt).getTime() > new Date(v.startAt).getTime(), {
     message: '종료 시간은 시작 시간 이후여야 해요',
@@ -86,6 +88,17 @@ export const ReservationSchema = z.object({
   checkedInAt: z.string().nullable(),
   checkedOutAt: z.string().nullable(),
   createdAt: z.string(),
+  /** 법인 결제일 때 동결된 회사 정보 (세금계산서 발행 대상). 일반 결제면 null */
+  corporateSnapshot: z
+    .object({
+      companyName: z.string(),
+      businessNumber: z.string(),
+      ceoName: z.string(),
+      billingEmail: z.string(),
+      taxPayer: z.enum(['GENERAL', 'TAX_FREE']),
+    })
+    .nullable()
+    .optional(),
 })
 export type Reservation = z.infer<typeof ReservationSchema>
 

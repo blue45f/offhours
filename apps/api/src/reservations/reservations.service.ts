@@ -66,6 +66,24 @@ export class ReservationsService {
     const status: ReservationStatus = space.instantBook ? 'APPROVED' : 'REQUESTED'
     const checkInCode = Math.random().toString(36).slice(2, 8).toUpperCase()
 
+    // 법인 결제 — 현재 등록된 corporate 프로필을 스냅샷으로 동결해 첨부
+    let corporateProfileId: string | null = null
+    let corporateSnapshot: object | null = null
+    if (input.useCorporateBilling) {
+      const corp = await this.prisma.corporateProfile.findUnique({ where: { userId: guestId } })
+      if (!corp) {
+        throw new BadRequestException('법인 결제 프로필이 없어요. 마이페이지에서 먼저 등록해주세요')
+      }
+      corporateProfileId = corp.id
+      corporateSnapshot = {
+        companyName: corp.companyName,
+        businessNumber: corp.businessNumber,
+        ceoName: corp.ceoName,
+        billingEmail: corp.billingEmail,
+        taxPayer: corp.taxPayer,
+      }
+    }
+
     const reservation = await this.prisma.reservation.create({
       data: {
         code,
@@ -83,6 +101,8 @@ export class ReservationsService {
         totalKRW,
         feeKRW,
         checkInCode,
+        corporateProfileId,
+        corporateSnapshot: corporateSnapshot ?? undefined,
       },
     })
 
@@ -358,6 +378,7 @@ export class ReservationsService {
       checkedInAt: r.checkedInAt?.toISOString() ?? null,
       checkedOutAt: r.checkedOutAt?.toISOString() ?? null,
       createdAt: r.createdAt.toISOString(),
+      corporateSnapshot: (r as { corporateSnapshot?: object | null }).corporateSnapshot ?? null,
     }
   }
 

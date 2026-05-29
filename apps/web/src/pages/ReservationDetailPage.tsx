@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { ReservationStatusLabel, calcRefundRate } from '@offhours/shared'
-import { MessageCircle, X } from 'lucide-react'
+import { Building2, MessageCircle, X } from 'lucide-react'
+import { CorporateTaxTypeLabel } from '@offhours/shared'
 
 import { useCancelReservation, useReservationDetail } from '../features/reservations/api'
 import { Button } from '../components/ui/Button'
@@ -72,6 +73,12 @@ export default function ReservationDetailPage() {
         <Badge tone={reservation.status === 'CANCELED' ? 'error' : 'primary'}>
           {ReservationStatusLabel[reservation.status]}
         </Badge>
+        {reservation.corporateSnapshot && (
+          <Badge tone="accent" soft>
+            <Building2 size={10} className="inline mr-0.5" />
+            법인 결제
+          </Badge>
+        )}
       </div>
       <h1 className="text-headline serif">{reservation.spaceTitle}</h1>
       <p className="mt-2 text-sm text-[var(--color-fg-muted)]">
@@ -131,6 +138,32 @@ export default function ReservationDetailPage() {
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
           </CardBody>
         </Card>
+
+        {reservation.corporateSnapshot && (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <span className="inline-flex items-center gap-1.5">
+                  <Building2 size={14} className="text-[var(--color-primary)]" />
+                  법인 결제 · 세금계산서
+                </span>
+              </CardTitle>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-primary)]">
+                {CorporateTaxTypeLabel[reservation.corporateSnapshot.taxPayer]}
+              </span>
+            </CardHeader>
+            <CardBody className="space-y-2 text-sm">
+              <Row label="회사명" value={reservation.corporateSnapshot.companyName} />
+              <Row label="사업자번호" value={reservation.corporateSnapshot.businessNumber} />
+              <Row label="대표자명" value={reservation.corporateSnapshot.ceoName} />
+              <Row label="세금계산서 수신" value={reservation.corporateSnapshot.billingEmail} />
+              <p className="text-[11px] text-[var(--color-fg-muted)] mt-1 leading-relaxed">
+                결제 완료 시점에 등록된 법인 정보로 세금계산서가 자동 발행돼요. 정보 수정은 새
+                예약부터 적용됩니다.
+              </p>
+            </CardBody>
+          </Card>
+        )}
 
         {reservation.arrivalGuide && (
           <ArrivalKitCard

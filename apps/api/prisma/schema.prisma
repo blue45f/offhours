@@ -53,6 +53,7 @@ model User {
 
   refreshTokens   RefreshToken[]
   hostProfile     HostProfile?
+  corporateProfile CorporateProfile?
   reservations    Reservation[]    @relation("GuestReservations")
   reviewsAuthored Review[]         @relation("AuthorReviews")
   reviewsAbout    Review[]         @relation("SubjectReviews")
@@ -89,6 +90,31 @@ model RefreshToken {
 enum TaxType {
   INDIVIDUAL
   CORPORATE
+}
+
+/**
+ * 법인 결제 프로필 — 사내 워크샵·팀빌딩 use case 의 핵심 마찰점인 세금계산서 발행을
+ * 한 번 등록해두고 예약 시 토글로 첨부. 게스트 본인 1:1 프로필이고, 그 예약은
+ * 자동으로 법인 결제로 표시되어 호스트가 세금계산서 발행 의무를 인지한다.
+ */
+model CorporateProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName     String
+  businessNumber  String
+  ceoName         String
+  billingEmail    String
+  taxOfficeAddress String?
+  /** 세금계산서 발행 사업자 유형 — 일반과세자/면세사업자 */
+  taxPayer         CorporateTaxType @default(GENERAL)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum CorporateTaxType {
+  GENERAL
+  TAX_FREE
 }
 
 enum PayoutCycle {
@@ -410,6 +436,9 @@ model Reservation {
   checkedOutAt   DateTime?
   /** 호스트 체크아웃 체크리스트 — { restored, trash, audio, lights, lock, note?, photoUrls? } */
   checkoutChecklist Json?
+  /** 법인 결제 — 예약 시점 corporate 스냅샷(공급자명·사업자번호·세금계산서 이메일) */
+  corporateProfileId String?
+  corporateSnapshot  Json?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 

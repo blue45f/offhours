@@ -14,6 +14,7 @@ const SignupPage = lazy(() => import('../pages/SignupPage'))
 const LogoutPage = lazy(() => import('../pages/LogoutPage'))
 const AboutPage = lazy(() => import('../pages/AboutPage'))
 const MePage = lazy(() => import('../pages/MePage'))
+const CorporatePage = lazy(() => import('../pages/CorporatePage'))
 const MyReservationsPage = lazy(() => import('../pages/MyReservationsPage'))
 const ReservationDetailPage = lazy(() => import('../pages/ReservationDetailPage'))
 const FavoritesPage = lazy(() => import('../pages/FavoritesPage'))
@@ -88,6 +89,7 @@ export const router = createBrowserRouter([
           { index: true, element: lazyEl(<MePage />) },
           { path: 'reservations', element: lazyEl(<MyReservationsPage />) },
           { path: 'reservations/:id', element: lazyEl(<ReservationDetailPage />) },
+          { path: 'corporate', element: lazyEl(<CorporatePage />) },
         ],
       },
       {

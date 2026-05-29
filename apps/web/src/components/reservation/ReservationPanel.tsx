@@ -18,7 +18,10 @@ import { Select } from '../ui/Select'
 import { Card } from '../ui/Card'
 import { useCreateReservation } from '../../features/reservations/api'
 import { useQuote, useSpaceSlots } from '../../features/spaces/api'
+import { useCorporateProfile } from '../../features/corporate/api'
 import { useIsAuthed } from '../../store/auth'
+import { Link } from 'react-router-dom'
+import { Building2 } from 'lucide-react'
 import { formatKRW } from '../../utils/format'
 import { getErrorMessage } from '../../services/api'
 
@@ -35,6 +38,8 @@ export function ReservationPanel({ space }: Props) {
   const [headcount, setHeadcount] = useState<number>(Math.max(space.capacityMin, 10))
   const [purpose, setPurpose] = useState<Purpose>('PARTY')
   const [note, setNote] = useState('')
+  const [useCorporate, setUseCorporate] = useState(false)
+  const { data: corporate } = useCorporateProfile()
 
   const { startAt, endAt } = useMemo(() => {
     if (!date || !startTime || !endTime) return { startAt: undefined, endAt: undefined }
@@ -76,6 +81,7 @@ export function ReservationPanel({ space }: Props) {
         headcount,
         purpose,
         note: note || undefined,
+        useCorporateBilling: useCorporate && !!corporate,
       })
       toast.success(space.instantBook ? '예약이 확정됐어요!' : '예약 요청을 보냈어요')
       navigate(`/me/reservations/${reservation.id}`)
@@ -161,6 +167,42 @@ export function ReservationPanel({ space }: Props) {
             onChange={(e) => setNote(e.target.value)}
           />
         </Field>
+
+        {isAuthed && (
+          <div className="rounded-[var(--radius-lg)] hairline p-3">
+            {corporate ? (
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useCorporate}
+                  onChange={(e) => setUseCorporate(e.target.checked)}
+                  className="mt-0.5 size-4 accent-[var(--color-primary)]"
+                />
+                <span className="flex-1 text-sm">
+                  <span className="inline-flex items-center gap-1 font-semibold">
+                    <Building2 size={12} className="text-[var(--color-primary)]" />
+                    법인 결제 (세금계산서)
+                  </span>
+                  <span className="block text-[11px] text-[var(--color-fg-muted)] mt-0.5">
+                    {corporate.companyName} ({corporate.businessNumber}) · {corporate.billingEmail}
+                  </span>
+                </span>
+              </label>
+            ) : (
+              <div className="text-xs text-[var(--color-fg-muted)] flex items-center justify-between">
+                <span className="inline-flex items-center gap-1">
+                  <Building2 size={12} /> 사내 워크샵·팀빌딩은 법인 결제로 세금계산서 자동 발행
+                </span>
+                <Link
+                  to="/me/corporate"
+                  className="text-[var(--color-primary)] font-semibold hover:underline"
+                >
+                  법인 등록 →
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
 
         {quote && (
           <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-4 space-y-2 text-sm">
