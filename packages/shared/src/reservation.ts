@@ -21,6 +21,8 @@ const CreateReservationObject = z.object({
   useCorporateBilling: z.boolean().optional(),
   /** true 면 법인 크레딧 잔액을 결제액에서 차감 (useCorporateBilling 필요) */
   useCredit: z.boolean().optional(),
+  /** true 면 보유 적립 포인트를 결제액에서 차감 */
+  usePoints: z.boolean().optional(),
   /** 게스트가 선택한 유료 옵션(애드온) */
   addons: z.array(AddonSelectionSchema).max(20).optional(),
   /** 반복 예약 그룹 식별자 — createRecurring 내부에서만 주입, 일반 단건 예약에서는 무시 */
@@ -125,6 +127,8 @@ export const ReservationSchema = z.object({
   feeKRW: z.number(),
   /** 법인 크레딧 차감액 — 실 결제액 = totalKRW - creditAppliedKRW */
   creditAppliedKRW: z.number().default(0),
+  /** 적립 포인트 차감액 */
+  pointsAppliedKRW: z.number().default(0),
   cancelReason: z.string().nullable(),
   checkInCode: z.string().nullable(),
   checkedInAt: z.string().nullable(),

@@ -3,6 +3,15 @@ import type { CancellationPolicy, Purpose } from './enums'
 export const PLATFORM_FEE_RATE = 0.12
 
 /**
+ * 적립 포인트 — 이용 완료 시 실 결제액의 2%를 적립하고 다음 예약 결제에 사용한다.
+ * 저빈도 카테고리(공간대여)의 재방문을 끌어올리는 레버(Spacemarket·Instabase 포인트).
+ */
+export const POINTS_EARN_RATE = 0.02
+export function earnedPoints(paidKRW: number): number {
+  return Math.round(Math.max(0, paidKRW) * POINTS_EARN_RATE)
+}
+
+/**
  * 취소·환불 정책 티어 — 호스트가 공간별로 선택. 영업 외 대관은 라스트미닛 비중이 커서
  * 유연(FLEXIBLE) 정책이 전환 레버가 되고, 인기 주말·성수기 공간은 엄격(STRICT)으로
  * 노쇼를 방어한다. Splacer/Giggster/Airbnb 의 Flexible·Moderate·Strict 한국화.

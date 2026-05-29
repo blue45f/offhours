@@ -13,7 +13,7 @@ import {
   type SpaceDetail,
 } from '@offhours/shared'
 import toast from 'react-hot-toast'
-import { Clock, RefreshCw, ShieldCheck, Users } from 'lucide-react'
+import { Clock, Coins, RefreshCw, ShieldCheck, Users } from 'lucide-react'
 
 import { Button } from '../ui/Button'
 import { Field, Input, Textarea } from '../ui/Input'
@@ -24,7 +24,7 @@ import { useQuote } from '../../features/spaces/api'
 import { AvailabilityCalendar } from './AvailabilityCalendar'
 import { AddonPicker } from './AddonPicker'
 import { useCorporateProfile } from '../../features/corporate/api'
-import { useIsAuthed } from '../../store/auth'
+import { useIsAuthed, useMe } from '../../store/auth'
 import { Link } from 'react-router-dom'
 import { Building2, Wallet } from 'lucide-react'
 import { WaitlistButton } from '../space/WaitlistButton'
@@ -46,10 +46,12 @@ export function ReservationPanel({ space }: Props) {
   const [note, setNote] = useState('')
   const [useCorporate, setUseCorporate] = useState(false)
   const [useCredit, setUseCredit] = useState(false)
+  const [usePoints, setUsePoints] = useState(false)
   const [addonQty, setAddonQty] = useState<Record<string, number>>({})
   const [isRecurring, setIsRecurring] = useState(false)
   const [recurringWeeks, setRecurringWeeks] = useState(4)
   const { data: corporate } = useCorporateProfile()
+  const me = useMe()
 
   const { startAt, endAt } = useMemo(() => {
     if (!date || !startTime || !endTime) return { startAt: undefined, endAt: undefined }
@@ -103,6 +105,7 @@ export function ReservationPanel({ space }: Props) {
       note: note || undefined,
       useCorporateBilling: useCorporate && !!corporate,
       useCredit: useCorporate && useCredit && !!corporate,
+      usePoints,
       addons: addonSelections.length > 0 ? addonSelections : undefined,
     }
 
@@ -298,6 +301,26 @@ export function ReservationPanel({ space }: Props) {
               </div>
             )}
           </div>
+        )}
+
+        {isAuthed && me && me.pointsKRW > 0 && (
+          <label className="flex items-center gap-2 cursor-pointer rounded-[var(--radius-lg)] hairline p-3">
+            <input
+              type="checkbox"
+              checked={usePoints}
+              onChange={(e) => setUsePoints(e.target.checked)}
+              className="size-4 accent-[var(--color-primary)]"
+            />
+            <span className="text-sm">
+              <span className="inline-flex items-center gap-1 font-semibold">
+                <Coins size={12} className="text-[var(--color-primary)]" />
+                적립 포인트 사용
+              </span>
+              <span className="block text-[11px] text-[var(--color-fg-muted)]">
+                보유 {formatKRW(me.pointsKRW)} — 결제액에서 차감
+              </span>
+            </span>
+          </label>
         )}
 
         {quote && (

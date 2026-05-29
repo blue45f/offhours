@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   calcRefundRate,
+  earnedPoints,
   formatKRW,
   HHmmToMinutes,
   minutesToHHmm,
@@ -59,6 +60,14 @@ describe('formatKRW', () => {
 describe('PLATFORM_FEE_RATE', () => {
   it('수수료율은 12%', () => {
     expect(PLATFORM_FEE_RATE).toBe(0.12)
+  })
+})
+
+describe('earnedPoints', () => {
+  it('실 결제액의 2% 적립(반올림)', () => {
+    expect(earnedPoints(0)).toBe(0)
+    expect(earnedPoints(300_000)).toBe(6_000)
+    expect(earnedPoints(125_000)).toBe(2_500)
   })
 })
 

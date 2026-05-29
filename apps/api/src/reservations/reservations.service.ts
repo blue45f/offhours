@@ -12,6 +12,7 @@ import {
   calcReservationFee,
   calcRefundRate,
   clampTrust,
+  earnedPoints,
   type AddonLine,
   type CheckOutInput,
   type CreateRecurringInput,
@@ -109,6 +110,24 @@ export class ReservationsService {
       }
     }
 
+    // 적립 포인트 사용 — 크레딧 차감 후 남은 결제액에서 추가 차감(모든 게스트). 서버가 잔액을
+    // 직접 읽어 차감하므로 클라이언트 표시가 낡아도 이중 차감이 없다.
+    let pointsAppliedKRW = 0
+    if (input.usePoints) {
+      const guestUser = await this.prisma.user.findUnique({
+        where: { id: guestId },
+        select: { pointsKRW: true },
+      })
+      const payableAfterCredit = Math.max(0, totalKRW - creditAppliedKRW)
+      pointsAppliedKRW = Math.min(guestUser?.pointsKRW ?? 0, payableAfterCredit)
+      if (pointsAppliedKRW > 0) {
+        await this.prisma.user.update({
+          where: { id: guestId },
+          data: { pointsKRW: { decrement: pointsAppliedKRW } },
+        })
+      }
+    }
+
     const reservation = await this.prisma.reservation.create({
       data: {
         code,
@@ -135,6 +154,7 @@ export class ReservationsService {
         corporateProfileId,
         corporateSnapshot: corporateSnapshot ?? undefined,
         creditAppliedKRW,
+        pointsAppliedKRW,
         recurringGroupId: input.recurringGroupId ?? null,
       },
     })
@@ -289,6 +309,13 @@ export class ReservationsService {
         data: { creditBalanceKRW: { increment: r.creditAppliedKRW } },
       })
     }
+    // 사용한 적립 포인트도 취소 시 환원
+    if (r.pointsAppliedKRW > 0) {
+      await this.prisma.user.update({
+        where: { id: r.guestId },
+        data: { pointsKRW: { increment: r.pointsAppliedKRW } },
+      })
+    }
     // 환불률이 낮을수록(=시작 임박 취소) 페널티 가중.
     const penalty = refundRate < 1 ? TRUST_SCORE.PENALTY_GUEST_CANCEL : 0
     if (penalty) await this.bumpTrust(guestId, penalty)
@@ -415,9 +442,11 @@ export class ReservationsService {
         } as object,
       },
     })
+    // 이용 완료 시 실 결제액의 일정 비율을 게스트 포인트로 적립(재방문 레버)
+    const paidKRW = r.totalKRW - r.creditAppliedKRW - r.pointsAppliedKRW
     await this.prisma.user.update({
       where: { id: r.guestId },
-      data: { guestedCount: { increment: 1 } },
+      data: { guestedCount: { increment: 1 }, pointsKRW: { increment: earnedPoints(paidKRW) } },
     })
     await this.prisma.user.update({
       where: { id: r.space.venue.host.userId },
@@ -622,6 +651,7 @@ export class ReservationsService {
         (r as { cancellationPolicy?: 'FLEXIBLE' | 'STANDARD' | 'STRICT' }).cancellationPolicy ??
         'STANDARD',
       creditAppliedKRW: (r as { creditAppliedKRW?: number }).creditAppliedKRW ?? 0,
+      pointsAppliedKRW: (r as { pointsAppliedKRW?: number }).pointsAppliedKRW ?? 0,
       totalKRW: r.totalKRW,
       feeKRW: r.feeKRW,
       cancelReason: r.cancelReason,

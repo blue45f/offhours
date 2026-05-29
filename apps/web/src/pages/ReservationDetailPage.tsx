@@ -56,7 +56,8 @@ export default function ReservationDetailPage() {
   const refundRate = calcRefundRate(reservation.startAt, new Date(), reservation.cancellationPolicy)
   const refundKRW = Math.round(reservation.totalKRW * refundRate)
   const isHost = !!me && me.id === reservation.hostId
-  const payableKRW = reservation.totalKRW - reservation.creditAppliedKRW
+  const payableKRW =
+    reservation.totalKRW - reservation.creditAppliedKRW - reservation.pointsAppliedKRW
 
   async function onCancel() {
     if (cancelReason.trim().length < 2) {
@@ -233,12 +234,20 @@ export default function ReservationDetailPage() {
             )}
             <hr className="border-[var(--color-border-subtle)] my-2" />
             <Row label="총 금액" value={formatKRW(reservation.totalKRW)} strong />
-            {reservation.creditAppliedKRW > 0 && (
+            {(reservation.creditAppliedKRW > 0 || reservation.pointsAppliedKRW > 0) && (
               <>
-                <Row
-                  label="법인 크레딧 차감"
-                  value={`-${formatKRW(reservation.creditAppliedKRW)}`}
-                />
+                {reservation.creditAppliedKRW > 0 && (
+                  <Row
+                    label="법인 크레딧 차감"
+                    value={`-${formatKRW(reservation.creditAppliedKRW)}`}
+                  />
+                )}
+                {reservation.pointsAppliedKRW > 0 && (
+                  <Row
+                    label="적립 포인트 사용"
+                    value={`-${formatKRW(reservation.pointsAppliedKRW)}`}
+                  />
+                )}
                 <Row label="실 결제액" value={formatKRW(payableKRW)} strong />
               </>
             )}

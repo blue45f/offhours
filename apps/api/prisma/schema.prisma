@@ -471,6 +471,8 @@ model Reservation {
   corporateSnapshot  Json?
   /** 법인 크레딧으로 차감한 금액 — 실 결제액 = totalKRW - creditAppliedKRW */
   creditAppliedKRW Int             @default(0)
+  /** 적립 포인트로 차감한 금액 — 실 결제액에서 추가 차감 */
+  pointsAppliedKRW Int             @default(0)
   /** 선택한 유료 옵션(애드온)의 합계와 스냅샷 — [{ addonId, name, unit, qty, unitPriceKRW, amountKRW }] */
   addonsAmountKRW Int             @default(0)
   addonsSnapshot  Json?
