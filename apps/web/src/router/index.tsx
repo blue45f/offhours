@@ -21,6 +21,7 @@ const FavoritesPage = lazy(() => import('../pages/FavoritesPage'))
 const CollectionsPage = lazy(() => import('../pages/CollectionsPage'))
 const CollectionDetailPage = lazy(() => import('../pages/CollectionDetailPage'))
 const PayTokenPage = lazy(() => import('../pages/PayTokenPage'))
+const EventHubPage = lazy(() => import('../pages/EventHubPage'))
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage'))
 const ChatPage = lazy(() => import('../pages/ChatPage'))
 const HostLandingPage = lazy(() => import('../pages/HostLandingPage'))
@@ -112,6 +113,8 @@ export const router = createBrowserRouter([
       { path: 'c/:slug', element: lazyEl(<CollectionDetailPage />) },
       // 1/N 분담 결제 청구 링크 — 토큰으로만 접근, 로그인 불필요
       { path: 'pay/:token', element: lazyEl(<PayTokenPage />) },
+      // 공개 모임 허브 — 친구가 로그인 없이 초대장을 열고 RSVP
+      { path: 'event/:code', element: lazyEl(<EventHubPage />) },
       {
         path: 'notifications',
         element: lazyEl(

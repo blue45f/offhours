@@ -27,6 +27,7 @@ import { ReportsModule } from './reports/reports.module'
 import { AdminModule } from './admin/admin.module'
 import { SeoModule } from './seo/seo.module'
 import { UploadsModule } from './uploads/uploads.module'
+import { EventsModule } from './events/events.module'
 import { HealthController } from './common/health.controller'
 
 @Module({
@@ -57,6 +58,7 @@ import { HealthController } from './common/health.controller'
     AdminModule,
     SeoModule,
     UploadsModule,
+    EventsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -413,6 +413,12 @@ enum ReservationStatus {
   REFUNDED
 }
 
+enum RsvpStatus {
+  GOING
+  MAYBE
+  NO
+}
+
 model Reservation {
   id             String            @id @default(cuid())
   code           String            @unique
@@ -453,9 +459,23 @@ model Reservation {
   chat    Chat?
   dispute Dispute?
   split   ReservationSplit?
+  rsvps   EventRsvp[]
 
   @@index([guestId, status])
   @@index([spaceId, startAt])
+}
+
+model EventRsvp {
+  id            String      @id @default(cuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  name          String
+  status        RsvpStatus
+  clientToken   String
+  createdAt     DateTime    @default(now())
+
+  @@unique([reservationId, clientToken])
+  @@index([reservationId])
 }
 
 enum PaymentProvider {

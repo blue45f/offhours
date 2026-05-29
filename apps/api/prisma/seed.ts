@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient, Role } from '@prisma/client'
+import { PrismaClient, Role, RsvpStatus } from '@prisma/client'
 import * as argon2 from 'argon2'
 import { randomBytes } from 'crypto'
 
@@ -1013,10 +1013,41 @@ async function main() {
     addonSeedCount += specs.length
   }
 
+  // 데모 이벤트 RSVP — 게스트 user 의 최근 예약(APPROVED/PAID/CHECKED_IN/COMPLETED) 최대 2건에
+  // 3~5개의 닉네임 RSVP 를 멱등하게 생성한다. clientToken 은 seed-<resId>-<i> 형식.
+  const rsvpEligibleStatuses = ['APPROVED', 'PAID', 'CHECKED_IN', 'COMPLETED'] as const
+  const demoReservations = await prisma.reservation.findMany({
+    where: { guestId: guest.id, status: { in: [...rsvpEligibleStatuses] } },
+    orderBy: { createdAt: 'desc' },
+    take: 2,
+    select: { id: true },
+  })
+  const rsvpNicknames: Array<{ name: string; status: RsvpStatus }> = [
+    { name: '지원', status: 'GOING' },
+    { name: '민호', status: 'GOING' },
+    { name: '서연', status: 'MAYBE' },
+    { name: '다은', status: 'GOING' },
+    { name: '현우', status: 'NO' },
+  ]
+  let rsvpSeedCount = 0
+  for (const res of demoReservations) {
+    await prisma.eventRsvp.deleteMany({ where: { reservationId: res.id } })
+    const picks = rsvpNicknames.slice(0, 3 + (rsvpSeedCount % 3))
+    await prisma.eventRsvp.createMany({
+      data: picks.map((n, i) => ({
+        reservationId: res.id,
+        name: n.name,
+        status: n.status,
+        clientToken: `seed-${res.id}-${i}`,
+      })),
+    })
+    rsvpSeedCount += picks.length
+  }
+
   console.log(
     `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
       `${hostUsers.length} host response stats, ${collectionsSeed.length} collections, ` +
-      `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides, ${addonSeedCount} addons.`
+      `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides, ${addonSeedCount} addons, ${rsvpSeedCount} rsvps.`
   )
   console.log(`👤 admin@offhours.kr / admin1234  (SUPERADMIN)`)
   console.log(`👤 guest@offhours.kr / guest1234  (USER)`)

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { ReservationStatusLabel, calcRefundRate } from '@offhours/shared'
-import { Building2, MessageCircle, X } from 'lucide-react'
+import { Building2, MessageCircle, Share2, X } from 'lucide-react'
 import { CorporateTaxTypeLabel } from '@offhours/shared'
 
 import { useCancelReservation, useReservationDetail } from '../features/reservations/api'
@@ -59,6 +59,16 @@ export default function ReservationDetailPage() {
     }
   }
 
+  async function onShareEvent() {
+    const url = `${window.location.origin}/event/${reservation.code}`
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('초대 링크를 복사했어요')
+    } catch {
+      toast.error('링크 복사에 실패했어요')
+    }
+  }
+
   return (
     <div className="container-page py-8 md:py-12 max-w-3xl">
       <button
@@ -84,6 +94,21 @@ export default function ReservationDetailPage() {
       <p className="mt-2 text-sm text-[var(--color-fg-muted)]">
         {formatDateTimeKR(reservation.startAt)} – {formatDateTimeKR(reservation.endAt)}
       </p>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Link to={`/event/${reservation.code}`}>
+          <Button variant="secondary" size="sm" leading={<Share2 size={14} />}>
+            모임 허브 공유
+          </Button>
+        </Link>
+        <button
+          type="button"
+          onClick={onShareEvent}
+          className="text-sm text-[var(--color-fg-muted)] underline-offset-4 hover:text-[var(--color-fg)] hover:underline"
+        >
+          초대 링크 복사
+        </button>
+      </div>
 
       <div className="mt-8 grid gap-4">
         <Card>
