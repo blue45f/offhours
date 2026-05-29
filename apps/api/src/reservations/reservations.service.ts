@@ -16,6 +16,7 @@ import {
   type CheckOutInput,
   type CreateRecurringInput,
   type CreateReservationInput,
+  type ExtendReservationInput,
   type FileClaimInput,
   type RecurringResult,
 } from '@offhours/shared'
@@ -283,6 +284,81 @@ export class ReservationsService {
     // 이 시간대가 다시 비었으니 대기자에게 빈자리 알림
     await this.waitlist.notifyOnSlotFreed(r.spaceId).catch(() => null)
     return { ...updated, refundKRW }
+  }
+
+  /**
+   * 이용 시간 연장 — "파티가 무르익었는데 1시간만 더" 수요를 잡는다. 단, 영업 외 대관의
+   * 핵심 제약을 지킨다: 예약이 속한 자동 슬롯의 끝(= 다음 영업 준비 + 청소 버퍼를 남긴
+   * 안전 경계)을 넘길 수 없다. 일반 공간대여 플랫폼은 "다음 영업"을 모델링하지 않아 못 하는
+   * 영업 외 고유 가드. 뒤 예약·호스트 차단과 겹치면 거절하고, 연장분은 동적 가격으로 가산한다.
+   */
+  async extend(guestId: string, reservationId: string, input: ExtendReservationInput) {
+    const r = await this.prisma.reservation.findUnique({
+      where: { id: reservationId },
+      include: { space: { include: { venue: { include: { host: true } } } }, payment: true },
+    })
+    if (!r) throw new NotFoundException()
+    if (r.guestId !== guestId) throw new ForbiddenException()
+    if (!['PAID', 'CHECKED_IN'].includes(r.status)) {
+      throw new BadRequestException('이용 중(결제 완료)인 예약만 연장할 수 있어요')
+    }
+    const newEnd = new Date(r.endAt.getTime() + input.hours * 60 * 60 * 1000)
+
+    // 영업 외 안전 경계 — 예약이 속한 자동 슬롯의 끝(다음 영업 준비 시각)을 넘길 수 없다.
+    const slot = await this.prisma.slot.findFirst({
+      where: { spaceId: r.spaceId, startAt: { lte: r.startAt }, endAt: { gte: r.endAt } },
+      select: { endAt: true },
+    })
+    if (!slot) throw new BadRequestException('이 예약은 연장할 수 없어요')
+    if (newEnd.getTime() > slot.endAt.getTime()) {
+      throw new BadRequestException(
+        `다음 영업 준비 때문에 ${slot.endAt.getHours()}시까지만 연장할 수 있어요`
+      )
+    }
+
+    // 연장 구간에 다른 예약·호스트 차단이 있으면 불가
+    const conflict = await this.prisma.reservation.findFirst({
+      where: {
+        spaceId: r.spaceId,
+        id: { not: r.id },
+        status: { in: ['REQUESTED', 'APPROVED', 'PAID', 'CHECKED_IN'] },
+        startAt: { lt: newEnd },
+        endAt: { gt: r.endAt },
+      },
+    })
+    if (conflict) throw new BadRequestException('연장하려는 시간에 다른 예약이 있어요')
+    const block = await this.prisma.venueBlock.findFirst({
+      where: { venueId: r.space.venueId, startAt: { lt: newEnd }, endAt: { gt: r.endAt } },
+      select: { id: true },
+    })
+    if (block) throw new BadRequestException('연장하려는 시간이 호스트 일정과 겹쳐요')
+
+    const ext = await this.slots.calcExtension(r.spaceId, r.endAt, newEnd, r.purpose)
+    const newBase = r.baseAmountKRW + ext.additionalKRW
+    const newSubtotal = newBase + r.cleaningFeeKRW + r.addonsAmountKRW
+    const newTotal = newSubtotal + r.protectionFeeKRW
+    const updated = await this.prisma.reservation.update({
+      where: { id: r.id },
+      data: {
+        endAt: newEnd,
+        baseAmountKRW: newBase,
+        totalKRW: newTotal,
+        feeKRW: calcReservationFee(newSubtotal),
+      },
+    })
+    if (r.payment) {
+      await this.prisma.payment.update({
+        where: { reservationId: r.id },
+        data: { amountKRW: newTotal },
+      })
+    }
+    await this.notifications.create(r.space.venue.host.userId, {
+      type: 'SYSTEM',
+      title: '이용 시간 연장',
+      body: `${r.space.title} — ${input.hours}시간 연장 (+${ext.additionalKRW.toLocaleString()}원)`,
+      data: { reservationId: r.id },
+    })
+    return { ...updated, additionalKRW: ext.additionalKRW }
   }
 
   async checkIn(hostUserId: string, reservationId: string, code: string) {

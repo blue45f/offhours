@@ -205,4 +205,17 @@ export class SlotsService {
       totalKRW: subtotalKRW + protectionFeeKRW,
     }
   }
+
+  /** 이용 시간 연장의 추가 요금 — 연장 구간에 동적 시간당가 × 시간 × 용도 배수 */
+  async calcExtension(spaceId: string, fromAt: Date, toAt: Date, purpose: Purpose = 'OTHER') {
+    const space = await this.prisma.space.findUnique({
+      where: { id: spaceId },
+      include: { pricingRules: true },
+    })
+    if (!space) throw new NotFoundException('Space not found')
+    const hours = Math.max(1, Math.ceil((toAt.getTime() - fromAt.getTime()) / (60 * 60 * 1000)))
+    const rate = pricePerHour(space.basePriceKRW, space.pricingRules, fromAt, toAt)
+    const additionalKRW = Math.round(rate * hours * purposeMultiplier(purpose))
+    return { hours, additionalKRW }
+  }
 }

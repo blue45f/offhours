@@ -6,12 +6,14 @@ import {
   CheckOutSchema,
   CreateRecurringSchema,
   CreateReservationSchema,
+  ExtendReservationSchema,
   FileClaimSchema,
   RejectReservationSchema,
   type CancelReservationInput,
   type CheckOutInput,
   type CreateRecurringInput,
   type CreateReservationInput,
+  type ExtendReservationInput,
   type FileClaimInput,
   type RejectReservationInput,
 } from '@offhours/shared'
@@ -107,5 +109,14 @@ export class ReservationsController {
     @Body(new ZodValidationPipe(FileClaimSchema)) body: FileClaimInput
   ) {
     return this.reservations.fileClaim(user.id, id, body)
+  }
+
+  @Post(':id/extend')
+  async extend(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(ExtendReservationSchema)) body: ExtendReservationInput
+  ) {
+    return this.reservations.extend(user.id, id, body)
   }
 }

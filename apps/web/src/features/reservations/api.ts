@@ -92,3 +92,15 @@ export function useFileClaim() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
   })
 }
+
+/** 이용 시간 연장 — 영업 외 안전 경계(다음 영업 준비) 안에서 N시간 추가 */
+export function useExtendReservation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (vars: { id: string; hours: number }) =>
+      api.post<{ additionalKRW: number }>(`/reservations/${vars.id}/extend`, {
+        hours: vars.hours,
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
+  })
+}

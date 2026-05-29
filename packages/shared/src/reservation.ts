@@ -40,6 +40,12 @@ export const CancelReservationSchema = z.object({
 })
 export type CancelReservationInput = z.infer<typeof CancelReservationSchema>
 
+/** 이용 시간 연장 — 영업 외 안전 경계(다음 영업 준비) 안에서만 N시간 추가 */
+export const ExtendReservationSchema = z.object({
+  hours: z.number().int().min(1).max(6),
+})
+export type ExtendReservationInput = z.infer<typeof ExtendReservationSchema>
+
 export const ApproveReservationSchema = z.object({
   note: z.string().trim().max(300).optional(),
 })

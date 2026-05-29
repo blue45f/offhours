@@ -8,11 +8,12 @@ import {
   ReservationStatusLabel,
   calcRefundRate,
 } from '@offhours/shared'
-import { Building2, MessageCircle, ShieldCheck, Share2, X } from 'lucide-react'
+import { Building2, Clock, MessageCircle, ShieldCheck, Share2, X } from 'lucide-react'
 import { CorporateTaxTypeLabel } from '@offhours/shared'
 
 import {
   useCancelReservation,
+  useExtendReservation,
   useFileClaim,
   useReservationDetail,
 } from '../features/reservations/api'
@@ -22,6 +23,7 @@ import { Badge } from '../components/ui/Badge'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { Dialog } from '../components/ui/Dialog'
 import { Field, Input, Textarea } from '../components/ui/Input'
+import { Select } from '../components/ui/Select'
 import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 import { getErrorMessage } from '../services/api'
 import { useTossPayment } from '../features/payments/useTossPayment'
@@ -37,11 +39,14 @@ export default function ReservationDetailPage() {
   const [cancelReason, setCancelReason] = useState('')
   const startPay = useTossPayment()
   const fileClaim = useFileClaim()
+  const extend = useExtendReservation()
   const me = useMe()
   const [claimOpen, setClaimOpen] = useState(false)
   const [claimAmount, setClaimAmount] = useState(0)
   const [claimReason, setClaimReason] = useState('')
   const [claimDesc, setClaimDesc] = useState('')
+  const [extendOpen, setExtendOpen] = useState(false)
+  const [extendHours, setExtendHours] = useState(1)
 
   if (isLoading || !data) return <div className="container-page py-12">불러오는 중...</div>
 
@@ -99,6 +104,16 @@ export default function ReservationDetailPage() {
       })
       toast.success('파손 청구가 접수됐어요')
       setClaimOpen(false)
+    } catch (e) {
+      toast.error(getErrorMessage(e))
+    }
+  }
+
+  async function onExtend() {
+    try {
+      const res = await extend.mutateAsync({ id: reservation.id, hours: extendHours })
+      toast.success(`${extendHours}시간 연장됐어요 (+${formatKRW(res.additionalKRW)})`)
+      setExtendOpen(false)
     } catch (e) {
       toast.error(getErrorMessage(e))
     }
@@ -303,6 +318,17 @@ export default function ReservationDetailPage() {
           />
         )}
 
+        {['PAID', 'CHECKED_IN'].includes(reservation.status) && !isHost && (
+          <Button
+            variant="secondary"
+            size="lg"
+            leading={<Clock size={14} />}
+            onClick={() => setExtendOpen(true)}
+          >
+            이용 시간 연장
+          </Button>
+        )}
+
         {['REQUESTED', 'APPROVED', 'PAID'].includes(reservation.status) && (
           <div className="flex flex-wrap gap-2">
             {reservation.status === 'APPROVED' && (
@@ -393,6 +419,31 @@ export default function ReservationDetailPage() {
             />
           </Field>
         </div>
+      </Dialog>
+
+      <Dialog
+        open={extendOpen}
+        onOpenChange={setExtendOpen}
+        title="이용 시간 연장"
+        description="다음 영업 준비를 위한 안전 경계 안에서만 연장돼요. 추가 요금은 동적 가격으로 계산됩니다."
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setExtendOpen(false)}>
+              닫기
+            </Button>
+            <Button onClick={onExtend} loading={extend.isPending}>
+              {extendHours}시간 연장
+            </Button>
+          </>
+        }
+      >
+        <Field label="연장 시간">
+          <Select
+            value={String(extendHours)}
+            onValueChange={(v) => setExtendHours(Number(v))}
+            options={[1, 2, 3, 4, 5, 6].map((h) => ({ value: String(h), label: `${h}시간` }))}
+          />
+        </Field>
       </Dialog>
     </div>
   )
