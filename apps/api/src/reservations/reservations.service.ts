@@ -18,13 +18,15 @@ import { PrismaService } from '../prisma/prisma.service'
 import { SlotsService } from '../slots/slots.service'
 import { randomCode } from '../common/util/code'
 import { NotificationsService } from '../notifications/notifications.service'
+import { WaitlistService } from '../waitlist/waitlist.service'
 
 @Injectable()
 export class ReservationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly slots: SlotsService,
-    private readonly notifications: NotificationsService
+    private readonly notifications: NotificationsService,
+    private readonly waitlist: WaitlistService
   ) {}
 
   async create(guestId: string, input: CreateReservationInput) {
@@ -223,6 +225,8 @@ export class ReservationsService {
       body: `${r.code} 게스트 취소 (환불률 ${Math.round(refundRate * 100)}%)`,
       data: { reservationId: r.id, refundKRW },
     })
+    // 이 시간대가 다시 비었으니 대기자에게 빈자리 알림
+    await this.waitlist.notifyOnSlotFreed(r.spaceId).catch(() => null)
     return { ...updated, refundKRW }
   }
 

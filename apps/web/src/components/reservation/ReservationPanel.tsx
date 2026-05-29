@@ -22,6 +22,7 @@ import { useCorporateProfile } from '../../features/corporate/api'
 import { useIsAuthed } from '../../store/auth'
 import { Link } from 'react-router-dom'
 import { Building2 } from 'lucide-react'
+import { WaitlistButton } from '../space/WaitlistButton'
 import { formatKRW } from '../../utils/format'
 import { getErrorMessage } from '../../services/api'
 
@@ -237,6 +238,8 @@ export function ReservationPanel({ space }: Props) {
         <p className="text-xs text-[var(--color-fg-subtle)] text-center">
           취소·환불 정책은 결제 전에 확인할 수 있어요.
         </p>
+
+        <WaitlistButton spaceId={space.id} />
       </form>
     </Card>
   )

@@ -59,6 +59,7 @@ model User {
   reviewsAbout    Review[]         @relation("SubjectReviews")
   favorites       Favorite[]
   collections     Collection[]
+  waitlists       SpaceWaitlist[]
   notifications   Notification[]
   chats           ChatMembership[]
   chatMessages    ChatMessage[]
@@ -337,6 +338,7 @@ model Space {
   reservations Reservation[]
   reviews      Review[]
   favorites    Favorite[]
+  waitlist     SpaceWaitlist[]
 
   @@index([status, createdAt])
   @@index([venueId])
@@ -636,6 +638,25 @@ model Notification {
   createdAt DateTime         @default(now())
 
   @@index([userId, readAt])
+}
+
+/**
+ * 빈자리 알림 대기 — 인기 공간이 꽉 찼을 때 게스트가 신청. 취소·신규 슬롯 발생 시 알림.
+ * 호스트에겐 "N명 대기 중" 수요 신호로 노출되어 영업 외 시간을 더 열도록 유도(= 추가 수입).
+ */
+model SpaceWaitlist {
+  id         String    @id @default(cuid())
+  spaceId    String
+  space      Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /** 원하는 날짜(선택). null = 아무 날이나 */
+  desiredDate DateTime?
+  notifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@unique([spaceId, userId])
+  @@index([spaceId])
 }
 
 model Favorite {

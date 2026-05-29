@@ -21,6 +21,7 @@ import { CollectionsModule } from './collections/collections.module'
 import { SplitsModule } from './splits/splits.module'
 import { CalendarsModule } from './calendars/calendars.module'
 import { CorporateModule } from './corporate/corporate.module'
+import { WaitlistModule } from './waitlist/waitlist.module'
 import { ReportsModule } from './reports/reports.module'
 import { AdminModule } from './admin/admin.module'
 import { SeoModule } from './seo/seo.module'
@@ -49,6 +50,7 @@ import { HealthController } from './common/health.controller'
     SplitsModule,
     CalendarsModule,
     CorporateModule,
+    WaitlistModule,
     ReportsModule,
     AdminModule,
     SeoModule,
