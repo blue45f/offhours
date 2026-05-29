@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 
@@ -6,6 +7,8 @@ import { AdminShell } from '../../components/admin/AdminShell'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card, CardBody } from '../../components/ui/Card'
+import { Dialog } from '../../components/ui/Dialog'
+import { Field, Textarea } from '../../components/ui/Input'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { formatDateTimeKR } from '../../utils/format'
 
@@ -20,6 +23,9 @@ interface Report {
   reporter: { id: string; name: string }
 }
 
+type ResolveStatus = 'RESOLVED' | 'DISMISSED'
+const ACTION_LABEL: Record<ResolveStatus, string> = { RESOLVED: '해결', DISMISSED: '기각' }
+
 export default function AdminReportsPage() {
   const qc = useQueryClient()
   const { data } = useQuery({
@@ -27,19 +33,32 @@ export default function AdminReportsPage() {
     queryFn: () => api.get<{ items: Report[]; total: number }>('/admin/reports'),
   })
   const resolve = useMutation({
-    mutationFn: (vars: { id: string; status: 'RESOLVED' | 'DISMISSED'; resolution: string }) =>
+    mutationFn: (vars: { id: string; status: ResolveStatus; resolution: string }) =>
       api.patch(`/admin/reports/${vars.id}/resolve`, vars),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'reports'] }),
   })
 
-  async function onResolve(id: string, status: 'RESOLVED' | 'DISMISSED') {
-    const resolution = prompt(status === 'RESOLVED' ? '처리 내용' : '기각 사유') ?? ''
-    if (!resolution) return
+  // 처리 다이얼로그 — 신고 맥락을 유지한 채 사유를 입력받는다(native prompt 대체)
+  const [acting, setActing] = useState<{ report: Report; status: ResolveStatus } | null>(null)
+  const [note, setNote] = useState('')
+
+  function start(report: Report, status: ResolveStatus) {
+    setNote('')
+    setActing({ report, status })
+  }
+
+  async function submit() {
+    if (!acting) return
+    if (note.trim().length < 2) {
+      toast.error('처리 사유를 입력해주세요')
+      return
+    }
     try {
-      await resolve.mutateAsync({ id, status, resolution })
+      await resolve.mutateAsync({ id: acting.report.id, status: acting.status, resolution: note })
       toast.success('처리 완료')
+      setActing(null)
     } catch {
-      toast.error('실패')
+      toast.error('처리에 실패했어요')
     }
   }
 
@@ -76,14 +95,10 @@ export default function AdminReportsPage() {
                   </div>
                   {r.status !== 'RESOLVED' && r.status !== 'DISMISSED' && (
                     <div className="flex flex-col gap-2">
-                      <Button size="sm" onClick={() => onResolve(r.id, 'RESOLVED')}>
+                      <Button size="sm" onClick={() => start(r, 'RESOLVED')}>
                         해결
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onResolve(r.id, 'DISMISSED')}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => start(r, 'DISMISSED')}>
                         기각
                       </Button>
                     </div>
@@ -94,6 +109,32 @@ export default function AdminReportsPage() {
           ))}
         </ul>
       )}
+
+      <Dialog
+        open={!!acting}
+        onOpenChange={(o) => !o && setActing(null)}
+        title={acting ? `${ACTION_LABEL[acting.status]} 처리` : ''}
+        description={acting ? `${acting.report.targetType} · ${acting.report.reason}` : undefined}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setActing(null)}>
+              닫기
+            </Button>
+            <Button onClick={submit} loading={resolve.isPending}>
+              {acting ? ACTION_LABEL[acting.status] : '확정'}
+            </Button>
+          </>
+        }
+      >
+        <Field label="처리 사유" helper="감사 로그에 기록됩니다">
+          <Textarea
+            placeholder="처리 내용 또는 기각 사유를 적어주세요"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={4}
+          />
+        </Field>
+      </Dialog>
     </AdminShell>
   )
 }
