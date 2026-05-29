@@ -1,0 +1,374 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-29T03:33:13Z",
+  "title": "Design System: Offhours",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "Primary brand color — primary buttons, links, active states, focus ring, price emphasis",
+        "displayName": "Deep Olive",
+        "canonical": "#5a6f4f",
+        "tonalRamp": [
+          "oklch(0.26 0.03 135)",
+          "oklch(0.34 0.04 135)",
+          "oklch(0.43 0.05 135)",
+          "oklch(0.52 0.055 135)",
+          "oklch(0.6 0.05 135)",
+          "oklch(0.72 0.045 135)",
+          "oklch(0.85 0.035 135)",
+          "oklch(0.95 0.02 135)"
+        ]
+      },
+      "accent-sienna": {
+        "role": "The one accent (≤5% of a screen) — live slot badges, favorited heart, single eyebrow label",
+        "displayName": "Burnt Sienna",
+        "canonical": "#c97550",
+        "tonalRamp": [
+          "oklch(0.32 0.07 45)",
+          "oklch(0.42 0.1 45)",
+          "oklch(0.52 0.12 45)",
+          "oklch(0.63 0.13 45)",
+          "oklch(0.7 0.12 45)",
+          "oklch(0.82 0.09 45)",
+          "oklch(0.91 0.05 45)",
+          "oklch(0.97 0.02 45)"
+        ]
+      },
+      "cream-bg": {
+        "role": "Default page background — the system never sits on pure white",
+        "displayName": "Cream Page",
+        "canonical": "#faf8f4",
+        "tonalRamp": [
+          "oklch(0.22 0.005 80)",
+          "oklch(0.31 0.006 80)",
+          "oklch(0.42 0.007 80)",
+          "oklch(0.55 0.008 80)",
+          "oklch(0.68 0.008 80)",
+          "oklch(0.82 0.007 80)",
+          "oklch(0.93 0.006 80)",
+          "oklch(0.98 0.004 80)"
+        ]
+      },
+      "ink": {
+        "role": "Primary text — warm near-black, never pure #000",
+        "displayName": "Ink",
+        "canonical": "#1a1814",
+        "tonalRamp": [
+          "oklch(0.2 0.006 70)",
+          "oklch(0.3 0.008 70)",
+          "oklch(0.4 0.009 70)",
+          "oklch(0.5 0.01 70)",
+          "oklch(0.61 0.011 70)",
+          "oklch(0.72 0.009 70)",
+          "oklch(0.85 0.007 70)",
+          "oklch(0.95 0.004 70)"
+        ]
+      },
+      "fg-muted": {
+        "role": "Secondary text — meta rows, helper copy",
+        "displayName": "Muted Ink",
+        "canonical": "#67604f",
+        "tonalRamp": [
+          "oklch(0.24 0.012 85)",
+          "oklch(0.33 0.014 85)",
+          "oklch(0.43 0.016 85)",
+          "oklch(0.52 0.017 85)",
+          "oklch(0.63 0.016 85)",
+          "oklch(0.75 0.013 85)",
+          "oklch(0.86 0.009 85)",
+          "oklch(0.96 0.004 85)"
+        ]
+      },
+      "border": {
+        "role": "Hairline separators — the structural work shadows would otherwise do",
+        "displayName": "Border",
+        "canonical": "#e5e0d5",
+        "tonalRamp": [
+          "oklch(0.27 0.008 85)",
+          "oklch(0.37 0.01 85)",
+          "oklch(0.47 0.011 85)",
+          "oklch(0.58 0.012 85)",
+          "oklch(0.7 0.011 85)",
+          "oklch(0.82 0.009 85)",
+          "oklch(0.91 0.008 85)",
+          "oklch(0.97 0.005 85)"
+        ]
+      },
+      "success": {
+        "role": "Success status — muted, warmed to belong to the room; soft 14% tint by default",
+        "displayName": "Forest Success",
+        "canonical": "#2f8f5e",
+        "tonalRamp": [
+          "oklch(0.26 0.05 155)",
+          "oklch(0.35 0.07 155)",
+          "oklch(0.45 0.09 155)",
+          "oklch(0.55 0.1 155)",
+          "oklch(0.64 0.095 155)",
+          "oklch(0.76 0.075 155)",
+          "oklch(0.88 0.05 155)",
+          "oklch(0.96 0.02 155)"
+        ]
+      },
+      "warning": {
+        "role": "Warning status — also the trust-gauge 'caution' amber signal",
+        "displayName": "Amber Warning",
+        "canonical": "#c9942e",
+        "tonalRamp": [
+          "oklch(0.3 0.06 80)",
+          "oklch(0.4 0.08 80)",
+          "oklch(0.5 0.1 80)",
+          "oklch(0.6 0.115 80)",
+          "oklch(0.71 0.11 80)",
+          "oklch(0.82 0.085 80)",
+          "oklch(0.91 0.05 80)",
+          "oklch(0.97 0.02 80)"
+        ]
+      },
+      "error": {
+        "role": "Error status — form errors, destructive actions, dispute signals",
+        "displayName": "Clay Error",
+        "canonical": "#b33a3a",
+        "tonalRamp": [
+          "oklch(0.3 0.08 25)",
+          "oklch(0.4 0.11 25)",
+          "oklch(0.5 0.14 25)",
+          "oklch(0.58 0.15 25)",
+          "oklch(0.68 0.13 25)",
+          "oklch(0.79 0.09 25)",
+          "oklch(0.89 0.05 25)",
+          "oklch(0.96 0.02 25)"
+        ]
+      },
+      "info": {
+        "role": "Info status — neutral informational tint",
+        "displayName": "Slate Info",
+        "canonical": "#3d6f8f",
+        "tonalRamp": [
+          "oklch(0.28 0.04 240)",
+          "oklch(0.37 0.055 240)",
+          "oklch(0.47 0.07 240)",
+          "oklch(0.56 0.08 240)",
+          "oklch(0.66 0.075 240)",
+          "oklch(0.77 0.06 240)",
+          "oklch(0.88 0.04 240)",
+          "oklch(0.96 0.018 240)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display (Noto Serif KR)",
+        "purpose": "One per page — the hero promise; the single place the system raises its voice, with serif elegance over size."
+      },
+      "headline": {
+        "displayName": "Headline (Noto Serif KR)",
+        "purpose": "Section openers (e.g. '어떤 모임이세요?'); emotional, feeling-led moments."
+      },
+      "title": {
+        "displayName": "Title (Pretendard)",
+        "purpose": "Card titles and panel headers; semibold sans that does not compete with the serif."
+      },
+      "body": {
+        "displayName": "Body (Pretendard)",
+        "purpose": "Default reading text, held to a 65–75ch measure; runs ss03 numerals."
+      },
+      "label": {
+        "displayName": "Label / Meta (Pretendard)",
+        "purpose": "Meta rows, chips, badges, helper copy; medium weight, muted ink, slight tracking."
+      }
+    },
+    "shadows": [
+      {
+        "name": "--shadow-sm",
+        "value": "0 1px 2px rgba(26, 24, 20, 0.04)",
+        "purpose": "Faintest seat — primary buttons, hot/new pills, the floating thumbnail chip on card hover."
+      },
+      {
+        "name": "--shadow-md",
+        "value": "0 4px 12px rgba(26, 24, 20, 0.08)",
+        "purpose": "Popovers, dropdowns, and the lift a card earns on hover."
+      },
+      {
+        "name": "--shadow-lg",
+        "value": "0 12px 28px rgba(26, 24, 20, 0.12)",
+        "purpose": "Larger floating panels and sheets."
+      },
+      {
+        "name": "--shadow-xl",
+        "value": "0 24px 48px rgba(26, 24, 20, 0.16)",
+        "purpose": "Modals and dialogs only — the highest float in the system."
+      }
+    ],
+    "motion": [
+      {
+        "name": "--duration-fast",
+        "value": "140ms",
+        "purpose": "Hover/press micro-interactions — buttons, chips, input focus bloom."
+      },
+      {
+        "name": "--duration-base",
+        "value": "240ms",
+        "purpose": "Default quiet exhale — card hover lift, fade-in, slide-up, modal enter."
+      },
+      {
+        "name": "--duration-slow",
+        "value": "420ms",
+        "purpose": "Larger transitions — thumbnail zoom, hover-carousel cross-fade tail."
+      },
+      {
+        "name": "--easing-standard",
+        "value": "cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "The single decelerating curve used almost everywhere — no bounce."
+      },
+      {
+        "name": "--easing-emphasized",
+        "value": "cubic-bezier(0.3, 0, 0, 1)",
+        "purpose": "Slightly sharper decelerate for emphasized entrances."
+      },
+      {
+        "name": "--easing-spring",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "Reserved strictly for a tiny press feel — never for entrances or overshoot."
+      }
+    ],
+    "breakpoints": [
+      { "name": "xs", "value": "320px" },
+      { "name": "sm", "value": "390px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "2xl", "value": "1536px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button — Primary",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single most important action: Deep Olive fill, white text, faint seat shadow, gently curved 14px radius. Hover steps darker; press scales to 0.98; focus-visible draws the 2px olive ring. No lift, no glow.",
+      "html": "<button class=\"ds-btn ds-btn--primary\" type=\"button\">예약하기</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-weight: 500; font-size: 0.9375rem; line-height: 1.3; height: 40px; padding: 0 16px; border: 0; border-radius: var(--radius-lg, 14px); cursor: pointer; user-select: none; transition: background 140ms cubic-bezier(0.2,0,0,1), color 140ms cubic-bezier(0.2,0,0,1), box-shadow 140ms cubic-bezier(0.2,0,0,1), transform 140ms cubic-bezier(0.2,0,0,1); }\n.ds-btn--primary { background: var(--color-primary, #5a6f4f); color: var(--color-primary-fg, #ffffff); box-shadow: var(--shadow-sm, 0 1px 2px rgba(26,24,20,0.04)); }\n.ds-btn--primary:hover { background: var(--color-primary-hover, #4a5f3f); }\n.ds-btn--primary:active { background: var(--color-primary-active, #3a4b32); transform: scale(0.98); }\n.ds-btn--primary:focus-visible { outline: 2px solid var(--color-primary, #5a6f4f); outline-offset: 2px; }\n.ds-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Button — Ghost",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-emphasis action: transparent until hovered, ink text on a cream-subtle bed. Same shape and motion as primary, zero resting shadow.",
+      "html": "<button class=\"ds-btn ds-btn--ghost\" type=\"button\">취소</button>",
+      "css": ".ds-btn--ghost { background: transparent; color: var(--color-fg, #1a1814); box-shadow: none; font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-weight: 500; font-size: 0.9375rem; height: 40px; padding: 0 16px; border: 0; border-radius: var(--radius-lg, 14px); display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 140ms cubic-bezier(0.2,0,0,1), transform 140ms cubic-bezier(0.2,0,0,1); }\n.ds-btn--ghost:hover { background: var(--color-bg-subtle, #f1eee7); }\n.ds-btn--ghost:active { transform: scale(0.98); }\n.ds-btn--ghost:focus-visible { outline: 2px solid var(--color-primary, #5a6f4f); outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip — Selected",
+      "kind": "chip",
+      "refersTo": "chip-selected",
+      "description": "The pill switch. 36px tall, full pill radius. Unselected: elevated-white with a hairline that strengthens on hover. Selected inverts to warm-ink fill with cream text — the strongest yet calmest 'on' state.",
+      "html": "<div style=\"display:flex; gap:8px;\">\n  <button class=\"ds-chip\" type=\"button\">전체</button>\n  <button class=\"ds-chip ds-chip--selected\" type=\"button\" aria-pressed=\"true\">스몰웨딩</button>\n</div>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-size: 0.875rem; font-weight: 500; border-radius: var(--radius-pill, 9999px); background: var(--color-bg-elevated, #ffffff); color: var(--color-fg, #1a1814); border: 1px solid var(--color-border, #e5e0d5); cursor: pointer; transition: background 140ms cubic-bezier(0.2,0,0,1), color 140ms cubic-bezier(0.2,0,0,1), border-color 140ms cubic-bezier(0.2,0,0,1); }\n.ds-chip:hover { border-color: var(--color-border-strong, #c8c1b3); }\n.ds-chip--selected { background: var(--color-fg, #1a1814); color: var(--color-bg, #faf8f4); border-color: transparent; }\n.ds-chip:focus-visible { outline: 2px solid var(--color-primary, #5a6f4f); outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat envelope: 18px radius, elevated-white surface, a single hairline, no resting shadow. The interactive variant lifts 2px and earns a medium shadow only on hover, over the slow 240ms curve.",
+      "html": "<div class=\"ds-card ds-card--interactive\">\n  <div class=\"ds-card__body\">\n    <h3 class=\"ds-card__title\">망원동 라운지 카페</h3>\n    <p class=\"ds-card__meta\">마포구 · 카페 · 최대 40인</p>\n  </div>\n</div>",
+      "css": ".ds-card { border-radius: var(--radius-xl, 18px); background: var(--color-bg-elevated, #ffffff); border: 1px solid var(--color-border, #e5e0d5); box-shadow: none; overflow: hidden; }\n.ds-card--interactive { transition: transform 240ms cubic-bezier(0.2,0,0,1), box-shadow 240ms cubic-bezier(0.2,0,0,1); cursor: pointer; }\n.ds-card--interactive:hover { transform: translateY(-2px); box-shadow: var(--shadow-md, 0 4px 12px rgba(26,24,20,0.08)); }\n.ds-card__body { padding: 24px; }\n.ds-card__title { margin: 0; font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; color: var(--color-fg, #1a1814); }\n.ds-card__meta { margin: 6px 0 0; font-size: 0.8125rem; letter-spacing: 0.01em; color: var(--color-fg-muted, #67604f); }"
+    },
+    {
+      "name": "Input — Field with olive focus",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Calm well: 44px tall, 14px radius, elevated-white, hairline border. Focus draws the border to Deep Olive and blooms a 2px Olive-Soft ring on the fast curve — gentle, never a hard glow.",
+      "html": "<label class=\"ds-field\">\n  <span class=\"ds-field__label\">이메일</span>\n  <div class=\"ds-input\">\n    <input class=\"ds-input__el\" type=\"email\" placeholder=\"you@example.com\" />\n  </div>\n  <span class=\"ds-field__helper\">예약 확인을 보내드려요.</span>\n</label>",
+      "css": ".ds-field { display: block; }\n.ds-field__label { display: block; margin-bottom: 6px; font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-size: 0.875rem; font-weight: 500; color: var(--color-fg, #1a1814); }\n.ds-field__helper { display: block; margin-top: 6px; font-size: 0.75rem; color: var(--color-fg-subtle, #847b6a); }\n.ds-input { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: var(--radius-lg, 14px); background: var(--color-bg-elevated, #ffffff); border: 1px solid var(--color-border, #e5e0d5); transition: border-color 140ms cubic-bezier(0.2,0,0,1), box-shadow 140ms cubic-bezier(0.2,0,0,1); }\n.ds-input:focus-within { border-color: var(--color-primary, #5a6f4f); box-shadow: 0 0 0 2px var(--color-primary-soft, #e8eee5); }\n.ds-input__el { width: 100%; border: 0; outline: none; background: transparent; font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-size: 0.9375rem; color: var(--color-fg, #1a1814); }\n.ds-input__el::placeholder { color: var(--color-fg-subtle, #847b6a); }"
+    },
+    {
+      "name": "Badge — Soft",
+      "kind": "chip",
+      "refersTo": "badge-soft",
+      "description": "Quiet label pill on a soft tint. Default primary tone uses Olive-Soft bed with Deep Olive text; the accent tone is the rare Sienna ember reserved for live/last-minute signals.",
+      "html": "<div style=\"display:flex; gap:8px; align-items:center;\">\n  <span class=\"ds-badge ds-badge--primary\">즉시 예약</span>\n  <span class=\"ds-badge ds-badge--accent\"><span class=\"ds-badge__dot\"></span>오늘 22:00 가능 · -10%</span>\n</div>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-pill, 9999px); font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-size: 0.75rem; font-weight: 500; line-height: 1; }\n.ds-badge--primary { background: var(--color-primary-soft, #e8eee5); color: var(--color-primary, #5a6f4f); }\n.ds-badge--accent { background: var(--color-accent-soft, #ffe5d2); color: var(--color-accent, #c97550); }\n.ds-badge__dot { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }"
+    },
+    {
+      "name": "Availability Calendar — Off-hours slots",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "The off-hours USP made tactile. A 7-column grid where nights with open after-close slots glow Olive-Soft with a small olive dot; the selected day fills Deep Olive; other days recede to 40% subtle ink. Slot chips warm to Olive-Soft on hover.",
+      "html": "<div class=\"ds-cal\">\n  <div class=\"ds-cal__month\">2026년 6월</div>\n  <div class=\"ds-cal__grid\">\n    <div class=\"ds-cal__wd ds-cal__wd--sun\">일</div>\n    <div class=\"ds-cal__wd\">월</div>\n    <div class=\"ds-cal__wd\">화</div>\n    <div class=\"ds-cal__wd\">수</div>\n    <div class=\"ds-cal__wd\">목</div>\n    <div class=\"ds-cal__wd\">금</div>\n    <div class=\"ds-cal__wd ds-cal__wd--sat\">토</div>\n    <button class=\"ds-cal__day ds-cal__day--muted\" disabled>1</button>\n    <button class=\"ds-cal__day ds-cal__day--open\" type=\"button\">2<span class=\"ds-cal__dot\"></span></button>\n    <button class=\"ds-cal__day ds-cal__day--selected\" type=\"button\">3</button>\n    <button class=\"ds-cal__day ds-cal__day--open\" type=\"button\">4<span class=\"ds-cal__dot\"></span></button>\n    <button class=\"ds-cal__day ds-cal__day--muted\" disabled>5</button>\n    <button class=\"ds-cal__day ds-cal__day--muted\" disabled>6</button>\n    <button class=\"ds-cal__day ds-cal__day--open\" type=\"button\">7<span class=\"ds-cal__dot\"></span></button>\n  </div>\n  <div class=\"ds-cal__slots\">\n    <button class=\"ds-cal__slot\" type=\"button\">\n      <svg width=\"10\" height=\"10\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/></svg>\n      23:00–06:00 · 7시간\n    </button>\n  </div>\n</div>",
+      "css": ".ds-cal { font-family: 'Pretendard Variable', 'Pretendard', sans-serif; color: var(--color-fg, #1a1814); }\n.ds-cal__month { margin-bottom: 8px; font-size: 0.875rem; font-weight: 500; color: var(--color-fg-muted, #67604f); }\n.ds-cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }\n.ds-cal__wd { font-size: 10px; font-weight: 600; padding-bottom: 4px; color: var(--color-fg-muted, #67604f); }\n.ds-cal__wd--sun { color: var(--color-error, #b33a3a); }\n.ds-cal__wd--sat { color: var(--color-primary, #5a6f4f); }\n.ds-cal__day { position: relative; aspect-ratio: 1 / 1; border: 0; border-radius: var(--radius-md, 10px); font-size: 0.75rem; background: transparent; color: var(--color-fg-subtle, #847b6a); cursor: pointer; transition: background 140ms cubic-bezier(0.2,0,0,1), color 140ms cubic-bezier(0.2,0,0,1); }\n.ds-cal__day--muted { opacity: 0.4; cursor: default; }\n.ds-cal__day--open { background: var(--color-primary-soft, #e8eee5); color: var(--color-fg, #1a1814); font-weight: 600; }\n.ds-cal__day--open:hover { background: var(--color-primary, #5a6f4f); color: var(--color-primary-fg, #ffffff); }\n.ds-cal__day--selected { background: var(--color-primary, #5a6f4f); color: var(--color-primary-fg, #ffffff); font-weight: 700; }\n.ds-cal__dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 9999px; background: var(--color-primary, #5a6f4f); }\n.ds-cal__day--open:hover .ds-cal__dot { background: var(--color-primary-fg, #ffffff); }\n.ds-cal__slots { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }\n.ds-cal__slot { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 0; border-radius: var(--radius-pill, 9999px); background: var(--color-bg-subtle, #f1eee7); color: var(--color-fg, #1a1814); font-size: 11px; font-weight: 500; cursor: pointer; transition: background 140ms cubic-bezier(0.2,0,0,1), color 140ms cubic-bezier(0.2,0,0,1); }\n.ds-cal__slot:hover { background: var(--color-primary-soft, #e8eee5); color: var(--color-primary, #5a6f4f); }\n.ds-cal__slot:focus-visible, .ds-cal__day:focus-visible { outline: 2px solid var(--color-primary, #5a6f4f); outline-offset: 2px; }"
+    },
+    {
+      "name": "Add-on Picker — Paid option row",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "A quiet upsell rail. Each paid option is a hairline row at 14px radius; an active row washes to Olive-Soft. A 28px circular stepper adjusts quantity and the live subtotal prints inline in Deep Olive. A single Sienna sparkles glyph marks the section — the lone accent.",
+      "html": "<div class=\"ds-addon\">\n  <div class=\"ds-addon__head\">\n    <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ds-addon__spark\" aria-hidden=\"true\"><path d=\"M12 3v4M12 17v4M5 12H1M23 12h-4M6.3 6.3 3.5 3.5M20.5 20.5l-2.8-2.8M17.7 6.3l2.8-2.8M3.5 20.5l2.8-2.8\"/></svg>\n    옵션 추가\n  </div>\n  <div class=\"ds-addon__row ds-addon__row--active\">\n    <div class=\"ds-addon__info\">\n      <div class=\"ds-addon__name\">빔프로젝터</div>\n      <div class=\"ds-addon__price\">30,000원 · 건당 <span class=\"ds-addon__sub\">· 30,000원</span></div>\n    </div>\n    <div class=\"ds-addon__stepper\">\n      <button class=\"ds-addon__btn\" type=\"button\" aria-label=\"수량 감소\">−</button>\n      <span class=\"ds-addon__qty\">1</span>\n      <button class=\"ds-addon__btn\" type=\"button\" aria-label=\"수량 증가\">+</button>\n    </div>\n  </div>\n</div>",
+      "css": ".ds-addon { font-family: 'Pretendard Variable', 'Pretendard', sans-serif; color: var(--color-fg, #1a1814); }\n.ds-addon__head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 0.875rem; font-weight: 500; }\n.ds-addon__spark { color: var(--color-accent, #c97550); }\n.ds-addon__row { display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--color-border, #e5e0d5); border-radius: var(--radius-lg, 14px); transition: background 140ms cubic-bezier(0.2,0,0,1); }\n.ds-addon__row--active { background: var(--color-primary-soft, #e8eee5); }\n.ds-addon__info { min-width: 0; flex: 1; }\n.ds-addon__name { font-size: 0.875rem; font-weight: 500; }\n.ds-addon__price { font-size: 11px; color: var(--color-fg-muted, #67604f); }\n.ds-addon__sub { color: var(--color-primary, #5a6f4f); font-weight: 500; }\n.ds-addon__stepper { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }\n.ds-addon__btn { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9999px; border: 1px solid var(--color-border, #e5e0d5); background: transparent; color: var(--color-fg, #1a1814); cursor: pointer; transition: background 140ms cubic-bezier(0.2,0,0,1); }\n.ds-addon__btn:hover { background: var(--color-bg-subtle, #f1eee7); }\n.ds-addon__btn:focus-visible { outline: 2px solid var(--color-primary, #5a6f4f); outline-offset: 2px; }\n.ds-addon__qty { width: 20px; text-align: center; font-size: 0.875rem; font-weight: 600; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Space Card — Hover carousel + live slot",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The quiet-luxury curation surface. A 4:3 image in an 18px frame; photos cross-fade on hover (500ms, desktop only). Overlay favorite/compare controls sit on a translucent scrim and scale on hover; the favorited heart fills Burnt Sienna. A live off-hours slot prints in a Sienna-Soft pill.",
+      "html": "<a class=\"ds-spacecard\" href=\"#\">\n  <div class=\"ds-spacecard__media\">\n    <div class=\"ds-spacecard__img\"></div>\n    <button class=\"ds-spacecard__fav\" type=\"button\" aria-label=\"찜하기\">\n      <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"var(--color-accent, #c97550)\" stroke=\"var(--color-accent, #c97550)\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z\"/></svg>\n    </button>\n  </div>\n  <div class=\"ds-spacecard__body\">\n    <div class=\"ds-spacecard__meta\">마포구 망원동 · 카페</div>\n    <h3 class=\"ds-spacecard__title\">햇살 드는 라운지 카페</h3>\n    <span class=\"ds-spacecard__slot\">\n      <svg width=\"10\" height=\"10\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/></svg>\n      오늘 22:00 가능 · -10%\n    </span>\n    <div class=\"ds-spacecard__price\">시간당 <span class=\"ds-spacecard__price-num\">55,000원</span></div>\n  </div>\n</a>",
+      "css": ".ds-spacecard { display: block; text-decoration: none; color: var(--color-fg, #1a1814); font-family: 'Pretendard Variable', 'Pretendard', sans-serif; }\n.ds-spacecard__media { position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius-xl, 18px); overflow: hidden; background: var(--color-bg-subtle, #f1eee7); }\n.ds-spacecard__img { position: absolute; inset: 0; background: linear-gradient(135deg, var(--color-primary-soft, #e8eee5), var(--color-bg-subtle, #f1eee7)); transition: transform 420ms cubic-bezier(0.2,0,0,1); }\n.ds-spacecard:hover .ds-spacecard__img { transform: scale(1.04); }\n.ds-spacecard__fav { position: absolute; top: 12px; right: 12px; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; border-radius: 9999px; background: rgba(26, 24, 20, 0.3); backdrop-filter: blur(4px); cursor: pointer; transition: transform 140ms cubic-bezier(0.2,0,0,1); }\n.ds-spacecard__fav:hover { transform: scale(1.05); }\n.ds-spacecard__fav:focus-visible { outline: 2px solid var(--color-primary, #5a6f4f); outline-offset: 2px; }\n.ds-spacecard__body { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }\n.ds-spacecard__meta { font-size: 0.8125rem; letter-spacing: 0.01em; color: var(--color-fg-muted, #67604f); }\n.ds-spacecard__title { margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.3; }\n.ds-spacecard:hover .ds-spacecard__title { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }\n.ds-spacecard__slot { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; padding: 2px 8px; border-radius: 9999px; background: var(--color-accent-soft, #ffe5d2); color: var(--color-accent, #c97550); font-size: 11px; font-weight: 600; }\n.ds-spacecard__price { font-size: 0.875rem; font-weight: 600; }\n.ds-spacecard__price-num { color: var(--color-primary, #5a6f4f); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lights Stay On After Closing. Offhours is built on a single quiet image: a beautiful cafe an hour after its last customer leaves, the chairs still warm, the evening light going amber — a space at its most cinematic precisely when it is officially idle. The whole interface exists to make that off-hour feel like a discovery, not a discount bin. The product sells borrowed time in borrowed rooms, so the design treats restraint as the luxury: we decorate the negative space of someone else's business, and we honor it by adding almost nothing.",
+    "overview": "Quiet Luxury filtered through Korean restraint (여백의 미) — the beauty of the deliberate blank. We lead with a single grounded Deep Olive and one rare Burnt Sienna ember against warm creams that have never met pure black or pure white. Typography carries the elegance (an optional Noto Serif KR headline over a calm Pretendard body), not chrome; motion is a slow 240ms exhale with no bounce. The off-hours theme is literal in the content surfaces too — an availability calendar that quietly lights only the nights a venue opens after close, and last-minute slots that surface like the lamp someone forgot to switch off. It explicitly rejects the loud information-density of legacy Korean rental marketplaces, the cold pure-white-and-shadow SaaS look, bouncy micro-interactions, gradient-text theatrics, decorative glassmorphism, and any use of the accent as paint rather than punctuation.",
+    "keyCharacteristics": [
+      "One primary, one accent — Deep Olive does the work; Burnt Sienna appears on at most ~5% of any screen and only where the eye must land.",
+      "Warm neutrals only — cream backgrounds and a near-black ink, never #000/#fff.",
+      "Flat by default — depth comes from tonal layering and hairline borders; shadows appear only on overlays and on hover.",
+      "Generous Korean whitespace — low density on a 4px grid, room to breathe.",
+      "Quiet motion — 240ms base on a single decelerating curve; reduced-motion honored.",
+      "One typographic family — Pretendard throughout, Noto Serif KR reserved for the emotional headline.",
+      "Mobile-first, 320px up — fluid type and progressive enhancement, always."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Burnt Sienna (#c97550) never exceeds ~5% of any single screen. Its scarcity is the luxury — the moment two accents compete, both lose.",
+        "section": "Colors"
+      },
+      {
+        "name": "No Pure Ink, No Pure Paper",
+        "body": "Text is warm ink (#1a1814), surfaces are warm cream — pure #000 and #fff are banned because they break the dusk-lit warmth that makes an empty room feel inviting rather than clinical.",
+        "section": "Colors"
+      },
+      {
+        "name": "The 65–75ch Measure",
+        "body": "Body copy is held to a 65–75 character line length so long Korean and Latin paragraphs stay restful; never let text run the full width of a wide container.",
+        "section": "Typography"
+      },
+      {
+        "name": "Shadows Are For Things That Float",
+        "body": "If an element is not an overlay and is not being hovered, it gets zero box-shadow. Elevation is earned by leaving the surface, not by default decoration.",
+        "section": "Elevation"
+      }
+    ],
+    "dos": [
+      "Lead with Deep Olive (#5a6f4f) for every primary action, active state, and link.",
+      "Spend Burnt Sienna (#c97550) like a rare ember — a live slot badge, the favorited heart, one eyebrow label.",
+      "Sit everything on warm cream (#faf8f4) over warm ink (#1a1814).",
+      "Express depth with tonal layers and hairline borders (#e5e0d5).",
+      "Keep motion to ~240ms on cubic-bezier(0.2,0,0,1), with a quiet scale(0.98) press.",
+      "Honor prefers-reduced-motion and keep generous Korean whitespace on a 4px grid.",
+      "Mark focus with the 2px Deep Olive outline at 2px offset on every interactive element.",
+      "Reserve the one sanctioned blur for the sticky-header .glass surface only."
+    ],
+    "donts": [
+      "Don't reach for a second brand hue — there is one primary and one accent, full stop.",
+      "Don't let the accent exceed ~5% of a screen; once it becomes a fill it stops meaning 'look here'.",
+      "Don't use pure #000 or pure #fff for text or page backgrounds — white is reserved strictly for elevated surfaces.",
+      "Don't put resting shadows on cards, inputs, or chips — shadows belong only to overlays and hover lifts.",
+      "Don't use bouncy, elastic, or spring-overshoot motion on UI; reserve any spring strictly for a tiny press feel.",
+      "Don't crowd cards with stacked badges, counters, and price shouts the way legacy rental sites do.",
+      "Don't remove focus rings or rely on color alone — errors always pair red with text.",
+      "Don't add decorative glassmorphism — frosted panels as ornament are banned.",
+      "Don't draw side-stripe accent borders thicker than 1px — structure is hairline, never a colored bar.",
+      "Don't ship gradient text via background-clip:text as a default device; headlines are solid ink or serif (the hero's animated rotating word is the single deliberate exception)."
+    ]
+  }
+}
