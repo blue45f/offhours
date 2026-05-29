@@ -96,6 +96,10 @@ export const SpaceCardSchema = z.object({
   responseRate24h: z.number().nullable().optional(),
   /** 응답 통계 표본 수 (최근 30일). 10건 미만이면 뱃지 미노출 */
   responseSampleCount: z.number().nullable().optional(),
+  /** 신규 등록 (7일 이내) — 카드에 "🆕 신규" 뱃지 */
+  isNew: z.boolean().optional(),
+  /** 인기 공간 (평점 ≥4.85 + 후기 ≥10건) — 카드에 "🔥 인기" 뱃지 */
+  isHot: z.boolean().optional(),
 })
 export type SpaceCard = z.infer<typeof SpaceCardSchema>
 
@@ -128,6 +132,10 @@ export const SpaceDetailSchema = SpaceCardSchema.extend({
       reviewSampleCount: z.number(),
     }),
   }),
+  /** 활동 시그널: 최근 30일 PAID/COMPLETED 예약 건수 */
+  bookingsLast30d: z.number(),
+  /** 누적 페이지 조회수 */
+  viewCount: z.number(),
 })
 export type SpaceDetail = z.infer<typeof SpaceDetailSchema>
 

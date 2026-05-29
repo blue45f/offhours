@@ -99,15 +99,35 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
             {inCompare ? <Check size={16} /> : <GitCompare size={16} />}
           </button>
         </div>
-        {space.instantBook && (
-          <Badge
-            tone="accent"
-            soft={false}
-            className="absolute left-3 top-3 !bg-[var(--color-bg-elevated)] !text-[var(--color-fg)] !shadow-[var(--shadow-sm)]"
-          >
-            즉시 예약
-          </Badge>
-        )}
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+          {space.instantBook && (
+            <Badge
+              tone="accent"
+              soft={false}
+              className="!bg-[var(--color-bg-elevated)] !text-[var(--color-fg)] !shadow-[var(--shadow-sm)]"
+            >
+              즉시 예약
+            </Badge>
+          )}
+          {space.isHot && (
+            <Badge
+              tone="accent"
+              soft={false}
+              className="!bg-[#e76f5119] !text-[var(--color-accent)] !shadow-[var(--shadow-sm)]"
+            >
+              🔥 인기
+            </Badge>
+          )}
+          {space.isNew && !space.isHot && (
+            <Badge
+              tone="primary"
+              soft={false}
+              className="!bg-[var(--color-bg-elevated)] !text-[var(--color-primary)] !shadow-[var(--shadow-sm)]"
+            >
+              🆕 신규
+            </Badge>
+          )}
+        </div>
       </div>
       <div className="mt-3 space-y-1.5">
         <div className="flex items-center gap-2 text-meta">

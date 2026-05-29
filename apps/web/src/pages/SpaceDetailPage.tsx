@@ -8,7 +8,17 @@ import {
   formatTrustTier,
   type UseCase,
 } from '@offhours/shared'
-import { Heart, MapPin, MessageCircle, ShieldCheck, Share2, Sparkles } from 'lucide-react'
+import {
+  Eye,
+  Flame,
+  Heart,
+  MapPin,
+  MessageCircle,
+  ShieldCheck,
+  Share2,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { useNearbyBundle, useSpaceDetail, useSpaceReviews } from '../features/spaces/api'
@@ -146,6 +156,13 @@ export default function SpaceDetailPage() {
           </section>
 
           <Divider />
+
+          <ActivityPulse
+            bookingsLast30d={data.bookingsLast30d}
+            viewCount={data.viewCount}
+            isNew={!!data.isNew}
+            isHot={!!data.isHot}
+          />
 
           <section>
             <h3 className="text-title font-semibold mb-3">이 공간에 대해</h3>
@@ -298,6 +315,76 @@ function TrustGauge({ score }: { score: number }) {
       <p className="mt-2 text-xs text-[var(--color-fg-muted)]">
         {tier.hint} · 평점·취소·응답률에 따라 실시간으로 갱신돼요
       </p>
+    </div>
+  )
+}
+
+function ActivityPulse({
+  bookingsLast30d,
+  viewCount,
+  isNew,
+  isHot,
+}: {
+  bookingsLast30d: number
+  viewCount: number
+  isNew: boolean
+  isHot: boolean
+}) {
+  if (!isNew && !isHot && bookingsLast30d === 0 && viewCount === 0) return null
+  return (
+    <section className="hairline rounded-[var(--radius-xl)] bg-[var(--color-bg-elevated)] p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold inline-flex items-center gap-1.5">
+          <TrendingUp size={14} className="text-[var(--color-primary)]" />이 공간의 활동
+        </h3>
+        <div className="flex gap-1.5">
+          {isHot && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 text-[11px] font-bold">
+              <Flame size={10} /> 인기
+            </span>
+          )}
+          {isNew && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] px-2 py-0.5 text-[11px] font-bold">
+              🆕 신규
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <PulseStat
+          label="최근 30일 예약"
+          value={bookingsLast30d.toLocaleString()}
+          unit="건"
+          accent
+        />
+        <PulseStat label="누적 조회" value={viewCount.toLocaleString()} unit="회" />
+      </div>
+    </section>
+  )
+}
+
+function PulseStat({
+  label,
+  value,
+  unit,
+  accent,
+}: {
+  label: string
+  value: string
+  unit?: string
+  accent?: boolean
+}) {
+  return (
+    <div className="rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] p-3">
+      <div className="text-[11px] text-[var(--color-fg-muted)]">{label}</div>
+      <div className="mt-1 flex items-baseline gap-1">
+        <span
+          className={`text-2xl font-bold ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-fg)]'}`}
+        >
+          {value}
+        </span>
+        {unit && <span className="text-xs text-[var(--color-fg-muted)]">{unit}</span>}
+      </div>
     </div>
   )
 }

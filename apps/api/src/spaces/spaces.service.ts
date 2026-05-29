@@ -217,6 +217,14 @@ export class SpacesService {
     if (space.status !== 'ACTIVE') {
       throw new NotFoundException('Space not available')
     }
+    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    const bookingsLast30d = await this.prisma.reservation.count({
+      where: {
+        spaceId: space.id,
+        status: { in: ['PAID', 'CHECKED_IN', 'CHECKED_OUT', 'COMPLETED'] },
+        startAt: { gte: since30 },
+      },
+    })
     void this.prisma.space.update({
       where: { id: space.id },
       data: { viewCount: { increment: 1 } },
@@ -224,6 +232,8 @@ export class SpacesService {
 
     return {
       ...this.toCard(space),
+      bookingsLast30d,
+      viewCount: space.viewCount,
       description: space.description,
       areaM2: space.areaM2,
       cleaningFeeKRW: space.cleaningFeeKRW,
@@ -555,6 +565,8 @@ export class SpacesService {
       category: s.venue.category,
       instantBook: s.instantBook,
       useCases: (s.useCases ?? []) as UseCase[],
+      isNew: Date.now() - s.createdAt.getTime() < 7 * 24 * 60 * 60 * 1000,
+      isHot: s.ratingAvg >= 4.85 && s.ratingCount >= 10,
       distanceKm: extras?.distanceKm ?? null,
       nextAvailableAt: extras?.nextAvailableAt ? extras.nextAvailableAt.toISOString() : null,
       lastMinuteDiscount: extras?.lastMinuteDiscount ?? null,
