@@ -368,12 +368,13 @@ function HostCta() {
         <div className="relative max-w-2xl">
           <span className="text-xs font-bold tracking-widest uppercase opacity-60">For Hosts</span>
           <h2 className="mt-3 text-headline serif">
-            우리 가게의 비어 있는 시간,
+            영업 외 짜투리 시간이
             <br />
-            수익으로 바꿔보세요.
+            매달 <span className="text-[var(--color-accent)]">+120만 원</span>이 됩니다.
           </h2>
           <p className="mt-4 opacity-80">
-            영업시간 등록 5분, 첫 예약까지 평균 48시간. 청소 SLA·정산까지 알아서 도와드려요.
+            임대료는 24시간 나가는데 매출은 영업시간에만. 휴무일·마감 후 비는 시간을 빌려주면 추가
+            비용 거의 없이 순수익이 쌓여요. 등록 5분, 첫 예약까지 평균 48시간.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link to="/host">

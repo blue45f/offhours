@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Check, Sparkles } from 'lucide-react'
 
 import { Button } from '../components/ui/Button'
+import { RevenueSimulator } from '../components/host/RevenueSimulator'
 import { useIsHost } from '../store/auth'
 
 export default function HostLandingPage() {
@@ -21,14 +22,21 @@ export default function HostLandingPage() {
               <Sparkles size={12} /> For Hosts
             </span>
             <h1 className="mt-5 text-display serif">
-              우리 가게의 영업 외 시간이
+              하루 중 비어 있던 짜투리 시간,
               <br />
-              고정 수익이 됩니다.
+              그대로 추가 수입이 됩니다.
             </h1>
             <p className="mt-5 text-lg text-[var(--color-fg-muted)] leading-relaxed max-w-xl">
-              영업시간을 등록하면 휴무일과 마감 후 시간이 자동으로 게스트에게 노출돼요.
-              청소·정산까지 플랫폼이 알아서 도와드립니다.
+              임대료는 24시간 나가는데 매출은 영업시간에만. 휴무일과 마감 후 비는 시간을
+              파티·모임·촬영 공간으로 빌려주면,{' '}
+              <strong className="text-[var(--color-fg)]">추가 비용 거의 없이</strong> 순수익이
+              쌓여요. 슬롯 생성·청소·정산은 플랫폼이 자동 처리합니다.
             </p>
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              <Stat label="첫 예약까지" value="평균 48시간" />
+              <Stat label="플랫폼 수수료" value="12%" />
+              <Stat label="정산 주기" value="7·14일 선택" />
+            </div>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link to={isHost ? '/host/dashboard' : '/signup?as=host'}>
                 <Button size="xl">{isHost ? '대시보드로 이동' : '호스트 시작하기'}</Button>
@@ -39,16 +47,8 @@ export default function HostLandingPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="hairline rounded-[var(--radius-2xl)] bg-[var(--color-bg-elevated)] p-8 shadow-[var(--shadow-md)]"
           >
-            <div className="text-sm text-[var(--color-fg-muted)] mb-2">예상 월 수익</div>
-            <div className="text-4xl font-bold serif text-[var(--color-primary)]">120만 원</div>
-            <div className="text-xs text-[var(--color-fg-muted)] mt-1">평균 매출 호스트 기준</div>
-            <div className="mt-6 space-y-3">
-              <Stat label="첫 예약까지" value="평균 48시간" />
-              <Stat label="플랫폼 수수료" value="12%" />
-              <Stat label="정산 주기" value="7일 / 14일 선택" />
-            </div>
+            <RevenueSimulator />
           </motion.div>
         </div>
       </section>
@@ -108,9 +108,9 @@ export default function HostLandingPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between text-sm">
+    <span className="inline-flex items-center gap-1.5">
       <span className="text-[var(--color-fg-muted)]">{label}</span>
-      <span className="font-semibold">{value}</span>
-    </div>
+      <span className="font-semibold text-[var(--color-fg)]">{value}</span>
+    </span>
   )
 }
