@@ -23,14 +23,34 @@ export class PaymentsService {
     if (!['REQUESTED', 'APPROVED'].includes(reservation.status)) {
       throw new BadRequestException('결제할 수 없는 예약 상태에요')
     }
-    const orderId = `ord_${reservation.id}_${Date.now()}`
+    const clientKey = process.env.TOSS_CLIENT_KEY ?? ''
+    // 실 결제액(공유 단일 공식): 총액 + 보증금 − 크레딧 − 포인트
+    const amount = payableKRW(reservation)
     const existing = await this.prisma.payment.findUnique({ where: { reservationId } })
     if (existing) {
       return {
         orderId: existing.orderId,
         amount: existing.amountKRW,
-        clientKey: process.env.TOSS_CLIENT_KEY ?? '',
+        clientKey,
+        settled: existing.status === 'CAPTURED',
       }
+    }
+    const orderId = `ord_${reservation.id}_${Date.now()}`
+    // 크레딧·포인트가 결제액을 전액 충당(0원)하면 PG 호출 없이 즉시 정산한다(0원 결제는 PG가 거부).
+    if (amount <= 0) {
+      const payment = await this.prisma.payment.create({
+        data: {
+          reservationId,
+          providerKey: orderId,
+          orderId,
+          method: 'CREDIT',
+          amountKRW: 0,
+          status: 'CAPTURED',
+          capturedAt: new Date(),
+        },
+      })
+      await this.settleReservationPaid(reservationId)
+      return { orderId: payment.orderId, amount: 0, clientKey, settled: true }
     }
     const payment = await this.prisma.payment.create({
       data: {
@@ -38,16 +58,11 @@ export class PaymentsService {
         providerKey: orderId,
         orderId,
         method,
-        // 실 결제액(공유 단일 공식): 총액 + 보증금 − 크레딧 − 포인트
-        amountKRW: payableKRW(reservation),
+        amountKRW: amount,
         status: 'READY',
       },
     })
-    return {
-      orderId: payment.orderId,
-      amount: payment.amountKRW,
-      clientKey: process.env.TOSS_CLIENT_KEY ?? '',
-    }
+    return { orderId: payment.orderId, amount: payment.amountKRW, clientKey, settled: false }
   }
 
   async confirm(userId: string, input: ConfirmPaymentInput) {
@@ -61,6 +76,18 @@ export class PaymentsService {
     if (payment.reservation.guestId !== userId) throw new BadRequestException()
     if (payment.amountKRW !== input.amount) throw new BadRequestException('금액이 일치하지 않아요')
 
+    // 이미 정산됐거나(멱등) 0원 결제(크레딧·포인트 전액 충당)는 PG 호출 없이 통과
+    if (payment.status === 'CAPTURED' || payment.amountKRW <= 0) {
+      if (payment.status !== 'CAPTURED') {
+        await this.prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: 'CAPTURED', capturedAt: new Date() },
+        })
+        await this.settleReservationPaid(payment.reservationId)
+      }
+      return this.prisma.payment.findUnique({ where: { id: payment.id } })
+    }
+
     const tossRes = await this.toss.confirm(input)
     const updated = await this.prisma.payment.update({
       where: { id: payment.id },
@@ -73,25 +100,29 @@ export class PaymentsService {
         capturedAt: new Date(),
       },
     })
-    await this.prisma.reservation.update({
-      where: { id: payment.reservationId },
-      data: { status: 'PAID' },
-    })
+    await this.settleReservationPaid(payment.reservationId)
+    return updated
+  }
 
-    await this.notifications.create(payment.reservation.guestId, {
+  /** 예약을 PAID 로 전환하고 게스트·호스트에게 결제 완료 알림 — confirm·0원 정산 공통 */
+  private async settleReservationPaid(reservationId: string) {
+    const reservation = await this.prisma.reservation.update({
+      where: { id: reservationId },
+      data: { status: 'PAID' },
+      include: { space: { include: { venue: { include: { host: true } } } } },
+    })
+    await this.notifications.create(reservation.guestId, {
       type: 'PAYMENT_COMPLETED',
       title: '결제가 완료됐어요',
-      body: `${payment.reservation.space.title} (${payment.reservation.code})`,
-      data: { reservationId: payment.reservationId },
+      body: `${reservation.space.title} (${reservation.code})`,
+      data: { reservationId },
     })
-    await this.notifications.create(payment.reservation.space.venue.host.userId, {
+    await this.notifications.create(reservation.space.venue.host.userId, {
       type: 'PAYMENT_COMPLETED',
       title: '게스트가 결제했어요',
-      body: `${payment.reservation.code} 결제 완료`,
-      data: { reservationId: payment.reservationId },
+      body: `${reservation.code} 결제 완료`,
+      data: { reservationId },
     })
-
-    return updated
   }
 
   async refund(reservationId: string, reason: string, amount?: number) {

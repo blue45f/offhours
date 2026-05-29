@@ -17,16 +17,21 @@ export interface PayParams {
 export function useTossPayment() {
   const qc = useQueryClient()
   return async (params: PayParams) => {
-    const intent = await api.post<{ orderId: string; amount: number; clientKey: string }>(
-      '/payments/intent',
-      { reservationId: params.reservationId, method: 'CARD' }
-    )
-    const paymentKey = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
-    await api.post('/payments/confirm', {
-      paymentKey,
-      orderId: intent.orderId,
-      amount: intent.amount,
-    })
+    const intent = await api.post<{
+      orderId: string
+      amount: number
+      clientKey: string
+      settled?: boolean
+    }>('/payments/intent', { reservationId: params.reservationId, method: 'CARD' })
+    // 크레딧·포인트가 결제액을 전액 충당하면 서버가 즉시 정산 → PG 확정 단계 생략(0원 결제 불가)
+    if (!intent.settled && intent.amount > 0) {
+      const paymentKey = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+      await api.post('/payments/confirm', {
+        paymentKey,
+        orderId: intent.orderId,
+        amount: intent.amount,
+      })
+    }
     await qc.invalidateQueries({ queryKey: ['reservations'] })
   }
 }
