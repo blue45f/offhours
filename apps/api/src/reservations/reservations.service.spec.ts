@@ -74,3 +74,109 @@ describe('ReservationsService.cancelByGuest', () => {
     )
   })
 })
+
+/**
+ * 이용 시간 연장 회귀 방지 — 영업 외 고유 가드(슬롯 끝=다음 영업 준비 경계)와 증분 가격의
+ * 정합성을 잠근다. 핵심 불변식: ① 수수료는 보장료를 뺀 소계에만 부과(호스트 매출 기준),
+ * ② 실 결제액은 공유 payableKRW 공식으로 재계산(보증금 가산·크레딧·포인트 차감),
+ * ③ 다음 영업 준비/충돌/호스트 차단을 넘기는 연장은 거절.
+ */
+const extReservationStart = new Date('2026-06-01T22:00:00.000Z')
+const extReservationEnd = new Date('2026-06-02T00:00:00.000Z')
+const slotFarEnd = new Date('2026-06-02T04:00:00.000Z')
+const extendable = {
+  id: 'r1',
+  guestId: 'g1',
+  status: 'PAID',
+  startAt: extReservationStart,
+  endAt: extReservationEnd,
+  spaceId: 's1',
+  purpose: 'PARTY',
+  baseAmountKRW: 200000,
+  cleaningFeeKRW: 30000,
+  addonsAmountKRW: 0,
+  protectionFeeKRW: 10000,
+  depositKRW: 100000,
+  creditAppliedKRW: 50000,
+  pointsAppliedKRW: 20000,
+  payment: { id: 'p1' },
+  space: { venueId: 'v1', title: '루프탑 라운지', venue: { host: { userId: 'h1' } } },
+}
+
+function makeExtendService(opts: {
+  reservation?: Record<string, unknown>
+  slotEndAt?: Date | null
+  conflict?: unknown
+  block?: unknown
+  additionalKRW?: number
+}) {
+  const reservation = opts.reservation ?? extendable
+  const prisma: any = {
+    reservation: {
+      findUnique: vi.fn().mockResolvedValue(reservation),
+      findFirst: vi.fn().mockResolvedValue(opts.conflict ?? null),
+      update: vi.fn().mockImplementation(({ data }: any) => ({ id: 'r1', ...data })),
+    },
+    slot: {
+      findFirst: vi
+        .fn()
+        .mockResolvedValue(
+          opts.slotEndAt === null ? null : { endAt: opts.slotEndAt ?? slotFarEnd }
+        ),
+    },
+    venueBlock: { findFirst: vi.fn().mockResolvedValue(opts.block ?? null) },
+    payment: { update: vi.fn().mockResolvedValue({}) },
+  }
+  const slots: any = {
+    calcExtension: vi.fn().mockResolvedValue({ additionalKRW: opts.additionalKRW ?? 60000 }),
+  }
+  const notifications: any = { create: vi.fn().mockResolvedValue(undefined) }
+  const waitlist: any = { notifyOnSlotFreed: vi.fn().mockResolvedValue(undefined) }
+  return { svc: new ReservationsService(prisma, slots, notifications, waitlist), prisma }
+}
+
+describe('ReservationsService.extend', () => {
+  it('연장 happy — 증분 가격 + 수수료는 보장료 뺀 소계 기준 + 실결제액 재계산', async () => {
+    const { svc, prisma } = makeExtendService({})
+    const res: any = await svc.extend('g1', 'r1', { hours: 2 })
+    expect(res.additionalKRW).toBe(60000)
+    const upd = prisma.reservation.update.mock.calls[0][0].data
+    expect(upd.endAt).toEqual(new Date('2026-06-02T02:00:00.000Z'))
+    expect(upd.baseAmountKRW).toBe(260000) // 200000 + 60000 증분
+    expect(upd.totalKRW).toBe(300000) // 260000 + 청소 30000 + 보장 10000
+    // 수수료는 보장료 제외 소계(290000)에만 — 총액(300000)이 아니다. round(290000*0.12)=34800
+    expect(upd.feeKRW).toBe(34800)
+    // 실결제액 = 총액 + 보증금 − 크레딧 − 포인트 = 300000 + 100000 − 50000 − 20000
+    expect(prisma.payment.update.mock.calls[0][0].data.amountKRW).toBe(330000)
+  })
+
+  it('영업 외 안전 경계 — 다음 영업 준비(슬롯 끝)를 넘기는 연장은 거절', async () => {
+    const { svc, prisma } = makeExtendService({
+      slotEndAt: new Date('2026-06-02T01:00:00.000Z'), // 1시간만 허용인데 2시간 요청
+    })
+    await expect(svc.extend('g1', 'r1', { hours: 2 })).rejects.toThrow()
+    expect(prisma.reservation.update).not.toHaveBeenCalled()
+  })
+
+  it('연장 구간에 다른 예약이 있으면 거절', async () => {
+    const { svc, prisma } = makeExtendService({ conflict: { id: 'r2' } })
+    await expect(svc.extend('g1', 'r1', { hours: 2 })).rejects.toThrow()
+    expect(prisma.reservation.update).not.toHaveBeenCalled()
+  })
+
+  it('연장 구간이 호스트 차단 일정과 겹치면 거절', async () => {
+    const { svc, prisma } = makeExtendService({ block: { id: 'b1' } })
+    await expect(svc.extend('g1', 'r1', { hours: 2 })).rejects.toThrow()
+    expect(prisma.reservation.update).not.toHaveBeenCalled()
+  })
+
+  it('결제 완료(PAID/CHECKED_IN) 상태가 아니면 연장 불가', async () => {
+    const { svc } = makeExtendService({ reservation: { ...extendable, status: 'REQUESTED' } })
+    await expect(svc.extend('g1', 'r1', { hours: 2 })).rejects.toThrow()
+  })
+
+  it('예약 게스트 본인이 아니면 연장 불가(Forbidden)', async () => {
+    const { svc } = makeExtendService({})
+    await expect(svc.extend('intruder', 'r1', { hours: 2 })).rejects.toThrow()
+  })
+})
