@@ -323,9 +323,17 @@ export class ReservationsService {
     const refundRate = calcRefundRate(r.startAt, new Date(), r.cancellationPolicy)
     const refundKRW = Math.round(r.totalKRW * refundRate)
     const next: ReservationStatus = r.status === 'PAID' ? 'REFUNDED' : 'CANCELED'
+    // 결제된 예약을 취소하면 이용이 없었으므로 보증금은 전액 환급 처리(released 표기).
+    // 보증금 자동 환급 크론은 COMPLETED 만 대상이라, 취소 예약은 여기서 직접 풀어준다.
+    const releaseDeposit = r.status === 'PAID' && r.depositKRW > 0 && !r.depositReleasedAt
+    const depositRefundKRW = releaseDeposit ? r.depositKRW : 0
     const updated = await this.prisma.reservation.update({
       where: { id: r.id },
-      data: { status: next, cancelReason: reason },
+      data: {
+        status: next,
+        cancelReason: reason,
+        ...(releaseDeposit ? { depositReleasedAt: new Date() } : {}),
+      },
     })
     // 법인 크레딧으로 차감했으면 취소 시 크레딧 환원
     if (r.creditAppliedKRW > 0 && r.corporateProfileId) {
@@ -352,7 +360,7 @@ export class ReservationsService {
     })
     // 이 시간대가 다시 비었으니 대기자에게 빈자리 알림
     await this.waitlist.notifyOnSlotFreed(r.spaceId).catch(() => null)
-    return { ...updated, refundKRW }
+    return { ...updated, refundKRW, depositRefundKRW }
   }
 
   /**
@@ -486,9 +494,12 @@ export class ReservationsService {
       },
     })
     if (r.payment) {
+      // 실 결제액 정합성 유지 — 크레딧·포인트 차감과 보증금을 반영(연장 전 결제식과 동일)
       await this.prisma.payment.update({
         where: { reservationId: r.id },
-        data: { amountKRW: newTotal },
+        data: {
+          amountKRW: newTotal - r.creditAppliedKRW - r.pointsAppliedKRW + r.depositKRW,
+        },
       })
     }
     await this.notifications.create(r.space.venue.host.userId, {
