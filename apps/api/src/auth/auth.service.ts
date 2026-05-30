@@ -91,7 +91,17 @@ export class AuthService {
       where: { tokenHash },
       include: { user: true },
     })
-    if (!record || record.revokedAt) throw new UnauthorizedException('Refresh token invalid')
+    if (!record) throw new UnauthorizedException('Refresh token invalid')
+    // 토큰 재사용 탐지 — 이미 회전·폐기된 refresh 토큰이 다시 제시되는 정상 경로는 없다.
+    // 탈취/복제 정황으로 보고 같은 family 전체를 폐기해 공격자·피해자 세션을 모두 끊는다
+    // (OAuth refresh token rotation 권고: reuse detection). family 인덱스로 일괄 폐기.
+    if (record.revokedAt) {
+      await this.prisma.refreshToken.updateMany({
+        where: { family: record.family, revokedAt: null },
+        data: { revokedAt: new Date() },
+      })
+      throw new UnauthorizedException('Refresh token invalid')
+    }
     if (record.expiresAt.getTime() < Date.now())
       throw new UnauthorizedException('Refresh token expired')
 
