@@ -58,6 +58,17 @@ export class ReviewsService {
         data: { isPublished: true, publishedAt: publishAt },
       })
       await this.refreshSpaceRating(reservation.spaceId)
+      // 후기가 공개되면 호스트 답글률 분모(표본)가 늘어나 캐시가 stale 해진다. 이미 통계가
+      // 잡힌(= 한 번이라도 답글한) 호스트만 재계산해, 미응답 호스트에게 "0% 답글률"을
+      // 새로 노출하지 않으면서 분모 정합성을 유지한다.
+      const hostUserId = reservation.space.venue.host.userId
+      const host = await this.prisma.user.findUnique({
+        where: { id: hostUserId },
+        select: { reviewStatsUpdatedAt: true },
+      })
+      if (host?.reviewStatsUpdatedAt) {
+        await this.recomputeHostResponseStats(hostUserId)
+      }
     }
 
     // 평점별 trustScore 양방향 갱신 (5점 +3 … 1점 -5). 0~100 클램프 보장.
