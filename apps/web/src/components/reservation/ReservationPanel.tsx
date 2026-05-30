@@ -20,6 +20,7 @@ import { Field, Input, Textarea } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { Card } from '../ui/Card'
 import { useCreateReservation, useCreateRecurring } from '../../features/reservations/api'
+import { defaultHeadcount } from '../../features/reservations/headcount'
 import { useQuote } from '../../features/spaces/api'
 import { AvailabilityCalendar } from './AvailabilityCalendar'
 import { AddonPicker } from './AddonPicker'
@@ -41,7 +42,9 @@ export function ReservationPanel({ space }: Props) {
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
-  const [headcount, setHeadcount] = useState<number>(Math.max(space.capacityMin, 10))
+  const [headcount, setHeadcount] = useState<number>(
+    defaultHeadcount(space.capacityMin, space.capacityMax)
+  )
   const [purpose, setPurpose] = useState<Purpose>('PARTY')
   const [note, setNote] = useState('')
   const [useCorporate, setUseCorporate] = useState(false)
