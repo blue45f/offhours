@@ -69,6 +69,17 @@ export default function SpacesPage() {
     setParams(next, { replace: true })
   }
 
+  // 여러 파라미터를 한 번의 빌드로 적용 — set() 을 연속 호출하면 둘 다 같은 params 스냅샷에서
+  // 출발해 뒤 호출이 앞 변경을 덮어쓴다(예: radiusKm+sort 동시 변경 시 radiusKm 유실). 이를 방지.
+  function setMany(patches: Record<string, string | undefined>) {
+    const next = new URLSearchParams(params)
+    for (const [key, value] of Object.entries(patches)) {
+      if (!value) next.delete(key)
+      else next.set(key, value)
+    }
+    setParams(next, { replace: true })
+  }
+
   function clearAll() {
     setParams(new URLSearchParams(), { replace: true })
   }
@@ -91,6 +102,18 @@ export default function SpacesPage() {
   if (query.instantBook) activeFilters.push('즉시 예약')
   if (query.verifiedOnly) activeFilters.push('검증된 사업장')
 
+  const sortOptions = [
+    { value: 'popular', label: '인기 순' },
+    { value: 'newest', label: '최신 순' },
+    { value: 'price-asc', label: '가격 낮은 순' },
+    { value: 'price-desc', label: '가격 높은 순' },
+    { value: 'rating', label: '평점 순' },
+    ...(useGeo ? [{ value: 'distance', label: '거리 순' }] : []),
+    ...(liveWithinHours ? [{ value: 'live', label: '곧 시작' }] : []),
+  ]
+  // URL 의 sort 가 현재 사용할 수 없는 옵션(예: 위치 끈 뒤 distance)이면 Select 가 빈칸이 되므로 popular 로 폴백
+  const sortValue = sortOptions.some((o) => o.value === query.sort) ? query.sort! : 'popular'
+
   return (
     <div className="container-page py-8 md:py-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
@@ -102,17 +125,9 @@ export default function SpacesPage() {
         </div>
         <div className="flex items-center gap-2">
           <Select
-            value={query.sort ?? 'popular'}
+            value={sortValue}
             onValueChange={(v) => set('sort', v)}
-            options={[
-              { value: 'popular', label: '인기 순' },
-              { value: 'newest', label: '최신 순' },
-              { value: 'price-asc', label: '가격 낮은 순' },
-              { value: 'price-desc', label: '가격 높은 순' },
-              { value: 'rating', label: '평점 순' },
-              ...(useGeo ? [{ value: 'distance', label: '거리 순' }] : []),
-              ...(liveWithinHours ? [{ value: 'live', label: '곧 시작' }] : []),
-            ]}
+            options={sortOptions}
             className="min-w-[160px]"
           />
           <Button
@@ -130,12 +145,15 @@ export default function SpacesPage() {
           type="button"
           onClick={() => {
             if (geo.status === 'granted' && useGeo) {
-              set('radiusKm', undefined)
+              // 위치 끄면 거리순 정렬도 해제(옵션이 사라져 Select 가 빈칸이 되는 것 방지)
+              setMany({
+                radiusKm: undefined,
+                sort: query.sort === 'distance' ? 'popular' : query.sort,
+              })
               return
             }
             if (geo.status !== 'granted') geo.request()
-            set('radiusKm', String(radiusKm ?? 3))
-            set('sort', 'distance')
+            setMany({ radiusKm: String(radiusKm ?? 3), sort: 'distance' })
           }}
           className={cn(
             'inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-pill)] px-3.5 text-sm font-medium border transition-colors',
@@ -174,11 +192,12 @@ export default function SpacesPage() {
           type="button"
           onClick={() => {
             if (liveWithinHours) {
-              set('liveWithinHours', undefined)
-              set('sort', 'popular')
+              setMany({
+                liveWithinHours: undefined,
+                sort: query.sort === 'live' ? 'popular' : query.sort,
+              })
             } else {
-              set('liveWithinHours', '24')
-              set('sort', 'live')
+              setMany({ liveWithinHours: '24', sort: 'live' })
             }
           }}
           className={cn(
