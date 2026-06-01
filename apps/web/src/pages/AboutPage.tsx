@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 
 import { Button } from '../components/ui/Button'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 export default function AboutPage() {
+  useDocumentTitle('서비스 소개')
   return (
     <div className="container-page py-16 md:py-24 max-w-3xl">
       <span className="text-xs font-bold tracking-widest uppercase text-[var(--color-primary)]">

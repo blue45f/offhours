@@ -5,9 +5,11 @@ import { Check, Sparkles } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { RevenueSimulator } from '../components/host/RevenueSimulator'
 import { useIsHost } from '../store/auth'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 export default function HostLandingPage() {
   const isHost = useIsHost()
+  useDocumentTitle('호스트 되기')
   return (
     <div className="bg-[var(--color-bg)]">
       <section className="relative overflow-hidden">
