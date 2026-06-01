@@ -43,6 +43,7 @@ import { Button } from '../components/ui/Button'
 import { ReservationPanel } from '../components/reservation/ReservationPanel'
 import { Skeleton } from '../components/ui/Skeleton'
 import { formatDateKR, formatKRW } from '../utils/format'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 export default function SpaceDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -53,6 +54,7 @@ export default function SpaceDetailPage() {
   const toggle = useToggleFavorite()
   const isFavorited = data ? favoriteIds.includes(data.id) : false
   const pushRecent = useRecentlyViewedStore((s) => s.push)
+  useDocumentTitle(data?.title)
   useEffect(() => {
     if (data?.slug) pushRecent(data.slug)
   }, [data?.slug, pushRecent])

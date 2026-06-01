@@ -33,6 +33,7 @@ import { useSpacesSearch } from '../features/spaces/api'
 import { Button } from '../components/ui/Button'
 import { Skeleton } from '../components/ui/Skeleton'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const categories: { value: VenueCategory; icon: typeof Coffee; hue: number }[] = [
   { value: 'CAFE', icon: Coffee, hue: 40 },
@@ -50,6 +51,7 @@ const categories: { value: VenueCategory; icon: typeof Coffee; hue: number }[] =
 ]
 
 export default function HomePage() {
+  useDocumentTitle()
   const geo = useGeolocation()
   const popular = useSpacesSearch({ sort: 'popular', pageSize: 8 })
   const newest = useSpacesSearch({ sort: 'newest', pageSize: 4 })

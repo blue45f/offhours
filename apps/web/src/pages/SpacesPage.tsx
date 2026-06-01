@@ -22,12 +22,14 @@ import { EmptyState } from '../components/ui/EmptyState'
 import { Dialog } from '../components/ui/Dialog'
 import { formatKRWShort } from '../utils/format'
 import { useGeolocation } from '../hooks/useGeolocation'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { cn } from '../utils/cn'
 
 export default function SpacesPage() {
   const [params, setParams] = useSearchParams()
   const [filterOpen, setFilterOpen] = useState(false)
   const geo = useGeolocation()
+  useDocumentTitle('공간 둘러보기')
 
   const radiusKm = params.get('radiusKm') ? Number(params.get('radiusKm')) : undefined
   const liveWithinHours = params.get('liveWithinHours')
