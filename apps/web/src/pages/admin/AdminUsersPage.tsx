@@ -13,14 +13,15 @@ import { formatDateKR } from '../../utils/format'
 
 export default function AdminUsersPage() {
   const [q, setQ] = useState('')
-  const [role, setRole] = useState<Role | ''>('')
+  // Radix Select 는 빈 문자열 value 를 던지므로 'ALL' 센티넬 사용(빈 옵션 = 앱 전체 크래시 방지)
+  const [role, setRole] = useState<Role | 'ALL'>('ALL')
   const qc = useQueryClient()
 
   const { data } = useQuery({
     queryKey: ['admin', 'users', q, role],
     queryFn: () =>
       api.get<Paginated<AdminUserRow>>('/admin/users', {
-        params: { q: q || undefined, role: role || undefined, pageSize: 40 },
+        params: { q: q || undefined, role: role === 'ALL' ? undefined : role, pageSize: 40 },
       }),
   })
 
@@ -44,9 +45,9 @@ export default function AdminUsersPage() {
         />
         <Select
           value={role}
-          onValueChange={(v) => setRole(v as Role | '')}
+          onValueChange={(v) => setRole(v as Role | 'ALL')}
           options={[
-            { value: '', label: '전체 역할' },
+            { value: 'ALL', label: '전체 역할' },
             { value: 'USER', label: 'USER' },
             { value: 'HOST', label: 'HOST' },
             { value: 'ADMIN', label: 'ADMIN' },
