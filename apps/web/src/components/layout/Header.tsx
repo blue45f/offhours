@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { Bell, Heart, LogIn, Menu, Moon, Search, Sun } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useIsAdmin, useIsAuthed, useIsHost, useMe } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
@@ -18,6 +18,16 @@ export function Header() {
   const { theme, toggle } = useThemeStore()
   const [open, setOpen] = useState(false)
   const { data: unread = 0 } = useUnreadNotifications()
+
+  // 계정 메뉴 열렸을 때 Esc 로 닫기(키보드 접근성)
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
 
   return (
     <header className="sticky top-0 z-[var(--z-sticky)] glass border-b border-[var(--color-border)]">
@@ -97,6 +107,9 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => setOpen((o) => !o)}
+                  aria-label="내 계정 메뉴"
+                  aria-haspopup="menu"
+                  aria-expanded={open}
                   className="flex items-center gap-2 rounded-full pl-2 pr-1 py-1 hover:bg-[var(--color-bg-subtle)]"
                 >
                   <Menu size={16} className="text-[var(--color-fg-muted)]" />
