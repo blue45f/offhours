@@ -4,6 +4,7 @@ import { lazy, Suspense, type ReactNode } from 'react'
 import { AppLayout } from '../components/layout/AppLayout'
 import { useAuthHydrated, useIsAdmin, useIsAuthed, useIsHost } from '../store/auth'
 import { PageLoader } from '../components/layout/PageLoader'
+import { RouteError } from '../components/layout/RouteError'
 
 const HomePage = lazy(() => import('../pages/HomePage'))
 const SpacesPage = lazy(() => import('../pages/SpacesPage'))
@@ -69,6 +70,7 @@ function lazyEl(node: ReactNode) {
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: lazyEl(<HomePage />) },
       { path: 'spaces', element: lazyEl(<SpacesPage />) },
