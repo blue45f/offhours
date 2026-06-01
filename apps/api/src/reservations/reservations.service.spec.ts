@@ -180,3 +180,48 @@ describe('ReservationsService.extend', () => {
     await expect(svc.extend('intruder', 'r1', { hours: 2 })).rejects.toThrow()
   })
 })
+
+/**
+ * 연장 예상 추가 요금 견적 — 확정 전 다이얼로그 표시용. 소유자 확인 + calcExtension 결과 반환.
+ */
+function makeQuoteService(reservation: Record<string, unknown> | null, additionalKRW = 45000) {
+  const prisma: any = {
+    reservation: { findUnique: vi.fn().mockResolvedValue(reservation) },
+  }
+  const slots: any = { calcExtension: vi.fn().mockResolvedValue({ hours: 2, additionalKRW }) }
+  const notifications: any = { create: vi.fn() }
+  const waitlist: any = { notifyOnSlotFreed: vi.fn() }
+  return { svc: new ReservationsService(prisma, slots, notifications, waitlist), slots }
+}
+
+const quoteReservation = {
+  guestId: 'g1',
+  spaceId: 's1',
+  endAt: new Date('2026-06-01T00:00:00.000Z'),
+  purpose: 'PARTY',
+}
+
+describe('ReservationsService.extensionQuote', () => {
+  it('소유자에게 calcExtension 견적 반환', async () => {
+    const { svc, slots } = makeQuoteService(quoteReservation, 45000)
+    const q = await svc.extensionQuote('g1', 'r1', 2)
+    expect(q).toEqual({ hours: 2, additionalKRW: 45000 })
+    // newEnd = endAt + 2h 로 calcExtension 호출
+    expect(slots.calcExtension).toHaveBeenCalledWith(
+      's1',
+      quoteReservation.endAt,
+      new Date('2026-06-01T02:00:00.000Z'),
+      'PARTY'
+    )
+  })
+
+  it('없는 예약이면 NotFound', async () => {
+    const { svc } = makeQuoteService(null)
+    await expect(svc.extensionQuote('g1', 'r1', 2)).rejects.toThrow()
+  })
+
+  it('예약 게스트 본인이 아니면 Forbidden', async () => {
+    const { svc } = makeQuoteService(quoteReservation)
+    await expect(svc.extensionQuote('intruder', 'r1', 2)).rejects.toThrow()
+  })
+})
