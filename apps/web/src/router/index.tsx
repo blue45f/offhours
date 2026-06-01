@@ -41,6 +41,7 @@ const AdminDisputesPage = lazy(() => import('../pages/admin/AdminDisputesPage'))
 const AdminAuditPage = lazy(() => import('../pages/admin/AdminAuditPage'))
 const AdminBroadcastPage = lazy(() => import('../pages/admin/AdminBroadcastPage'))
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
+const ComingSoonPage = lazy(() => import('../pages/ComingSoonPage'))
 
 function Protected({ children }: { children: ReactNode }) {
   const hydrated = useAuthHydrated()
@@ -81,6 +82,16 @@ export const router = createBrowserRouter([
       { path: 'logout', element: lazyEl(<LogoutPage />) },
       { path: 'about', element: lazyEl(<AboutPage />) },
       { path: 'host', element: lazyEl(<HostLandingPage />) },
+      // 푸터가 가리키던 미작성 페이지들 — 404 대신 "준비 중" 임시 페이지로(깨진 링크 방지)
+      { path: 'pricing', element: lazyEl(<ComingSoonPage />) },
+      { path: 'help', element: lazyEl(<ComingSoonPage />) },
+      { path: 'help/host', element: lazyEl(<ComingSoonPage />) },
+      { path: 'help/guest', element: lazyEl(<ComingSoonPage />) },
+      { path: 'contact', element: lazyEl(<ComingSoonPage />) },
+      { path: 'terms', element: lazyEl(<ComingSoonPage />) },
+      { path: 'privacy', element: lazyEl(<ComingSoonPage />) },
+      { path: 'cancel-policy', element: lazyEl(<ComingSoonPage />) },
+      { path: 'safety', element: lazyEl(<ComingSoonPage />) },
 
       {
         path: 'me',
