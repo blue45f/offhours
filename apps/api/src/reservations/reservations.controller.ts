@@ -119,4 +119,14 @@ export class ReservationsController {
   ) {
     return this.reservations.extend(user.id, id, body)
   }
+
+  @Get(':id/extension-quote')
+  async extensionQuote(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Query('hours') hours: string
+  ) {
+    const h = Math.min(6, Math.max(1, Math.floor(Number(hours) || 1)))
+    return this.reservations.extensionQuote(user.id, id, h)
+  }
 }

@@ -435,6 +435,22 @@ export class ReservationsService {
   }
 
   /**
+   * 연장 예상 추가 요금 — 다이얼로그에서 확정 전에 동적 가격을 미리 보여주기 위한 견적.
+   * 실제 가능 여부(슬롯 경계·충돌)는 commit(extend) 시 최종 검증한다.
+   */
+  async extensionQuote(guestId: string, reservationId: string, hours: number) {
+    const r = await this.prisma.reservation.findUnique({
+      where: { id: reservationId },
+      select: { guestId: true, spaceId: true, endAt: true, purpose: true },
+    })
+    if (!r) throw new NotFoundException()
+    if (r.guestId !== guestId) throw new ForbiddenException()
+    const newEnd = new Date(r.endAt.getTime() + hours * 60 * 60 * 1000)
+    const ext = await this.slots.calcExtension(r.spaceId, r.endAt, newEnd, r.purpose)
+    return { hours, additionalKRW: ext.additionalKRW }
+  }
+
+  /**
    * 이용 시간 연장 — "파티가 무르익었는데 1시간만 더" 수요를 잡는다. 단, 영업 외 대관의
    * 핵심 제약을 지킨다: 예약이 속한 자동 슬롯의 끝(= 다음 영업 준비 + 청소 버퍼를 남긴
    * 안전 경계)을 넘길 수 없다. 일반 공간대여 플랫폼은 "다음 영업"을 모델링하지 않아 못 하는

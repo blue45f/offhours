@@ -16,6 +16,7 @@ import { CorporateTaxTypeLabel } from '@offhours/shared'
 import {
   useCancelReservation,
   useExtendReservation,
+  useExtensionQuote,
   useFileClaim,
   useReservationDetail,
 } from '../features/reservations/api'
@@ -51,6 +52,7 @@ export default function ReservationDetailPage() {
   const [claimDesc, setClaimDesc] = useState('')
   const [extendOpen, setExtendOpen] = useState(false)
   const [extendHours, setExtendHours] = useState(1)
+  const extQuote = useExtensionQuote(id ?? '', extendHours, extendOpen)
 
   if (isLoading) return <div className="container-page py-12">불러오는 중...</div>
   // 쿼리가 끝났는데 데이터가 없으면(404/403/삭제) 무한 로딩 대신 안내 + 복귀 동선
@@ -527,6 +529,16 @@ export default function ReservationDetailPage() {
             options={[1, 2, 3, 4, 5, 6].map((h) => ({ value: String(h), label: `${h}시간` }))}
           />
         </Field>
+        <div className="mt-3 flex items-center justify-between rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] px-3.5 py-2.5 text-sm">
+          <span className="text-[var(--color-fg-muted)]">예상 추가 요금 (동적 가격)</span>
+          <span className="font-semibold">
+            {extQuote.isLoading
+              ? '계산 중…'
+              : extQuote.data
+                ? `+${formatKRW(extQuote.data.additionalKRW)}`
+                : '—'}
+          </span>
+        </div>
       </Dialog>
     </div>
   )

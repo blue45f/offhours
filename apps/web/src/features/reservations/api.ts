@@ -104,3 +104,15 @@ export function useExtendReservation() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
   })
 }
+
+/** 연장 예상 추가 요금 — 다이얼로그에서 확정 전에 동적 가격을 미리 보여준다 */
+export function useExtensionQuote(id: string, hours: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['reservations', 'extension-quote', id, hours],
+    enabled: enabled && !!id && hours > 0,
+    queryFn: () =>
+      api.get<{ hours: number; additionalKRW: number }>(`/reservations/${id}/extension-quote`, {
+        params: { hours },
+      }),
+  })
+}
