@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { CreateRsvpSchema, type CreateRsvpInput } from '@offhours/shared'
 
@@ -13,8 +13,8 @@ export class EventsController {
 
   @Public()
   @Get(':code')
-  async getByCode(@Param('code') code: string) {
-    return this.events.getByCode(code)
+  async getByCode(@Param('code') code: string, @Query('token') token?: string) {
+    return this.events.getByCode(code, token)
   }
 
   @Public()

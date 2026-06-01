@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service'
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getByCode(code: string): Promise<EventSummary> {
+  async getByCode(code: string, viewerToken?: string): Promise<EventSummary> {
     const r = await this.prisma.reservation.findUnique({
       where: { code },
       include: {
@@ -46,6 +46,8 @@ export class EventsService {
         name: rsvp.name,
         status: rsvp.status,
         createdAt: rsvp.createdAt.toISOString(),
+        // 이름이 아니라 clientToken 으로 본인 응답을 식별(동명이인 오인·중복 방지)
+        mine: !!viewerToken && rsvp.clientToken === viewerToken,
       })),
       counts,
     }
@@ -66,6 +68,6 @@ export class EventsService {
       },
     })
 
-    return this.getByCode(code)
+    return this.getByCode(code, dto.clientToken)
   }
 }

@@ -73,7 +73,8 @@ function EventHub({ event }: { event: EventSummary }) {
   const token = useMemo(() => getClientToken(), [])
   const [savedName, setSavedName] = useState(() => readSavedName())
   const [editing, setEditing] = useState(false)
-  const myRsvp = event.rsvps.find((r) => r.name === savedName && savedName.length > 0)
+  // 본인 응답은 이름이 아니라 서버가 clientToken 으로 판정한 mine 플래그로 식별(동명이인 오인 방지)
+  const myRsvp = event.rsvps.find((r) => r.mine)
 
   async function submit(name: string, status: RsvpStatus) {
     saveName(name)

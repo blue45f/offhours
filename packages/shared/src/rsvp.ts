@@ -15,6 +15,8 @@ export const RsvpSchema = z.object({
   name: z.string(),
   status: RsvpStatusSchema,
   createdAt: z.string(),
+  /** 요청자(viewer)의 clientToken 과 일치하는 본인 응답인지 — 동명이인 오인 방지 */
+  mine: z.boolean().default(false),
 })
 export type Rsvp = z.infer<typeof RsvpSchema>
 
