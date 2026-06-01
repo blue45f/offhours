@@ -43,12 +43,12 @@ export default function HostReviewsPage() {
         후기에 정중히 답하면 신뢰점수가 오르고, 검색 노출도 좋아져요.
       </p>
 
-      {stats && data && data.total > 0 && (
+      {/* 답글률은 전체 후기 기준일 때만 의미가 있다(필터 탭에선 0%/100% 로 오해 소지) */}
+      {tab === 'all' && stats && data && data.total > 0 && (
         <div className="mt-5 inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-[var(--color-primary-soft)] px-3.5 py-1.5 text-xs">
           <ShieldCheck size={12} className="text-[var(--color-primary)]" />
           <span>
-            <span className="font-semibold">{tab === 'all' ? data.total : data.total}</span>건 표시
-            중 ·{' '}
+            후기 <span className="font-semibold">{data.total}</span>개 ·{' '}
             <span className="font-semibold">
               답글률 {stats.total > 0 ? Math.round((stats.answered / stats.total) * 100) : 0}%
             </span>
