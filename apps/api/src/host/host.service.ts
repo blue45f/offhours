@@ -54,7 +54,22 @@ export class HostService {
   }
 
   async getProfile(userId: string) {
-    return this.prisma.hostProfile.findUnique({ where: { userId } })
+    // 계좌번호(bankAccount)는 민감 정보라 반환하지 않는다. 은행명은 편집 폼 복원에 필요해 포함.
+    return this.prisma.hostProfile.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        userId: true,
+        businessName: true,
+        businessNumber: true,
+        bankName: true,
+        taxType: true,
+        payoutCycle: true,
+        isInsured: true,
+        approvedAt: true,
+        createdAt: true,
+      },
+    })
   }
 
   /**

@@ -71,7 +71,8 @@ export default function HostProfilePage() {
       reset({
         businessName: existing.businessName,
         businessNumber: existing.businessNumber,
-        bankName: '토스뱅크',
+        // 저장된 은행명 복원 — 토스뱅크로 덮어쓰지 않는다. 계좌번호는 민감해 미반환이라 재입력 필요.
+        bankName: existing.bankName,
         bankAccount: '',
         taxType: existing.taxType as TaxType,
         payoutCycle: existing.payoutCycle as PayoutCycle,

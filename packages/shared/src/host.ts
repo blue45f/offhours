@@ -26,6 +26,8 @@ export const HostProfileSchema = z.object({
   userId: z.string(),
   businessName: z.string(),
   businessNumber: z.string(),
+  // 정산 은행명은 프로필 편집 시 복원에 필요(미반환 시 토스뱅크로 덮어쓰는 버그). 계좌번호는 민감해 미반환.
+  bankName: z.string(),
   taxType: TaxTypeSchema,
   payoutCycle: PayoutCycleSchema,
   isInsured: z.boolean(),
