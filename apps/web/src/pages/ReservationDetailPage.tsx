@@ -52,7 +52,20 @@ export default function ReservationDetailPage() {
   const [extendOpen, setExtendOpen] = useState(false)
   const [extendHours, setExtendHours] = useState(1)
 
-  if (isLoading || !data) return <div className="container-page py-12">불러오는 중...</div>
+  if (isLoading) return <div className="container-page py-12">불러오는 중...</div>
+  // 쿼리가 끝났는데 데이터가 없으면(404/403/삭제) 무한 로딩 대신 안내 + 복귀 동선
+  if (!data)
+    return (
+      <div className="container-page py-20 text-center">
+        <h1 className="text-headline serif">예약을 찾을 수 없어요</h1>
+        <p className="mt-3 text-sm text-[var(--color-fg-muted)]">
+          이미 취소됐거나 접근 권한이 없는 예약일 수 있어요.
+        </p>
+        <Button className="mt-6" onClick={() => navigate('/me/reservations')}>
+          내 예약 목록으로
+        </Button>
+      </div>
+    )
 
   const reservation = data
   const refundRate = calcRefundRate(reservation.startAt, new Date(), reservation.cancellationPolicy)
