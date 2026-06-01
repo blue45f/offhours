@@ -53,7 +53,7 @@ export default function SpacesPage() {
       radiusKm: useGeo ? radiusKm : undefined,
       liveWithinHours,
       sort: (params.get('sort') as SpaceSearchParams['sort']) ?? 'popular',
-      page: 1,
+      page: params.get('page') ? Math.max(1, Number(params.get('page'))) : 1,
       pageSize: 24,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,6 +66,8 @@ export default function SpacesPage() {
     const next = new URLSearchParams(params)
     if (!value) next.delete(key)
     else next.set(key, value)
+    // 페이지 외 조건이 바뀌면 1페이지로 리셋(현재 페이지가 결과 범위를 벗어나 빈 화면이 되는 것 방지)
+    if (key !== 'page') next.delete('page')
     setParams(next, { replace: true })
   }
 
@@ -77,6 +79,7 @@ export default function SpacesPage() {
       if (!value) next.delete(key)
       else next.set(key, value)
     }
+    if (!('page' in patches)) next.delete('page')
     setParams(next, { replace: true })
   }
 
@@ -113,6 +116,15 @@ export default function SpacesPage() {
   ]
   // URL 의 sort 가 현재 사용할 수 없는 옵션(예: 위치 끈 뒤 distance)이면 Select 가 빈칸이 되므로 popular 로 폴백
   const sortValue = sortOptions.some((o) => o.value === query.sort) ? query.sort! : 'popular'
+
+  const page = query.page ?? 1
+  const pageSize = query.pageSize ?? 24
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1
+
+  function goToPage(p: number) {
+    set('page', p <= 1 ? undefined : String(p))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <div className="container-page py-8 md:py-12">
@@ -280,6 +292,30 @@ export default function SpacesPage() {
         <SpaceCardGrid spaces={data?.items} loading={isLoading} />
       )}
 
+      {data && totalPages > 1 && (
+        <div className="mt-10 flex items-center justify-center gap-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => goToPage(page - 1)}
+          >
+            이전
+          </Button>
+          <span className="text-sm text-[var(--color-fg-muted)] tabular-nums">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => goToPage(page + 1)}
+          >
+            다음
+          </Button>
+        </div>
+      )}
+
       <Dialog open={filterOpen} onOpenChange={setFilterOpen} title="필터" size="md">
         <FilterContent
           query={query}
@@ -289,6 +325,7 @@ export default function SpacesPage() {
               if (v === undefined || v === '' || v === null) next.delete(k)
               else next.set(k, String(v))
             }
+            next.delete('page') // 필터 변경 시 1페이지로
             setParams(next, { replace: true })
             setFilterOpen(false)
           }}
