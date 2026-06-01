@@ -42,7 +42,8 @@ export interface SpaceSearchParams {
 export const spacesKeys = {
   search: (q: SpaceSearchParams) => ['spaces', 'search', q] as const,
   detail: (slug: string) => ['spaces', 'detail', slug] as const,
-  slots: (spaceId: string) => ['spaces', spaceId, 'slots'] as const,
+  slots: (spaceId: string, from?: string, to?: string) =>
+    ['spaces', spaceId, 'slots', from, to] as const,
   reviews: (spaceId: string) => ['spaces', spaceId, 'reviews'] as const,
 }
 
@@ -70,7 +71,7 @@ export function useSpaceDetail(slug?: string) {
 
 export function useSpaceSlots(spaceId?: string, from?: string, to?: string) {
   return useQuery({
-    queryKey: spacesKeys.slots(spaceId ?? ''),
+    queryKey: spacesKeys.slots(spaceId ?? '', from, to),
     enabled: !!spaceId,
     queryFn: () =>
       api.get<Slot[]>(`/spaces/${spaceId}/slots`, {
