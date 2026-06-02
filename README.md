@@ -59,7 +59,7 @@ pnpm dev:web           # web만
 pnpm dev:api           # api만
 pnpm build             # 전체 build
 pnpm typecheck         # 타입 검사
-pnpm lint              # ESLint
+pnpm lint              # ESLint (flat config, 루트 eslint.config.mjs)
 pnpm test              # 단위 테스트
 pnpm format            # Prettier 적용
 pnpm verify            # CI (format + lint + typecheck + test + build)
