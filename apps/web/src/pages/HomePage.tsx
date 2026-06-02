@@ -139,14 +139,14 @@ function RotatingNoun() {
     return () => clearInterval(t)
   }, [])
   return (
-    <span className="relative inline-flex h-[1.1em] overflow-hidden align-bottom">
+    <span className="relative inline-flex h-[1.1em] overflow-hidden align-bottom text-[var(--color-accent)]">
       <motion.span
         key={idx}
         initial={{ y: '100%', opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '-100%', opacity: 0 }}
         transition={{ duration: 0.5, ease: [0.2, 0, 0, 1] }}
-        className="inline-block bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-accent)] to-[#d97757] bg-clip-text text-transparent"
+        className="inline-block"
       >
         {HERO_ROTATING_NOUNS[idx]}
       </motion.span>
@@ -156,48 +156,37 @@ function RotatingNoun() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      {/* 화사한 그라데이션 메쉬 — 모던 라이브 느낌 */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-primary-soft)]/50 via-transparent to-transparent" />
-        <div
-          className="absolute -top-32 -right-32 size-[500px] rounded-full opacity-60 blur-3xl"
-          style={{
-            background:
-              'radial-gradient(circle at center, oklch(0.78 0.14 35 / 0.55), transparent 60%)',
-          }}
-        />
-        <div
-          className="absolute top-20 -left-40 size-[420px] rounded-full opacity-55 blur-3xl"
-          style={{
-            background:
-              'radial-gradient(circle at center, oklch(0.75 0.12 280 / 0.4), transparent 70%)',
-          }}
-        />
-        <div
-          className="absolute top-1/2 left-1/3 size-[360px] rounded-full opacity-40 blur-3xl"
-          style={{
-            background:
-              'radial-gradient(circle at center, oklch(0.82 0.13 150 / 0.45), transparent 70%)',
-          }}
-        />
-      </div>
-      <div className="container-page pt-16 pb-12 md:pt-24 md:pb-20">
+    <section className="relative overflow-hidden bg-[var(--color-bg-subtle)]">
+      {/* 따뜻한 톤 레이어링 — 마감 후 실내처럼, 위는 크림빛 잔광 아래는 차분히 가라앉는다. 메쉬·블롭 없음 */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            'linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-subtle) 58%, var(--color-bg-subtle) 100%)',
+        }}
+      />
+      {/* 하단 헤어라인 — 인테리어 기본 envelope와 동일한 구조 신호 */}
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-[var(--color-border)]" />
+
+      <div className="container-page pt-16 pb-14 md:pt-24 md:pb-20">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.2, 0, 0, 1] }}
           className="max-w-3xl"
         >
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm hairline px-3 py-1 text-xs font-semibold text-[var(--color-primary)]">
-            <Clock size={12} /> 영업 외 시간 전문 공간 대여
+          <span className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] hairline bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)] shadow-[var(--shadow-sm)]">
+            <LightStillOn />
+            영업이 끝난 뒤에도, 불은 켜져 있습니다
           </span>
-          <h1 className="mt-5 text-display serif leading-[1.1]">
-            비어 있던 그 시간,
+          <h1 className="mt-6 text-display serif leading-[1.08]">
+            마감한 가게의 불을
             <br />
-            가장 멋진 <RotatingNoun />이 됩니다.
+            당신의 <RotatingNoun />
+            으로 켭니다.
           </h1>
-          <p className="mt-5 text-lg text-[var(--color-fg-muted)] max-w-2xl leading-relaxed">
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--color-fg-muted)]">
             카페·바·레스토랑·갤러리의 휴무일과 영업 종료 후. 평소엔 만날 수 없던 감성 공간을
             파티·스몰웨딩·모임·팝업으로 시간 단위 통대관 하세요.
           </p>
@@ -213,6 +202,23 @@ function Hero() {
         </motion.div>
       </div>
     </section>
+  )
+}
+
+/**
+ * "불은 켜져 있다" 모티프. 페이지 스케일 발광 블롭 대신, 따뜻한 액센트 한 점을
+ * 토큰 색으로 부드럽게 호흡시켜 마감 후에도 켜진 실내등을 표현한다.
+ */
+function LightStillOn() {
+  return (
+    <span aria-hidden className="relative inline-flex size-2 items-center justify-center">
+      <motion.span
+        className="absolute inset-0 rounded-full bg-[var(--color-accent)]"
+        animate={{ opacity: [0.55, 1, 0.55], scale: [0.9, 1, 0.9] }}
+        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <span className="size-1 rounded-full bg-[var(--color-accent-soft)]" />
+    </span>
   )
 }
 

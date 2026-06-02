@@ -352,3 +352,17 @@ xl:  1280px  (데스크탑)
 - [ ] Skip to main content 링크
 - [ ] 폼 에러는 텍스트 + 색
 - [ ] 모달은 focus trap + Esc
+
+## 13. Hero (HomePage)
+
+North Star "마감 후에도 불은 켜져 있다(The Lights Stay On After Closing)"를 시스템 워밍 팔레트로만
+표현하는 타이포그래피 히어로. **금지 사항(절대 재도입 금지)**:
+
+- **글로우 메쉬/블롭 없음** — 보라/초록/주황 radial-gradient blur 블롭 제거. 배경은 크림 톤 레이어링
+  (`--color-bg` → `--color-bg-subtle`)과 하단 헤어라인 한 줄로만 구성.
+- **그라데이션 텍스트 없음** — `bg-clip-text`+gradient 금지. 회전 명사는 단색 `--color-accent`(sienna)로 강조.
+- **오프 팔레트 색 없음** — 강조는 타입 weight/scale + 워밍 액센트로. "불은 켜져 있다" 모티프는 페이지
+  스케일 블롭이 아니라 액센트 한 점(`LightStillOn`)을 토큰 색으로 호흡시켜 표현.
+
+UseCaseDiscovery도 시나리오별 per-hue 틴팅·발광 블롭을 제거하고 시스템 기본 envelope(크림 elevated +
+hairline) 카드 + mono 인덱스 라벨로 통일했다. 동일 원칙: 색이 아니라 구조와 절제된 워밍 액센트로 위계를 만든다.
