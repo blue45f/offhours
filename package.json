@@ -7,10 +7,6 @@
     "node": ">=20",
     "pnpm": ">=11"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "dev": "pnpm shared:build && pnpm -r --parallel --stream --if-present run dev",
     "dev:web": "pnpm --filter @offhours/web dev",

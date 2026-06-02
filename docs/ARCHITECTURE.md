@@ -104,7 +104,6 @@ offhours/
 │   └── validate-architecture.mjs
 ├── docker-compose.yml
 ├── pnpm-workspace.yaml
-├── turbo.json
 ├── tsconfig.base.json
 ├── .prettierrc
 ├── .editorconfig

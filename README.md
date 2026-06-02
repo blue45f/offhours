@@ -45,7 +45,7 @@ cp .env.example .env
 pnpm db:push
 pnpm seed
 
-# 5) 개발 (turbo가 web/api/shared 동시 기동)
+# 5) 개발 (pnpm이 web/api/shared 동시 기동)
 pnpm dev
 ```
 
