@@ -4,6 +4,7 @@ import { Calendar } from 'lucide-react'
 import { ReservationStatusLabel, type ReservationStatus } from '@offhours/shared'
 
 import { Tabs } from '../components/ui/Tabs'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Card, CardBody } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
@@ -35,6 +36,7 @@ const STATUS_TONE: Record<
 }
 
 export default function MyReservationsPage() {
+  useDocumentTitle('예약 내역')
   const [tab, setTab] = useState('all')
   const { data, isLoading } = useMyReservations(
     'guest',

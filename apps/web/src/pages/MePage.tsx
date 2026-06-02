@@ -4,12 +4,14 @@ import { Building2, Calendar, Heart, MessageCircle, Sparkles } from 'lucide-reac
 import { REFERRAL_BONUS_KRW } from '@offhours/shared'
 
 import { useMe } from '../store/auth'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { Avatar } from '../components/ui/Avatar'
 import { Card, CardBody } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { RecentlyViewedRow } from '../components/space/RecentlyViewedRow'
 
 export default function MePage() {
+  useDocumentTitle('마이페이지')
   const me = useMe()
   if (!me) return null
 

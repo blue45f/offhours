@@ -22,6 +22,7 @@ import {
 } from '../features/reservations/api'
 import { useMe } from '../store/auth'
 import { useOpenChat } from '../features/chat/api'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
@@ -53,6 +54,7 @@ export default function ReservationDetailPage() {
   const [extendOpen, setExtendOpen] = useState(false)
   const [extendHours, setExtendHours] = useState(1)
   const extQuote = useExtensionQuote(id ?? '', extendHours, extendOpen)
+  useDocumentTitle(data?.spaceTitle)
 
   if (isLoading) return <div className="container-page py-12">불러오는 중...</div>
   // 쿼리가 끝났는데 데이터가 없으면(404/403/삭제) 무한 로딩 대신 안내 + 복귀 동선

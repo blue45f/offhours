@@ -5,8 +5,10 @@ import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Button } from '../components/ui/Button'
 import { useFavorites } from '../features/favorites/api'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 export default function FavoritesPage() {
+  useDocumentTitle('찜한 공간')
   const { data, isLoading } = useFavorites()
   return (
     <div className="container-page py-8 md:py-12">
