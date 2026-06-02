@@ -21,7 +21,8 @@
   --ref-sienna-50: #fff5ee;
   --ref-sienna-100: #ffe5d2;
   --ref-sienna-300: #dba58c;
-  --ref-sienna-500: #c97550;
+  /* WCAG AA: 액센트 텍스트(크림 위 4.7:1)·흰 글자 버튼(5.0:1) 충족하도록 한 톤 진한 테라코타 */
+  --ref-sienna-500: #a15e40;
   --ref-sienna-700: #8b4a2d;
 
   /* Warm cream */
@@ -30,7 +31,8 @@
   --ref-cream-200: #e5e0d5;
   --ref-cream-300: #c8c1b3;
   --ref-cream-400: #a39a88;
-  --ref-cream-500: #847b6a;
+  /* WCAG AA: 보조 텍스트(fg-subtle)가 서브 배경 위 4.6:1 충족하도록 약간 진하게 */
+  --ref-cream-500: #726a5b;
   --ref-cream-600: #67604f;
   --ref-cream-700: #4d4738;
   --ref-cream-800: #312d23;
