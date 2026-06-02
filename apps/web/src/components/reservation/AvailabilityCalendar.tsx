@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { addDays, format, parseISO, startOfWeek } from 'date-fns'
 import { Clock } from 'lucide-react'
 
 import { useSpaceSlots } from '../../features/spaces/api'
@@ -22,14 +23,13 @@ interface Props {
 }
 
 function ymd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return format(d, 'yyyy-MM-dd')
 }
 function hm(iso: string): string {
-  const d = new Date(iso)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  return format(parseISO(iso), 'HH:mm')
 }
 function durationH(startIso: string, endIso: string): number {
-  return Math.round((new Date(endIso).getTime() - new Date(startIso).getTime()) / 3_600_000)
+  return Math.round((parseISO(endIso).getTime() - parseISO(startIso).getTime()) / 3_600_000)
 }
 
 /**
@@ -45,16 +45,8 @@ export function AvailabilityCalendar({ spaceId, value, onPickDate, onPickSlot }:
   }, [])
 
   // 이번 주 일요일부터 6주
-  const gridStart = useMemo(() => {
-    const d = new Date(today)
-    d.setDate(d.getDate() - d.getDay())
-    return d
-  }, [today])
-  const gridEnd = useMemo(() => {
-    const d = new Date(gridStart)
-    d.setDate(d.getDate() + WEEKS * 7)
-    return d
-  }, [gridStart])
+  const gridStart = useMemo(() => startOfWeek(today, { weekStartsOn: 0 }), [today])
+  const gridEnd = useMemo(() => addDays(gridStart, WEEKS * 7), [gridStart])
 
   const { data: slots } = useSpaceSlots(spaceId, gridStart.toISOString(), gridEnd.toISOString())
 
@@ -63,7 +55,7 @@ export function AvailabilityCalendar({ spaceId, value, onPickDate, onPickSlot }:
     const map = new Map<string, OpenSlot[]>()
     for (const s of slots ?? []) {
       if (!s.isOpen || s.isReserved) continue
-      const key = ymd(new Date(s.startAt))
+      const key = ymd(parseISO(s.startAt))
       const arr = map.get(key) ?? []
       arr.push({ startAt: s.startAt, endAt: s.endAt, priceKRW: s.priceKRW })
       map.set(key, arr)
@@ -73,11 +65,7 @@ export function AvailabilityCalendar({ spaceId, value, onPickDate, onPickSlot }:
   }, [slots])
 
   const days = useMemo(() => {
-    return Array.from({ length: WEEKS * 7 }, (_, i) => {
-      const d = new Date(gridStart)
-      d.setDate(d.getDate() + i)
-      return d
-    })
+    return Array.from({ length: WEEKS * 7 }, (_, i) => addDays(gridStart, i))
   }, [gridStart])
 
   const selectedSlots = byDay.get(value) ?? []

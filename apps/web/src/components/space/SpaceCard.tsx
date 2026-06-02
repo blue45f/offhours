@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { format, parseISO } from 'date-fns'
 import { Link } from 'react-router-dom'
 import {
   Check,
@@ -208,14 +209,13 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
 }
 
 function formatNextSlot(iso: string): string {
-  const start = new Date(iso)
+  const start = parseISO(iso)
   const diffH = (start.getTime() - Date.now()) / (1000 * 60 * 60)
-  const hh = String(start.getHours()).padStart(2, '0')
-  const mm = String(start.getMinutes()).padStart(2, '0')
-  if (diffH < 0) return `방금 ${hh}:${mm} 가능`
-  if (diffH < 1) return `${Math.max(1, Math.round(diffH * 60))}분 뒤 ${hh}:${mm} 가능`
-  if (diffH < 24) return `${Math.round(diffH)}시간 뒤 ${hh}:${mm} 가능`
-  return `${Math.round(diffH / 24)}일 뒤 ${hh}:${mm} 가능`
+  const clock = format(start, 'HH:mm')
+  if (diffH < 0) return `방금 ${clock} 가능`
+  if (diffH < 1) return `${Math.max(1, Math.round(diffH * 60))}분 뒤 ${clock} 가능`
+  if (diffH < 24) return `${Math.round(diffH)}시간 뒤 ${clock} 가능`
+  return `${Math.round(diffH / 24)}일 뒤 ${clock} 가능`
 }
 
 function Header({ space }: { space: SpaceCardType }) {

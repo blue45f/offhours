@@ -1,3 +1,10 @@
+import { format, parseISO } from 'date-fns'
+import { ko } from 'date-fns/locale/ko'
+
+function toDate(value: string | Date): Date {
+  return typeof value === 'string' ? parseISO(value) : value
+}
+
 export function formatKRW(value: number): string {
   return `${value.toLocaleString('ko-KR')}원`
 }
@@ -9,33 +16,15 @@ export function formatKRWShort(value: number): string {
 }
 
 export function formatDateKR(value: string | Date): string {
-  const d = new Date(value)
-  return d.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    weekday: 'short',
-  })
+  return format(toDate(value), 'yyyy년 M월 d일 (EEE)', { locale: ko })
 }
 
 export function formatDateTimeKR(value: string | Date): string {
-  const d = new Date(value)
-  return d.toLocaleString('ko-KR', {
-    month: 'short',
-    day: 'numeric',
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
+  return format(toDate(value), 'M월 d일 (EEE) HH:mm', { locale: ko })
 }
 
 export function formatTimeRange(start: string | Date, end: string | Date): string {
-  const s = new Date(start)
-  const e = new Date(end)
-  const sd = s.toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
-  const ed = e.toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
-  return `${sd} – ${ed}`
+  return `${format(toDate(start), 'HH:mm')} – ${format(toDate(end), 'HH:mm')}`
 }
 
 export function timeFromNow(value: string | Date): string {

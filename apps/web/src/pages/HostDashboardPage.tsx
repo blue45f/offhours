@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { format, parseISO } from 'date-fns'
 import { Link } from 'react-router-dom'
 import { Calendar, MapPin, PlusCircle, Star, Wallet } from 'lucide-react'
 
@@ -233,9 +234,7 @@ function PayoutRow({
     payoutAt: string
   }
 }) {
-  const payoutDate = new Date(item.payoutAt)
-  const mm = String(payoutDate.getMonth() + 1).padStart(2, '0')
-  const dd = String(payoutDate.getDate()).padStart(2, '0')
+  const payoutDate = format(parseISO(item.payoutAt), 'MM/dd')
 
   return (
     <li
@@ -248,9 +247,7 @@ function PayoutRow({
       </div>
       <div className="shrink-0 text-right">
         <p className="text-sm font-semibold text-[var(--color-fg)]">{formatKRW(item.netKRW)}</p>
-        <p className="text-xs text-[var(--color-fg-muted)] mt-0.5">
-          {mm}/{dd} 정산 예정
-        </p>
+        <p className="text-xs text-[var(--color-fg-muted)] mt-0.5">{payoutDate} 정산 예정</p>
       </div>
     </li>
   )

@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { format, parseISO } from 'date-fns'
+import { ko } from 'date-fns/locale/ko'
 import { Link, useParams } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -18,7 +20,6 @@ import { Skeleton } from '../components/ui/Skeleton'
 
 const CONFIRMED = new Set(['APPROVED', 'PAID', 'CHECKED_IN', 'COMPLETED'])
 const EASE = [0.2, 0, 0, 1] as const
-const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
 
 function partOfDay(h: number): string {
   if (h < 5) return '새벽'
@@ -30,21 +31,19 @@ function partOfDay(h: number): string {
 
 /** "5월 30일 토요일 · 밤 11시" 같은 자연스러운 한국어 표기 */
 function inviteDateLine(value: string): string {
-  const d = new Date(value)
+  const d = parseISO(value)
   const h = d.getHours()
   const hour12 = h % 12 === 0 ? 12 : h % 12
   const min = d.getMinutes()
   const time = min === 0 ? `${partOfDay(h)} ${hour12}시` : `${partOfDay(h)} ${hour12}시 ${min}분`
-  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${WEEKDAY[d.getDay()]}요일 · ${time}`
+  return `${format(d, 'M월 d일 EEEE', { locale: ko })} · ${time}`
 }
 
 function fullDateLine(start: string, end: string): string {
-  const s = new Date(start)
-  const e = new Date(end)
-  const date = `${s.getFullYear()}년 ${s.getMonth() + 1}월 ${s.getDate()}일 (${WEEKDAY[s.getDay()]})`
-  const hm = (d: Date) =>
-    `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-  return `${date} · ${hm(s)} ~ ${hm(e)}`
+  const s = parseISO(start)
+  const e = parseISO(end)
+  const date = format(s, 'yyyy년 M월 d일 (EEE)', { locale: ko })
+  return `${date} · ${format(s, 'HH:mm')} ~ ${format(e, 'HH:mm')}`
 }
 
 function countdownLabel(c: Countdown): string {
