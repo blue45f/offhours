@@ -67,7 +67,7 @@ export class ChatService {
   }
 
   async send(userId: string, chatId: string, body: string) {
-    const membership = await this.ensureMember(userId, chatId)
+    await this.ensureMember(userId, chatId)
     const msg = await this.prisma.chatMessage.create({
       data: { chatId, senderId: userId, body },
     })

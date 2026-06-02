@@ -13,8 +13,6 @@ import {
   paginated,
   type CreateSpaceInput,
   type GalleryPhoto,
-  type PriceSuggestion,
-  type PriceSuggestionQuery,
   type SpaceCard,
   type SpaceDetail,
   type SpaceSearch,
@@ -67,7 +65,6 @@ export class SpacesService {
 
     const hasGeo = query.lat != null && query.lng != null
     const isLive = query.sort === 'live' || query.liveWithinHours != null
-    const isDistance = query.sort === 'distance' || (hasGeo && query.radiusKm != null)
 
     // 라이브/거리 정렬이면 인메모리 처리(슬롯 매칭+거리 계산)가 필요 → 우선 충분히 많이 가져와
     // 후처리 후 페이지네이션. 운영 규모 커지면 PostGIS + Materialized View 로 이관.

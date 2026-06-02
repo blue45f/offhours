@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { BusinessHour, Holiday, PricingRule } from '@prisma/client'
+import type { BusinessHour, PricingRule } from '@prisma/client'
 
 import { generateOffhoursPlans, pricePerHour } from './slots.engine'
 

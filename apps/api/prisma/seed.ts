@@ -469,7 +469,7 @@ async function main() {
   const guestPwd = await argon2.hash('guest1234', { type: argon2.argon2id })
   const hostPwd = await argon2.hash('host1234', { type: argon2.argon2id })
 
-  const superadmin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'admin@offhours.kr' },
     update: {},
     create: {
