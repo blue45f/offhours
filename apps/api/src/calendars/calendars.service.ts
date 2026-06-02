@@ -9,7 +9,7 @@ import type {
 
 import { PrismaService } from '../prisma/prisma.service'
 import { parseIcs } from './ics-parser'
-import { assertSafeIcsUrl } from './ics-url'
+import { assertSafeIcsUrl, fetchIcsSafely } from './ics-url'
 
 @Injectable()
 export class CalendarsService {
@@ -130,8 +130,8 @@ export class CalendarsService {
     const cal = await this.prisma.externalCalendar.findUnique({ where: { id: calendarId } })
     if (!cal) return { ok: false, error: 'Calendar gone' }
     try {
-      assertSafeIcsUrl(cal.icsUrl) // 재동기화·크론 경로의 방어선(저장된 URL도 매 fetch 전 재검증)
-      const res = await fetch(cal.icsUrl, {
+      // 저장된 URL도 매 fetch 전 재검증 + DNS 해석 IP·리다이렉트 매 홉 재검증(SSRF/DNS rebinding 방어)
+      const res = await fetchIcsSafely(cal.icsUrl, {
         signal: AbortSignal.timeout(10_000),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)

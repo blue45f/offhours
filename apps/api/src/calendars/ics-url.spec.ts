@@ -26,8 +26,17 @@ describe('assertSafeIcsUrl', () => {
     'http://172.16.0.9/cal.ics',
     'http://0.0.0.0/cal.ics',
     'http://[::1]/cal.ics', // IPv6 루프백
+    'http://[::]/cal.ics', // IPv6 unspecified
+    'http://[::ffff:127.0.0.1]/cal.ics', // IPv4-mapped 루프백
     'http://intranet.local/cal.ics',
     'http://svc.internal/cal.ics',
+    'http://100.64.0.1/cal.ics', // CGNAT 100.64/10
+    'http://224.0.0.1/cal.ics', // multicast
+    'http://240.0.0.1/cal.ics', // reserved
+    'http://198.18.0.1/cal.ics', // 벤치마킹
+    'http://192.0.2.1/cal.ics', // TEST-NET-1
+    'https://user:pass@cal.example.com/x.ics', // 자격증명 포함
+    'https://user@cal.example.com/x.ics', // 자격증명(user만)
     'not-a-url',
   ])('내부/비정상 URL 거부: %s', (url) => {
     expect(() => assertSafeIcsUrl(url)).toThrow()
