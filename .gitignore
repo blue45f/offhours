@@ -39,8 +39,11 @@ coverage
 *.db
 *.db-journal
 
-# Uploads
+# Uploads (storage dir for uploaded files)
 uploads/
+# ...but keep the API uploads module source (the broad rule above over-matched it)
+!apps/api/src/uploads/
+!apps/api/src/uploads/*.ts
 
 # Playwright
 playwright-report
