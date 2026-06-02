@@ -91,6 +91,7 @@ export default function HomePage() {
           </div>
           <Link
             to="/spaces"
+            aria-label="인기 공간 전체 보기"
             className="hidden md:inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)]"
           >
             전체 보기 <ArrowRight size={14} />

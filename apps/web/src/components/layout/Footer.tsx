@@ -19,7 +19,7 @@ export function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">서비스</h4>
+            <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">서비스</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
                 <Link to="/spaces">공간 둘러보기</Link>
@@ -36,7 +36,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">고객 지원</h4>
+            <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">고객 지원</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
                 <Link to="/help">도움말</Link>
@@ -53,7 +53,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">정책</h4>
+            <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">정책</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
                 <Link to="/terms">이용약관</Link>
