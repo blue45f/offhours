@@ -25,7 +25,7 @@ import {
 
 import { PrismaService } from '../prisma/prisma.service'
 import { SlotsService } from '../slots/slots.service'
-import { randomCode } from '../common/util/code'
+import { randomCode, randomUpperCode } from '../common/util/code'
 import { NotificationsService } from '../notifications/notifications.service'
 import { WaitlistService } from '../waitlist/waitlist.service'
 import { PaymentsService } from '../payments/payments.service'
@@ -84,7 +84,7 @@ export class ReservationsService {
     const feeKRW = calcReservationFee(quote.subtotalKRW)
     const code = randomCode('OFH')
     const status: ReservationStatus = space.instantBook ? 'APPROVED' : 'REQUESTED'
-    const checkInCode = Math.random().toString(36).slice(2, 8).toUpperCase()
+    const checkInCode = randomUpperCode(6)
 
     // 법인 결제 — 현재 등록된 corporate 프로필을 스냅샷으로 동결해 첨부
     let corporateProfileId: string | null = null

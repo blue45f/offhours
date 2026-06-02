@@ -20,7 +20,7 @@ const VOTER_NAME_KEY = 'offhours.voter.name'
 function getOrCreateVoterToken() {
   let t = localStorage.getItem(VOTER_TOKEN_KEY)
   if (!t) {
-    t = `v_${Math.random().toString(36).slice(2)}_${Date.now().toString(36)}`
+    t = `v_${crypto.randomUUID()}`
     localStorage.setItem(VOTER_TOKEN_KEY, t)
   }
   return t
