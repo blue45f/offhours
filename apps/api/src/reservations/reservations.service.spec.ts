@@ -21,10 +21,12 @@ function makeService(reservation: Record<string, unknown>) {
   const slots: any = {}
   const notifications: any = { create: vi.fn().mockResolvedValue(undefined) }
   const waitlist: any = { notifyOnSlotFreed: vi.fn().mockResolvedValue(undefined) }
+  const payments: any = { refund: vi.fn().mockResolvedValue({}) }
   return {
-    svc: new ReservationsService(prisma, slots, notifications, waitlist),
+    svc: new ReservationsService(prisma, slots, notifications, waitlist, payments),
     prisma,
     waitlist,
+    payments,
   }
 }
 
@@ -47,24 +49,46 @@ const paid = {
 }
 
 describe('ReservationsService.cancelByGuest', () => {
-  it('결제된 예약 취소 → 보증금 전액 환급 + released 표기 + 크레딧·포인트 환원', async () => {
-    const { svc, prisma, waitlist } = makeService(paid)
+  it('결제된 예약 100% 취소 → 보증금 전액 + 크레딧·포인트 전액 환원 + 카드 환불(PG)', async () => {
+    const { svc, prisma, waitlist, payments } = makeService(paid)
     const res: any = await svc.cancelByGuest('g1', 'r1', '단순 변심')
     expect(res.depositRefundKRW).toBe(100000)
     const upd = prisma.reservation.update.mock.calls[0][0]
     expect(upd.data.status).toBe('REFUNDED')
     expect(upd.data.depositReleasedAt).toBeInstanceOf(Date)
+    // 환불률 100% → 비례 환원 = 전액
     expect(prisma.corporateProfile.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: { creditBalanceKRW: { increment: 50000 } } })
     )
     expect(prisma.user.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: { pointsKRW: { increment: 20000 } } })
     )
+    // 카드 환불 = 서비스 카드분(230000) + 보증금(100000)
+    expect(payments.refund).toHaveBeenCalledWith('r1', expect.any(String), 330000)
     expect(waitlist.notifyOnSlotFreed).toHaveBeenCalledWith('s1')
   })
 
-  it('미결제(REQUESTED) 취소 → 보증금 환급 없음(예치 전), 크레딧은 환원', async () => {
-    const { svc, prisma } = makeService({ ...paid, status: 'REQUESTED' })
+  it('부분 환불(FLEXIBLE 24h 이내 = 50%) → 비례 배분: 크레딧·포인트·카드 모두 환불률만큼만', async () => {
+    const partial = {
+      ...paid,
+      startAt: new Date(Date.now() + 12 * 60 * 60 * 1000), // 12h 후 → FLEXIBLE 50%
+      cancellationPolicy: 'FLEXIBLE',
+    }
+    const { svc, prisma, payments } = makeService(partial)
+    await svc.cancelByGuest('g1', 'r1', '단순 변심')
+    // 크레딧 50000×0.5=25000, 포인트 20000×0.5=10000 (전액 아님 — 몰수분 비례 적용)
+    expect(prisma.corporateProfile.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { creditBalanceKRW: { increment: 25000 } } })
+    )
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { pointsKRW: { increment: 10000 } } })
+    )
+    // 카드 = 0.5×(300000−50000−20000) + 보증금 100000 = 115000 + 100000
+    expect(payments.refund).toHaveBeenCalledWith('r1', expect.any(String), 215000)
+  })
+
+  it('미결제(REQUESTED) 취소 → 보증금·카드 환불 없음(예치 전), 크레딧은 환원', async () => {
+    const { svc, prisma, payments } = makeService({ ...paid, status: 'REQUESTED' })
     const res: any = await svc.cancelByGuest('g1', 'r1', '단순 변심')
     expect(res.depositRefundKRW).toBe(0)
     const upd = prisma.reservation.update.mock.calls[0][0]
@@ -72,6 +96,7 @@ describe('ReservationsService.cancelByGuest', () => {
     expect(prisma.corporateProfile.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: { creditBalanceKRW: { increment: 50000 } } })
     )
+    expect(payments.refund).not.toHaveBeenCalled() // 결제 전이라 PG 환불 없음
   })
 })
 
@@ -132,7 +157,11 @@ function makeExtendService(opts: {
   }
   const notifications: any = { create: vi.fn().mockResolvedValue(undefined) }
   const waitlist: any = { notifyOnSlotFreed: vi.fn().mockResolvedValue(undefined) }
-  return { svc: new ReservationsService(prisma, slots, notifications, waitlist), prisma }
+  const payments: any = { refund: vi.fn().mockResolvedValue({}) }
+  return {
+    svc: new ReservationsService(prisma, slots, notifications, waitlist, payments),
+    prisma,
+  }
 }
 
 describe('ReservationsService.extend', () => {
@@ -191,7 +220,8 @@ function makeQuoteService(reservation: Record<string, unknown> | null, additiona
   const slots: any = { calcExtension: vi.fn().mockResolvedValue({ hours: 2, additionalKRW }) }
   const notifications: any = { create: vi.fn() }
   const waitlist: any = { notifyOnSlotFreed: vi.fn() }
-  return { svc: new ReservationsService(prisma, slots, notifications, waitlist), slots }
+  const payments: any = { refund: vi.fn().mockResolvedValue({}) }
+  return { svc: new ReservationsService(prisma, slots, notifications, waitlist, payments), slots }
 }
 
 const quoteReservation = {

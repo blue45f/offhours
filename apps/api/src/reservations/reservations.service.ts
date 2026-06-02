@@ -28,6 +28,7 @@ import { SlotsService } from '../slots/slots.service'
 import { randomCode } from '../common/util/code'
 import { NotificationsService } from '../notifications/notifications.service'
 import { WaitlistService } from '../waitlist/waitlist.service'
+import { PaymentsService } from '../payments/payments.service'
 
 @Injectable()
 export class ReservationsService {
@@ -35,7 +36,8 @@ export class ReservationsService {
     private readonly prisma: PrismaService,
     private readonly slots: SlotsService,
     private readonly notifications: NotificationsService,
-    private readonly waitlist: WaitlistService
+    private readonly waitlist: WaitlistService,
+    private readonly payments: PaymentsService
   ) {}
 
   async create(guestId: string, input: CreateReservationInput) {
@@ -336,19 +338,31 @@ export class ReservationsService {
         ...(releaseDeposit ? { depositReleasedAt: new Date() } : {}),
       },
     })
-    // 법인 크레딧으로 차감했으면 취소 시 크레딧 환원
-    if (r.creditAppliedKRW > 0 && r.corporateProfileId) {
+    // 비례 배분 환원 — 몰수분(1−환불률)을 카드·크레딧·포인트 서비스 분담분에 비례로 적용한다.
+    // (creditApplied + pointsApplied ≤ totalKRW 가 보장돼 카드 서비스분은 항상 ≥ 0)
+    const creditRefund = Math.round(refundRate * r.creditAppliedKRW)
+    const pointsRefund = Math.round(refundRate * r.pointsAppliedKRW)
+    if (creditRefund > 0 && r.corporateProfileId) {
       await this.prisma.corporateProfile.update({
         where: { id: r.corporateProfileId },
-        data: { creditBalanceKRW: { increment: r.creditAppliedKRW } },
+        data: { creditBalanceKRW: { increment: creditRefund } },
       })
     }
-    // 사용한 적립 포인트도 취소 시 환원
-    if (r.pointsAppliedKRW > 0) {
+    if (pointsRefund > 0) {
       await this.prisma.user.update({
         where: { id: r.guestId },
-        data: { pointsKRW: { increment: r.pointsAppliedKRW } },
+        data: { pointsKRW: { increment: pointsRefund } },
       })
+    }
+    // 카드 환불(실 PG, mock 게이트) — 서비스 카드분(환불률 적용) + 보증금 전액. PAID 였을 때만 실제 결제가 잡혀 있다.
+    const cardServiceRefundKRW = Math.round(
+      refundRate * (r.totalKRW - r.creditAppliedKRW - r.pointsAppliedKRW)
+    )
+    const cardRefundKRW = cardServiceRefundKRW + depositRefundKRW
+    if (r.status === 'PAID' && cardRefundKRW > 0) {
+      await this.payments
+        .refund(r.id, `게스트 취소 (환불률 ${Math.round(refundRate * 100)}%)`, cardRefundKRW)
+        .catch(() => null)
     }
     // 환불률이 낮을수록(=시작 임박 취소) 페널티 가중.
     const penalty = refundRate < 1 ? TRUST_SCORE.PENALTY_GUEST_CANCEL : 0
@@ -361,7 +375,7 @@ export class ReservationsService {
     })
     // 이 시간대가 다시 비었으니 대기자에게 빈자리 알림
     await this.waitlist.notifyOnSlotFreed(r.spaceId).catch(() => null)
-    return { ...updated, refundKRW, depositRefundKRW }
+    return { ...updated, refundKRW, depositRefundKRW, cardRefundKRW, creditRefund, pointsRefund }
   }
 
   /**
