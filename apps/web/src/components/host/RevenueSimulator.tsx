@@ -186,6 +186,8 @@ function SliderRow({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
+        aria-label={label}
+        aria-valuetext={display}
         className="mt-1.5 w-full accent-[var(--color-primary)]"
       />
     </div>
