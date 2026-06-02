@@ -18,6 +18,7 @@ import {
 import {
   Flame,
   Heart,
+  Image as ImageIcon,
   MapPin,
   MessageCircle,
   ShieldCheck,
@@ -488,20 +489,31 @@ function Gallery({
     )
   }
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 rounded-[var(--radius-2xl)] overflow-hidden">
-      <img
-        src={photos[0].url}
-        alt={photos[0].alt ?? title}
-        className="col-span-2 row-span-2 size-full object-cover aspect-[4/3]"
-      />
-      {photos.slice(1, 5).map((p) => (
+    <div className="group relative grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 rounded-[var(--radius-2xl)] overflow-hidden hairline">
+      <div className="col-span-2 row-span-2 relative overflow-hidden bg-[var(--color-bg-subtle)]">
         <img
-          key={p.url}
-          src={p.url}
-          alt={p.alt ?? title}
-          className="size-full object-cover aspect-[4/3] hidden md:block"
+          src={photos[0].url}
+          alt={photos[0].alt ?? title}
+          className="size-full object-cover aspect-[4/3] transition-transform duration-[var(--duration-slow)] ease-[var(--easing-standard)] group-hover:scale-[1.02]"
         />
+      </div>
+      {photos.slice(1, 5).map((p) => (
+        <div
+          key={p.url}
+          className="relative overflow-hidden bg-[var(--color-bg-subtle)] hidden md:block"
+        >
+          <img
+            src={p.url}
+            alt={p.alt ?? title}
+            className="size-full object-cover aspect-[4/3] transition-transform duration-[var(--duration-slow)] ease-[var(--easing-standard)] hover:scale-[1.03]"
+          />
+        </div>
       ))}
+      {photos.length > 1 && (
+        <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-elevated)]/85 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-[var(--color-fg-muted)] shadow-[var(--shadow-sm)]">
+          <ImageIcon size={11} /> 사진 {photos.length}장
+        </span>
+      )}
     </div>
   )
 }

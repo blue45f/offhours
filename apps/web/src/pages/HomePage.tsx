@@ -25,13 +25,13 @@ import {
 } from '@offhours/shared'
 
 import { HeroSearch } from '../components/space/HeroSearch'
-import { SpaceCard } from '../components/space/SpaceCard'
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
+import { FeaturedSpacesBand } from '../components/space/FeaturedSpacesBand'
+import { LiveNearbyRail } from '../components/space/LiveNearbyRail'
 import { UseCaseDiscovery } from '../components/space/UseCaseDiscovery'
 import { ForYouSection } from '../components/space/ForYouSection'
 import { useSpacesSearch } from '../features/spaces/api'
 import { Button } from '../components/ui/Button'
-import { Skeleton } from '../components/ui/Skeleton'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
@@ -84,7 +84,10 @@ export default function HomePage() {
       <section className="container-page py-12 md:py-16">
         <div className="flex items-end justify-between mb-6">
           <div>
-            <h2 className="text-headline">지금 가장 사랑받는 공간</h2>
+            <span className="text-xs font-bold tracking-widest uppercase text-[var(--color-primary)]">
+              Editor&apos;s Pick
+            </span>
+            <h2 className="mt-2 text-headline serif">지금 가장 사랑받는 공간</h2>
             <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
               영업이 끝난 시간, 가장 매력적인 모임 장소가 됩니다.
             </p>
@@ -97,7 +100,7 @@ export default function HomePage() {
             전체 보기 <ArrowRight size={14} />
           </Link>
         </div>
-        <SpaceCardGrid spaces={popular.data?.items} loading={popular.isLoading} />
+        <FeaturedSpacesBand spaces={popular.data?.items} loading={popular.isLoading} />
       </section>
 
       <CategoryRow />
@@ -105,13 +108,24 @@ export default function HomePage() {
       <DifferentiationSection />
 
       <section className="container-page py-12 md:py-16">
-        <div className="flex items-end justify-between mb-6">
+        <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-headline">새로 합류한 공간</h2>
+            <span className="text-xs font-bold tracking-widest uppercase text-[var(--color-fg-subtle)]">
+              Just Joined
+            </span>
+            <h2 className="mt-2 text-headline">새로 합류한 공간</h2>
             <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
               방금 등록된 따끈한 공간들을 가장 먼저 만나보세요.
             </p>
           </div>
+          <span aria-hidden className="mb-2 hidden h-px flex-1 bg-[var(--color-border)] md:block" />
+          <Link
+            to="/spaces?sort=newest"
+            aria-label="새로 합류한 공간 전체 보기"
+            className="hidden shrink-0 md:inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)]"
+          >
+            전체 보기 <ArrowRight size={14} />
+          </Link>
         </div>
         <SpaceCardGrid spaces={newest.data?.items} loading={newest.isLoading} />
       </section>
@@ -354,16 +368,7 @@ function NowNearbySection({
             </Link>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {loading
-            ? Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-3">
-                  <Skeleton className="aspect-[4/3] w-full rounded-[var(--radius-xl)]" />
-                  <Skeleton variant="text" className="w-3/4" />
-                </div>
-              ))
-            : items?.slice(0, 4).map((s) => <SpaceCard key={s.id} space={s} />)}
-        </div>
+        <LiveNearbyRail spaces={items} loading={loading} />
       </div>
     </section>
   )

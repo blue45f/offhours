@@ -26,7 +26,7 @@ import { COMPARE_MAX, useCompareStore } from '../../store/compare'
 
 interface Props {
   space: SpaceCardType
-  layout?: 'card' | 'list'
+  layout?: 'card' | 'list' | 'featured'
 }
 
 export function SpaceCard({ space, layout = 'card' }: Props) {
@@ -68,6 +68,83 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
         <Thumbnail space={space} className="size-32 shrink-0 rounded-[var(--radius-lg)]" />
         <div className="flex-1 min-w-0">
           <Header space={space} />
+        </div>
+      </Link>
+    )
+  }
+
+  if (layout === 'featured') {
+    return (
+      <Link
+        to={`/spaces/${space.slug}`}
+        className="group relative block h-full min-h-[22rem] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-bg-subtle)] focus:outline-none"
+      >
+        <HoverCarousel space={space} className="absolute inset-0 size-full" />
+        {/* 아래에서 차오르는 따뜻한 잉크 스크림 — 마감 후 실내처럼 텍스트만 또렷이 */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(to top, rgba(26,24,20,0.78) 0%, rgba(26,24,20,0.34) 38%, transparent 66%)',
+          }}
+        />
+        <div className="absolute right-4 top-4 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleToggle}
+            aria-label={isFavorited ? '찜 해제' : '찜하기'}
+            className="inline-flex size-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-transform hover:scale-105"
+          >
+            <Heart
+              size={16}
+              className={cn(isFavorited && 'fill-[var(--color-accent)] text-[var(--color-accent)]')}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={handleCompare}
+            aria-label={inCompare ? '비교에서 빼기' : '비교에 담기'}
+            className={cn(
+              'inline-flex size-9 items-center justify-center rounded-full backdrop-blur-sm transition-transform hover:scale-105',
+              inCompare ? 'bg-[var(--color-primary)] text-white' : 'bg-black/30 text-white'
+            )}
+          >
+            {inCompare ? <Check size={16} /> : <GitCompare size={16} />}
+          </button>
+        </div>
+        <div className="absolute inset-x-0 bottom-0 p-5 md:p-7 text-white">
+          <div className="flex items-center gap-2 text-[13px] text-white/80">
+            <MapPin size={13} />
+            <span>
+              {space.region} {space.district}
+            </span>
+            <span aria-hidden>·</span>
+            <span>{VenueCategoryLabel[space.category]}</span>
+          </div>
+          <h3 className="mt-2 text-title serif font-semibold leading-tight line-clamp-2 group-hover:underline underline-offset-4 decoration-1 decoration-white/40">
+            {space.title}
+          </h3>
+          <p className="mt-1.5 max-w-prose text-sm text-white/75 line-clamp-2">{space.summary}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {space.nextAvailableAt && (
+              <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-accent)] px-2.5 py-1 text-[11px] font-semibold text-white">
+                <Clock size={11} />
+                {formatNextSlot(space.nextAvailableAt)}
+                {space.lastMinuteDiscount ? (
+                  <span className="ml-0.5">· -{Math.round(space.lastMinuteDiscount * 100)}%</span>
+                ) : null}
+              </span>
+            )}
+            {space.ratingCount > 0 && (
+              <span className="inline-flex items-center gap-1 text-sm text-white/85">
+                <StarRating value={space.ratingAvg} size={13} showValue />
+              </span>
+            )}
+            <span className="ml-auto text-base font-semibold">
+              시간당 {formatKRW(space.basePriceKRW)}
+            </span>
+          </div>
         </div>
       </Link>
     )
