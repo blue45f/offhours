@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common'
+import { Throttle } from '@nestjs/throttler'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Request, Response } from 'express'
 import { SignInSchema, SignUpSchema } from '@offhours/shared'
@@ -29,6 +30,8 @@ function clearRefreshCookie(res: Response) {
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  // 계정 생성 남용 방지 — 전역(120/분)보다 엄격히 IP당 5/분
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('signup')
   async signUp(
     @Body(new ZodValidationPipe(SignUpSchema)) body: import('@offhours/shared').SignUpInput,
@@ -41,6 +44,8 @@ export class AuthController {
     return { accessToken: result.accessToken, user: result.user }
   }
 
+  // 비밀번호 무차별 대입 완화 — 전역(120/분)보다 엄격히 IP당 10/분
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(200)
   @Post('signin')
   async signIn(
