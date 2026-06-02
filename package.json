@@ -29,7 +29,8 @@
     "shared:dev": "pnpm --filter @offhours/shared dev",
     "postinstall": "pnpm --filter @offhours/shared build",
     "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
-    "verify": "pnpm run ci",
+    "validate:architecture": "node scripts/validate-architecture.mjs",
+    "verify": "pnpm run validate:architecture && pnpm run ci",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "prepare": "husky"
