@@ -8,6 +8,7 @@ allowBuilds:
   argon2: true
   esbuild: true
   '@scarf/scarf': false
+  msw: true
 minimumReleaseAgeExclude:
   - lucide-react@1.17.0
   - zustand@5.0.14
