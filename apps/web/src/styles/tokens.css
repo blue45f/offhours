@@ -166,6 +166,49 @@
   color-scheme: dark;
 }
 
+/* 시스템 선호 다크 (DESIGN.md §3 계약): 명시적으로 라이트를 고정(.theme-light)하지
+ * 않은 한, OS 다크 사용자는 JS 없이도 다크 토큰 값을 받는다. no-FOUC 스크립트가
+ * 실패하거나 저장값이 없는 첫 방문에도 동작하는 방어선이다. .theme-dark 와 동일 값 유지. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light) {
+    --color-bg: #15140f;
+    --color-bg-elevated: #1f1d17;
+    --color-bg-subtle: #1a1813;
+    --color-bg-inverse: var(--ref-cream-50);
+
+    --color-fg: var(--ref-cream-50);
+    --color-fg-muted: var(--ref-cream-300);
+    --color-fg-subtle: var(--ref-cream-400);
+    --color-fg-inverse: var(--ref-cream-900);
+
+    --color-border: #2c2920;
+    --color-border-strong: #3a3528;
+    --color-border-subtle: #221f18;
+
+    --color-primary: #87a07a;
+    --color-primary-hover: #9ab18c;
+    --color-primary-active: #acbe9f;
+    --color-primary-soft: rgba(135, 160, 122, 0.16);
+    --color-primary-fg: #15140f;
+
+    --color-accent: #dca284;
+    --color-accent-soft: rgba(220, 162, 132, 0.18);
+
+    --color-overlay: rgba(0, 0, 0, 0.6);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.36);
+    --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.55);
+
+    --shadow-card: var(--shadow-sm);
+    --shadow-popover: var(--shadow-md);
+    --shadow-modal: var(--shadow-xl);
+
+    color-scheme: dark;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
