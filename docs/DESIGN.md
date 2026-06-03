@@ -226,10 +226,38 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not(.theme-light) {
+    /* .theme-dark 와 동일한 토큰 값 전체를 적용 (JS 없이도 OS 다크 존중). */
+    --color-bg: #15140f;
+    /* …bg/fg/border/primary/accent/overlay/shadow 전체 — tokens.css 참조 */
     color-scheme: dark;
   }
 }
 ```
+
+### 3.1 런타임 테마 적용 (no-FOUC)
+
+다크 테마는 토큰만 정의해선 안 되고 **첫 페인트 전에** 결정돼야 깜빡임(FOUC)이 없다.
+Offhours 의 테마 적용 흐름은 4단계다.
+
+1. **no-FOUC 인라인 스크립트** (`apps/web/index.html` `<head>`) — 번들 로드 전에 실행.
+   `localStorage['offh.theme']`(zustand persist 형태 `{"state":{"theme":...}}`)를 파싱해
+   저장값이 있으면 그대로, 없으면 `prefers-color-scheme`로 결정한 뒤
+   `<html>`에 `.theme-light` / `.theme-dark` 클래스를 즉시 적용한다.
+2. **`@media (prefers-color-scheme: dark)` 방어선** (`tokens.css`) — JS가 실패하거나
+   클래스가 없는 첫 방문에도 OS 다크 사용자는 다크 토큰 값을 받는다.
+   `:root:not(.theme-light)` 셀렉터라 **명시적 라이트 고정은 항상 존중**한다.
+3. **store 초기값** (`store/theme.ts` `resolveInitialTheme()`) — 저장값이 없을 때
+   no-FOUC 스크립트가 적용해 둔 `<html>` 클래스를 1차 소스로 읽어 store 와 화면을 일치시킨다.
+   `persist`가 `offh.theme`를 찾으면 이 초기값은 무시된다.
+4. **store→DOM 동기화** (`app/AppProviders.tsx`) — 토글/복원 시
+   `theme` 변화를 `useEffect`로 `<html>` 클래스에 반영한다.
+
+토글 UI 는 헤더의 테마 버튼(`components/layout/Header.tsx`, `aria-label="테마 전환"`, 해·달 글리프)이며
+상태는 `useThemeStore`(zustand persist) 한 곳에서 관리한다.
+테마 결정 로직(`resolveInitialTheme`)·토글 왕복은 `store/theme.test.ts`로 회귀 보호한다.
+
+> 새 표면을 만들 땐 항상 시맨틱 토큰(`--color-bg`, `--color-fg` 등)만 참조하라.
+> 하드코딩 hex 는 다크에서 깨진다 — `.theme-dark`/media 블록이 토큰만 재정의하기 때문이다.
 
 ## 4. 컴포넌트 인벤토리
 

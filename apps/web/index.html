@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#FAF8F4" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#15140F" media="(prefers-color-scheme: dark)" />
+    <script>
+      // No-FOUC: 첫 페인트 전에 저장된 테마(zustand persist 'offh.theme') 또는
+      // 시스템 선호(prefers-color-scheme)를 즉시 <html> 클래스로 적용한다.
+      // AppProviders 의 store→DOM 동기화와 동일한 .theme-light/.theme-dark 규약을 따른다.
+      ;(function () {
+        try {
+          var stored = null
+          var raw = localStorage.getItem('offh.theme')
+          if (raw) {
+            var parsed = JSON.parse(raw)
+            var t = parsed && parsed.state && parsed.state.theme
+            if (t === 'light' || t === 'dark') stored = t
+          }
+          var theme =
+            stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          var root = document.documentElement
+          root.classList.toggle('theme-dark', theme === 'dark')
+          root.classList.toggle('theme-light', theme === 'light')
+        } catch (e) {
+          /* localStorage/matchMedia 불가 환경은 정적 class="theme-light" 기본값을 유지한다. */
+        }
+      })()
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link
