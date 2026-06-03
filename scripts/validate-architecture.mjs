@@ -16,6 +16,7 @@ const requiredPaths = [
   'docs/ARCHITECTURE.md',
   'docs/PRODUCT.md',
   'docs/DESIGN.md',
+  'docs/DEVELOPMENT.md',
   'pnpm-workspace.yaml',
   'tsconfig.base.json',
 ]
