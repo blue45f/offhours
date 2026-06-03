@@ -117,9 +117,12 @@ export function Header() {
                 </button>
                 {open && (
                   <>
-                    <div
+                    <button
+                      type="button"
+                      aria-label="메뉴 닫기"
+                      tabIndex={-1}
                       onClick={() => setOpen(false)}
-                      className="fixed inset-0 z-[var(--z-overlay)]"
+                      className="fixed inset-0 z-[var(--z-overlay)] cursor-default"
                     />
                     <div className="absolute right-0 mt-2 z-[var(--z-popover)] min-w-[220px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] py-2 shadow-[var(--shadow-popover)]">
                       <div className="px-4 py-2 text-sm">
