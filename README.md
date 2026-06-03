@@ -77,6 +77,17 @@ pnpm seed              # 시드 데이터
 - 🎨 [DESIGN.md](./docs/DESIGN.md) — Quiet Luxury 디자인 시스템
 - 🤖 [CLAUDE.md](./CLAUDE.md) — AI 개발 가이드
 
+## 접근성 (a11y)
+
+핵심 검색·예약 동선은 스크린리더·키보드 사용자를 1차 시민으로 취급한다. 컴포넌트 작성 시 다음 컨벤션을 따른다.
+
+- **랜드마크**: 검색 영역은 `<search role="search" aria-label>`(예: `HeroSearch`), 네비게이션은 이름 있는 `<nav aria-label>`(예: `BottomNav`)로 노출한다.
+- **폼 컨트롤 이름**: 시각적 라벨은 `<label htmlFor>`로 컨트롤과 연결해 접근 가능한 이름을 부여한다. 장식용 `<div>` 라벨 금지.
+- **토글 상태**: 토글 버튼은 `aria-pressed`로 선택 상태를 노출한다(색상만으로 표시 금지). 활성 라우트는 `NavLink` 기본 `aria-current="page"`를 유지한다.
+- **상태 알림**: 검색 결과 수·자연어 파싱 결과 등 동적 변화는 `role="status"` / `aria-live="polite"` 라이브 리전으로 알린다. 시각용 칩 등 중복 표현은 `aria-hidden`으로 가린다.
+- **장식 아이콘**: lucide 아이콘 등 의미 없는 그래픽은 `aria-hidden` 처리한다.
+- **검증**: a11y 회귀는 Vitest + Testing Library의 role 기반 쿼리(`getByRole`)로 테스트한다. `HeroSearch.test.tsx`·`BottomNav.test.tsx`가 레퍼런스. 외부 의존성 없이 `pnpm --filter @offhours/web test:run`으로 실행된다.
+
 ## 차별화 포인트
 
 1. **영업외 시간 자동 슬롯** — 호스트 영업시간만 입력하면 휴무일/마감후 슬롯이 자동 생성

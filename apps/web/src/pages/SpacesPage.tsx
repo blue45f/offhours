@@ -133,8 +133,8 @@ export default function SpacesPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <h1 className="text-headline serif">공간 둘러보기</h1>
-          <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
-            {data ? `${data.total.toLocaleString()}개의 공간` : '...'}
+          <p role="status" aria-live="polite" className="mt-1 text-sm text-[var(--color-fg-muted)]">
+            {data ? `${data.total.toLocaleString()}개의 공간` : '공간을 불러오는 중...'}
           </p>
         </div>
         <div className="flex items-center gap-2">
