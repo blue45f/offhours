@@ -13,7 +13,10 @@ const items = [
 
 export function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-[var(--z-sticky)] glass border-t border-[var(--color-border)] pb-[max(0px,env(safe-area-inset-bottom))]">
+    <nav
+      aria-label="주요 메뉴"
+      className="md:hidden fixed bottom-0 inset-x-0 z-[var(--z-sticky)] glass border-t border-[var(--color-border)] pb-[max(0px,env(safe-area-inset-bottom))]"
+    >
       <ul className="grid grid-cols-5 h-14">
         {items.map(({ to, icon: Icon, label }) => (
           <li key={to}>
@@ -27,7 +30,7 @@ export function BottomNav() {
                 )
               }
             >
-              <Icon size={20} />
+              <Icon size={20} aria-hidden />
               {label}
             </NavLink>
           </li>
