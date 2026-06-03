@@ -1,0 +1,42 @@
+name: Deploy API to Render
+
+# Backend counterpart to deploy-vercel-web.yml. Triggers AFTER the CI workflow
+# succeeds on main (workflow_run), so the API only deploys once verify is green.
+# Mirrors the same "skip when the secret is not configured" pattern, so this
+# workflow is safe to merge before the maintainer wires up Render. Render builds
+# from render.yaml (Blueprint); this job pings the service's deploy hook to
+# trigger a new deploy.
+
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # On workflow_run, only proceed if CI actually succeeded. (workflow_dispatch
+    # runs have no parent conclusion, so allow them through.)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Skip deployment when Render deploy hook is not configured
+        if: env.RENDER_DEPLOY_HOOK_URL == ''
+        run: echo "RENDER_DEPLOY_HOOK_URL is not configured; skipping Render deployment."
+
+      - name: Trigger Render deploy
+        if: env.RENDER_DEPLOY_HOOK_URL != ''
+        run: |
+          status=$(curl -fsS -o /dev/null -w "%{http_code}" "$RENDER_DEPLOY_HOOK_URL")
+          echo "Render deploy hook responded with HTTP $status"
