@@ -6,6 +6,7 @@ import {
   Clock,
   GitCompare,
   Heart,
+  ImageOff,
   MapPin,
   MessageCircle,
   Navigation,
@@ -319,22 +320,32 @@ function Header({ space }: { space: SpaceCardType }) {
   )
 }
 
+/** 사진이 없거나 로드에 실패했을 때의 폴백 — 따뜻한 토널 그라데이션 + 절제된 아이콘. */
+function ThumbnailFallback({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        'flex items-center justify-center bg-gradient-to-br from-[var(--color-primary-soft)] to-[var(--color-bg-subtle)]',
+        className
+      )}
+    >
+      <ImageOff className="size-6 text-[var(--color-fg-subtle)]" />
+    </div>
+  )
+}
+
 function Thumbnail({ space, className }: { space: SpaceCardType; className?: string }) {
-  if (!space.thumbnailUrl) {
-    return (
-      <div
-        className={cn(
-          'bg-gradient-to-br from-[var(--color-primary-soft)] to-[var(--color-bg-subtle)]',
-          className
-        )}
-      />
-    )
+  const [failed, setFailed] = useState(false)
+  if (!space.thumbnailUrl || failed) {
+    return <ThumbnailFallback className={className} />
   }
   return (
     <img
       src={space.thumbnailUrl}
       alt={space.title}
       loading="lazy"
+      onError={() => setFailed(true)}
       className={cn(
         'object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--easing-standard)] group-hover:scale-[1.04]',
         className
@@ -351,6 +362,8 @@ function HoverCarousel({ space, className }: { space: SpaceCardType; className?:
   const urls = [space.thumbnailUrl, ...(space.photoUrls ?? [])].filter((u): u is string => !!u)
   const [idx, setIdx] = useState(0)
   const [hovered, setHovered] = useState(false)
+  // 로드에 실패한 사진 인덱스 — 해당 프레임은 숨겨 아래 폴백 레이어(따뜻한 그라데이션)가 드러난다.
+  const [failed, setFailed] = useState<ReadonlySet<number>>(() => new Set())
 
   useEffect(() => {
     if (!hovered || urls.length < 2) return
@@ -371,15 +384,18 @@ function HoverCarousel({ space, className }: { space: SpaceCardType; className?:
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* 폴백 베이스: 사진이 모두 깨져도 빈 회색 대신 따뜻한 플레이스홀더가 보이도록 항상 뒤에 둔다. */}
+      <ThumbnailFallback className="absolute inset-0 size-full" />
       {urls.map((u, i) => (
         <img
           key={u + i}
           src={u}
           alt={space.title}
           loading={i === 0 ? 'eager' : 'lazy'}
+          onError={() => setFailed((prev) => (prev.has(i) ? prev : new Set(prev).add(i)))}
           className={cn(
             'absolute inset-0 size-full object-cover transition-opacity duration-500 ease-[var(--easing-standard)]',
-            i === idx ? 'opacity-100' : 'opacity-0'
+            i === idx && !failed.has(i) ? 'opacity-100' : 'opacity-0'
           )}
         />
       ))}
