@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
   Camera,
@@ -147,11 +147,14 @@ const HERO_ROTATING_NOUNS = [
 ]
 
 function RotatingNoun() {
+  const reduce = useReducedMotion()
   const [idx, setIdx] = useState(0)
+  // reduced-motion: 2.2초 주기 텍스트 교체(주의 분산·전정기관 자극)를 멈추고 한 단어를 고정 노출
   useEffect(() => {
+    if (reduce) return
     const t = setInterval(() => setIdx((i) => (i + 1) % HERO_ROTATING_NOUNS.length), 2200)
     return () => clearInterval(t)
-  }, [])
+  }, [reduce])
   return (
     <span className="relative inline-flex h-[1.1em] overflow-hidden align-bottom text-[var(--color-accent)]">
       <motion.span
@@ -194,13 +197,13 @@ function Hero() {
             <LightStillOn />
             영업이 끝난 뒤에도, 불은 켜져 있습니다
           </span>
-          <h1 className="mt-6 text-display serif leading-[1.08]">
+          <h1 className="mt-7 text-display serif leading-[1.08]">
             마감한 가게의 불을
             <br />
             당신의 <RotatingNoun />
             으로 켭니다.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--color-fg-muted)]">
+          <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-fg-muted)]">
             카페·바·레스토랑·갤러리의 휴무일과 영업 종료 후. 평소엔 만날 수 없던 감성 공간을
             파티·스몰웨딩·모임·팝업으로 시간 단위 통대관 하세요.
           </p>
@@ -224,12 +227,16 @@ function Hero() {
  * 토큰 색으로 부드럽게 호흡시켜 마감 후에도 켜진 실내등을 표현한다.
  */
 function LightStillOn() {
+  const reduce = useReducedMotion()
   return (
     <span aria-hidden className="relative inline-flex size-2 items-center justify-center">
+      {/* reduced-motion: 무한 호흡 펄스 대신 켜진 등을 정적인 한 점으로 표현 */}
       <motion.span
         className="absolute inset-0 rounded-full bg-[var(--color-accent)]"
-        animate={{ opacity: [0.55, 1, 0.55], scale: [0.9, 1, 0.9] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduce ? { opacity: 0.9 } : { opacity: [0.55, 1, 0.55], scale: [0.9, 1, 0.9] }}
+        transition={
+          reduce ? { duration: 0 } : { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }
+        }
       />
       <span className="size-1 rounded-full bg-[var(--color-accent-soft)]" />
     </span>
