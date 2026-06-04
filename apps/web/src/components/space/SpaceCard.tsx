@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { format, parseISO } from 'date-fns'
 import { Link } from 'react-router-dom'
 import {
@@ -78,7 +79,7 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
     return (
       <Link
         to={`/spaces/${space.slug}`}
-        className="group relative block h-full min-h-[22rem] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-bg-subtle)] focus:outline-none"
+        className="group relative block h-full min-h-[22rem] overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-bg-subtle)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       >
         <HoverCarousel space={space} className="absolute inset-0 size-full" />
         {/* 아래에서 차오르는 따뜻한 잉크 스크림 — 마감 후 실내처럼 텍스트만 또렷이 */}
@@ -152,8 +153,8 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
   }
 
   return (
-    <Link to={`/spaces/${space.slug}`} className="group block focus:outline-none">
-      <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-bg-subtle)] aspect-[4/3]">
+    <Link to={`/spaces/${space.slug}`} className="group block outline-none">
+      <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-bg-subtle)] aspect-[4/3] transition-shadow group-focus-visible:ring-2 group-focus-visible:ring-[var(--color-primary)] group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[var(--color-bg)]">
         <HoverCarousel space={space} className="absolute inset-0 size-full" />
         <div className="absolute right-3 top-3 flex flex-col gap-2">
           <button
@@ -244,7 +245,7 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
             </>
           )}
         </div>
-        <h3 className="font-semibold text-[var(--color-fg)] line-clamp-1 group-hover:underline underline-offset-4 decoration-1">
+        <h3 className="font-semibold text-[var(--color-fg)] line-clamp-1 underline-offset-4 decoration-1 decoration-[var(--color-primary)]/40 transition-colors duration-[var(--duration-fast)] group-hover:text-[var(--color-primary)] group-hover:underline group-focus-visible:underline">
           {space.title}
         </h3>
         <p className="text-sm text-[var(--color-fg-muted)] line-clamp-1">{space.summary}</p>
@@ -359,17 +360,19 @@ function Thumbnail({ space, className }: { space: SpaceCardType; className?: str
  * 모바일(터치)에서는 비활성. 사진 1장만 있으면 정적 Thumbnail 로 폴백.
  */
 function HoverCarousel({ space, className }: { space: SpaceCardType; className?: string }) {
+  const reduce = useReducedMotion()
   const urls = [space.thumbnailUrl, ...(space.photoUrls ?? [])].filter((u): u is string => !!u)
   const [idx, setIdx] = useState(0)
   const [hovered, setHovered] = useState(false)
   // 로드에 실패한 사진 인덱스 — 해당 프레임은 숨겨 아래 폴백 레이어(따뜻한 그라데이션)가 드러난다.
   const [failed, setFailed] = useState<ReadonlySet<number>>(() => new Set())
 
+  // reduced-motion: 호버 시 자동 슬라이드(1.6초 주기)를 멈추고 첫 사진만 정적으로 보여준다
   useEffect(() => {
-    if (!hovered || urls.length < 2) return
+    if (reduce || !hovered || urls.length < 2) return
     const t = setInterval(() => setIdx((i) => (i + 1) % urls.length), 1600)
     return () => clearInterval(t)
-  }, [hovered, urls.length])
+  }, [reduce, hovered, urls.length])
 
   // 호버 해제 시 첫 사진으로 복귀 (UX 안정성)
   useEffect(() => {

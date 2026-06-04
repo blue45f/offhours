@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { MotionConfig } from 'framer-motion'
 
 import { appQueryClient } from './queryClient'
 import { router } from '../router'
@@ -26,11 +27,15 @@ export function AppProviders() {
 
   return (
     <QueryClientProvider client={appQueryClient}>
-      <ConfirmProvider>
-        <PromptProvider>
-          <RouterProvider router={router} />
-        </PromptProvider>
-      </ConfirmProvider>
+      {/* reducedMotion="user": Framer 진입/리빌 모션 전체가 prefers-reduced-motion 을 자동 존중
+          (transform 애니메이션은 opacity-only 로 축약). CSS 토큰 분기만으론 JS 모션이 안 잡힌다. */}
+      <MotionConfig reducedMotion="user">
+        <ConfirmProvider>
+          <PromptProvider>
+            <RouterProvider router={router} />
+          </PromptProvider>
+        </ConfirmProvider>
+      </MotionConfig>
       <Toaster
         position="top-center"
         gutter={10}
