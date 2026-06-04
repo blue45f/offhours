@@ -78,6 +78,9 @@ export default function MyReservationsPage() {
                     <img
                       src={r.spaceThumbnailUrl}
                       alt={r.spaceTitle}
+                      loading="lazy"
+                      width={112}
+                      height={112}
                       className="size-full md:size-28 rounded-[var(--radius-lg)] object-cover md:shrink-0"
                     />
                   )}

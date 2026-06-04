@@ -209,6 +209,9 @@ export default function ReservationDetailPage() {
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=8&data=${encodeURIComponent(`offhours-checkin:${reservation.checkInCode}`)}`}
                   alt="체크인 QR"
+                  loading="lazy"
+                  width={128}
+                  height={128}
                   className="size-32 rounded-[var(--radius-md)] bg-white p-1.5"
                 />
                 <div className="flex-1 text-center sm:text-left">
