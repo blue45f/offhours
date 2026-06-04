@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { APP_GUARD } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
+import { LoggerModule } from 'nestjs-pino'
 
 import { PrismaModule } from './prisma/prisma.module'
 import { AuthModule } from './auth/auth.module'
@@ -33,6 +34,18 @@ import { HealthController } from './common/health.controller'
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty', options: { singleLine: true } }
+            : undefined,
+        autoLogging: {
+          ignore: (req) =>
+            req.url?.startsWith('/health') || req.url?.startsWith('/api/docs') || false,
+        },
+      },
+    }),
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     ScheduleModule.forRoot(),
     PrismaModule,
