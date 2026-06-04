@@ -44,6 +44,14 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
+      // 네이티브 window.confirm/alert 금지 — 브랜드 ConfirmDialog/Toast를 쓴다.
+      // (useConfirm() 같은 로컬 confirm 변수는 섀도잉이라 영향 없음)
+      // window.prompt 는 텍스트 입력 다이얼로그 마이그레이션 후 추가 예정.
+      'no-restricted-globals': [
+        'error',
+        { name: 'confirm', message: 'useConfirm()/ConfirmDialog를 사용하세요 (window.confirm 금지).' },
+        { name: 'alert', message: 'Toast/Dialog를 사용하세요 (window.alert 금지).' },
+      ],
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // react-hooks v7 ships experimental React Compiler diagnostics as errors.
