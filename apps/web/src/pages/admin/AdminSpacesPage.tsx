@@ -6,6 +6,7 @@ import { AdminShell } from '../../components/admin/AdminShell'
 import { Card, CardBody } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { usePrompt } from '../../components/ui/PromptDialog'
 import { formatKRW } from '../../utils/format'
 
 interface PendingSpace {
@@ -38,6 +39,7 @@ export default function AdminSpacesPage() {
       api.patch(`/admin/spaces/${vars.id}/reject`, { reason: vars.reason }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'spaces'] }),
   })
+  const prompt = usePrompt()
 
   async function onApprove(id: string) {
     try {
@@ -48,7 +50,7 @@ export default function AdminSpacesPage() {
     }
   }
   async function onReject(id: string) {
-    const reason = prompt('거절 사유') ?? ''
+    const reason = (await prompt({ title: '공간 등록을 거절할까요?', label: '거절 사유' })) ?? ''
     if (!reason) return
     try {
       await reject.mutateAsync({ id, reason })

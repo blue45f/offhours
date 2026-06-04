@@ -8,6 +8,7 @@ import { SpaceCard } from '../components/space/SpaceCard'
 import { Button } from '../components/ui/Button'
 import { Avatar } from '../components/ui/Avatar'
 import { EmptyState } from '../components/ui/EmptyState'
+import { usePrompt } from '../components/ui/PromptDialog'
 import { PageLoader } from '../components/layout/PageLoader'
 import { useCastCollectionVote, useCollectionBySlug } from '../features/collections/api'
 import { getErrorMessage } from '../services/api'
@@ -34,6 +35,7 @@ export default function CollectionDetailPage() {
   )
   const { data, isLoading, error } = useCollectionBySlug(slug, voterToken)
   const cast = useCastCollectionVote(slug ?? '')
+  const prompt = usePrompt()
 
   useEffect(() => {
     if (voterName) localStorage.setItem(VOTER_NAME_KEY, voterName)
@@ -71,7 +73,14 @@ export default function CollectionDetailPage() {
   async function vote(favoriteId: string, value: VoteValue | null) {
     let name = voterName
     if (!name) {
-      const input = prompt('투표 전에 닉네임을 알려주세요 (친구에게 보일 이름)')?.trim()
+      const input = (
+        await prompt({
+          title: '닉네임을 알려주세요',
+          description: '투표 시 친구에게 보일 이름이에요.',
+          label: '닉네임',
+          placeholder: '예: 햇살',
+        })
+      )?.trim()
       if (!input) return
       name = input.slice(0, 20)
       setVoterName(name)
