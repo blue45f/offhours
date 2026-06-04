@@ -10,6 +10,7 @@ import {
 
 import { Button } from '../components/ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
+import { useConfirm } from '../components/ui/ConfirmDialog'
 import { Field, Input } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
 import {
@@ -27,6 +28,7 @@ export default function CorporatePage() {
   const upsert = useUpsertCorporateProfile()
   const del = useDeleteCorporateProfile()
   const topup = useTopupCredit()
+  const confirm = useConfirm()
   const [topupAmount, setTopupAmount] = useState(1_000_000)
   const [form, setForm] = useState<UpsertCorporateProfileInput>({
     companyName: '',
@@ -71,7 +73,13 @@ export default function CorporatePage() {
   }
 
   async function onDelete() {
-    if (!confirm('법인 결제 프로필을 삭제할까요? 기존 예약은 영향 없어요.')) return
+    const ok = await confirm({
+      title: '법인 결제 프로필을 삭제할까요?',
+      description: '기존 예약은 영향 없어요.',
+      confirmLabel: '삭제',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await del.mutateAsync()
       toast.success('삭제했어요')

@@ -5,6 +5,7 @@ import { FolderHeart, Globe2, Lock, Plus } from 'lucide-react'
 
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
+import { useConfirm } from '../components/ui/ConfirmDialog'
 import { Dialog } from '../components/ui/Dialog'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Field, Input, Textarea } from '../components/ui/Input'
@@ -21,6 +22,7 @@ export default function CollectionsPage() {
   const { data, isLoading } = useMyCollections()
   const create = useCreateCollection()
   const del = useDeleteCollection()
+  const confirm = useConfirm()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
@@ -42,7 +44,13 @@ export default function CollectionsPage() {
   }
 
   async function onDelete(id: string, name: string) {
-    if (!confirm(`"${name}" 컬렉션을 삭제할까요? (담긴 공간은 기본 찜으로 이동돼요)`)) return
+    const ok = await confirm({
+      title: '컬렉션을 삭제할까요?',
+      description: `"${name}"에 담긴 공간은 기본 찜으로 이동돼요.`,
+      confirmLabel: '삭제',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await del.mutateAsync(id)
       toast.success('삭제했어요')
