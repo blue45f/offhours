@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { Logger } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { NestExpressApplication } from '@nestjs/platform-express'
+import compression from 'compression'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 
@@ -16,6 +17,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api', { exclude: ['health'] })
 
+  app.use(compression())
   app.use(
     helmet({
       contentSecurityPolicy: false,
