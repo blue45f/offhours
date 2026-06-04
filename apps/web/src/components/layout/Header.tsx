@@ -8,6 +8,7 @@ import { Button } from '../ui/Button'
 import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
 import { useUnreadNotifications } from '../../features/notifications/useUnreadNotifications'
+import { openCommandPalette } from '../CommandPalette'
 
 export function Header() {
   const me = useMe()
@@ -68,8 +69,9 @@ export function Header() {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => navigate('/spaces')}
-            aria-label="검색"
+            onClick={openCommandPalette}
+            aria-label="검색 (⌘K)"
+            title="검색 (⌘K)"
             className="hidden md:inline-flex size-10 items-center justify-center rounded-full text-[var(--color-fg-muted)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)]"
           >
             <Search size={18} />

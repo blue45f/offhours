@@ -5,6 +5,7 @@ import { Footer } from './Footer'
 import { BottomNav } from './BottomNav'
 import { RouteAnnouncer } from './RouteAnnouncer'
 import { CompareBar } from '../space/CompareBar'
+import { CommandPalette } from '../CommandPalette'
 
 export function AppLayout() {
   return (
@@ -23,6 +24,7 @@ export function AppLayout() {
       <Footer />
       <BottomNav />
       <CompareBar />
+      <CommandPalette />
     </div>
   )
 }
