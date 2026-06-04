@@ -11,6 +11,7 @@ import { bootstrapAuth } from '../store/auth'
 import { useThemeStore } from '../store/theme'
 import { ConfirmProvider } from '../components/ui/ConfirmDialog'
 import { PromptProvider } from '../components/ui/PromptDialog'
+import { ErrorBoundary } from '../components/layout/ErrorBoundary'
 
 export function AppProviders() {
   const theme = useThemeStore((s) => s.theme)
@@ -30,11 +31,13 @@ export function AppProviders() {
       {/* reducedMotion="user": Framer 진입/리빌 모션 전체가 prefers-reduced-motion 을 자동 존중
           (transform 애니메이션은 opacity-only 로 축약). CSS 토큰 분기만으론 JS 모션이 안 잡힌다. */}
       <MotionConfig reducedMotion="user">
-        <ConfirmProvider>
-          <PromptProvider>
-            <RouterProvider router={router} />
-          </PromptProvider>
-        </ConfirmProvider>
+        <ErrorBoundary>
+          <ConfirmProvider>
+            <PromptProvider>
+              <RouterProvider router={router} />
+            </PromptProvider>
+          </ConfirmProvider>
+        </ErrorBoundary>
       </MotionConfig>
       <Toaster
         position="top-center"
