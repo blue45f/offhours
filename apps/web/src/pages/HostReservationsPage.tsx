@@ -9,6 +9,7 @@ import { Card, CardBody } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
+import { usePrompt } from '../components/ui/PromptDialog'
 import {
   useApproveReservation,
   useMyReservations,
@@ -32,6 +33,7 @@ export default function HostReservationsPage() {
   const { data } = useMyReservations('host', tab)
   const approve = useApproveReservation()
   const reject = useRejectReservation()
+  const prompt = usePrompt()
   const qc = useQueryClient()
   const [checkout, setCheckout] = useState<{ id: string; code: string; title: string } | null>(null)
 
@@ -55,7 +57,11 @@ export default function HostReservationsPage() {
   }
 
   async function onReject(id: string) {
-    const reason = prompt('거절 사유를 입력해주세요')
+    const reason = await prompt({
+      title: '예약을 거절할까요?',
+      label: '거절 사유',
+      placeholder: '거절 사유를 입력해주세요',
+    })
     if (!reason || reason.length < 2) return
     try {
       await reject.mutateAsync({ id, reason })
@@ -66,7 +72,12 @@ export default function HostReservationsPage() {
   }
 
   async function onCheckIn(id: string) {
-    const code = prompt('게스트가 보여준 6자리 체크인 코드 또는 QR을 입력하세요')
+    const code = await prompt({
+      title: '체크인 코드 입력',
+      description: '게스트가 보여준 6자리 체크인 코드 또는 QR을 입력하세요.',
+      label: '체크인 코드',
+      placeholder: '예: A1B2C3',
+    })
     if (!code || code.length < 4) return
     checkIn.mutate({ id, code: code.trim().toUpperCase() })
   }
