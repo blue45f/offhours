@@ -43,6 +43,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swagger)
   SwaggerModule.setup('api/docs', app, document)
 
+  // Let Nest run PrismaService.onModuleDestroy ($disconnect) on SIGTERM/SIGINT
+  // so container deploys close the DB pool cleanly instead of leaking it.
+  app.enableShutdownHooks()
+
   const port = Number(process.env.PORT ?? 3000)
   await app.listen(port)
   Logger.log(`🚀 Offhours API listening on http://localhost:${port}`, 'Bootstrap')
