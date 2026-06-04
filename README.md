@@ -3,6 +3,18 @@
 > 카페·바·레스토랑의 **영업 외 시간**(휴무일·마감 후)을 파티·스몰웨딩·모임·팝업 공간으로
 > 매칭하는 양면시장 플랫폼. "비어 있던 그 시간, 가장 멋진 공간이 됩니다."
 
+## 화면
+
+<p align="center">
+  <img src="docs/screenshots/home.png" alt="Offhours 홈 — 영업 외 시간 공간 매칭 플랫폼" width="820" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/home-mobile.png" alt="Offhours 모바일 홈" width="240" />
+</p>
+
+> 데모(mock) 모드 실행 화면 — `cd apps/web && pnpm dev:mock` 으로 백엔드 없이 확인할 수 있습니다.
+
 ## 스택
 
 | 영역     | 기술                                                                     |
