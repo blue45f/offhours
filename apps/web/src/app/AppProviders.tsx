@@ -8,6 +8,7 @@ import { appQueryClient } from './queryClient'
 import { router } from '../router'
 import { bootstrapAuth } from '../store/auth'
 import { useThemeStore } from '../store/theme'
+import { ConfirmProvider } from '../components/ui/ConfirmDialog'
 
 export function AppProviders() {
   const theme = useThemeStore((s) => s.theme)
@@ -24,7 +25,9 @@ export function AppProviders() {
 
   return (
     <QueryClientProvider client={appQueryClient}>
-      <RouterProvider router={router} />
+      <ConfirmProvider>
+        <RouterProvider router={router} />
+      </ConfirmProvider>
       <Toaster
         position="top-center"
         gutter={10}

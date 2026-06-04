@@ -13,6 +13,7 @@ import { BlockSourceLabel, type ExternalCalendar, type VenueBlock } from '@offho
 
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
+import { useConfirm } from '../components/ui/ConfirmDialog'
 import { Dialog } from '../components/ui/Dialog'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Field, Input } from '../components/ui/Input'
@@ -134,6 +135,7 @@ function uniqueVenues(spaces: { venueId: string; venue?: { name: string } }[]): 
 function CalendarCard({ cal }: { cal: ExternalCalendar }) {
   const resync = useResyncCalendar()
   const remove = useDeleteCalendar()
+  const confirm = useConfirm()
   const hasError = !!cal.lastError
   async function syncNow() {
     try {
@@ -144,7 +146,13 @@ function CalendarCard({ cal }: { cal: ExternalCalendar }) {
     }
   }
   async function onDelete() {
-    if (!confirm(`"${cal.label}" 캘린더를 해제할까요? 차단된 시간도 함께 사라져요.`)) return
+    const ok = await confirm({
+      title: '캘린더를 해제할까요?',
+      description: `"${cal.label}"의 차단된 시간도 함께 사라져요.`,
+      confirmLabel: '해제',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await remove.mutateAsync(cal.id)
       toast.success('해제했어요')
@@ -210,8 +218,15 @@ function CalendarCard({ cal }: { cal: ExternalCalendar }) {
 
 function BlockRow({ block }: { block: VenueBlock }) {
   const remove = useDeleteBlock()
+  const confirm = useConfirm()
   async function onDelete() {
-    if (!confirm(`"${block.label}" 차단을 삭제할까요?`)) return
+    const ok = await confirm({
+      title: '차단을 삭제할까요?',
+      description: `"${block.label}"`,
+      confirmLabel: '삭제',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await remove.mutateAsync(block.id)
       toast.success('삭제했어요')
