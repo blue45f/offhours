@@ -1,29 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Offhours">
   <defs>
-    <!-- Deep night gradient -->
-    <linearGradient id="nightBg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1e1b4b" /> <!-- deep purple-indigo -->
-      <stop offset="100%" stop-color="#090514" />
+    <linearGradient id="room" x1="9" y1="7" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6f835f" />
+      <stop offset="0.72" stop-color="#4a5f3f" />
+      <stop offset="1" stop-color="#3a4b32" />
     </linearGradient>
-    <!-- Glowing neon amber/gold gradient -->
-    <linearGradient id="neonGlow" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f59e0b" />
-      <stop offset="100%" stop-color="#d97706" />
-    </linearGradient>
-    <filter id="neon" x="-25%" y="-25%" width="150%" height="150%">
-      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#f59e0b" flood-opacity="0.8" />
-    </filter>
   </defs>
-  <rect width="64" height="64" rx="18" fill="url(#nightBg)"/>
-  <rect x="1.5" y="1.5" width="61" height="61" rx="16.5" stroke="#312e81" stroke-width="2.5"/>
-  
-  <!-- Crescent moon + cocktail silhouette -->
-  <g filter="url(#neon)">
-    <!-- Crescent Moon -->
-    <path d="M 40 16 A 11 11 0 0 1 24 29 A 10 10 0 0 0 33 15 C 35 15 37.5 15.5 40 16 Z" fill="url(#neonGlow)" stroke="none" opacity="0.3"/>
-    <!-- Line work -->
-    <path d="M 40 16 A 11 11 0 0 1 24 29" stroke="url(#neonGlow)" stroke-width="3.5" stroke-linecap="round"/>
-    <path d="M 21 27 L 35 27 L 28 36 Z" stroke="url(#neonGlow)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M 28 36 L 28 46 M 22 46 L 34 46" stroke="url(#neonGlow)" stroke-width="3" stroke-linecap="round"/>
-  </g>
+  <rect x="5" y="5" width="54" height="54" rx="16" fill="url(#room)" />
+  <path d="M14 42.5c4.8-9.8 12.1-15 21.9-15.6 5.4-.3 10.1.8 14.1 3.2" fill="none" stroke="#faf8f4" stroke-width="3.3" stroke-linecap="round" />
+  <path d="M16 43.5h33" stroke="#faf8f4" stroke-width="3.3" stroke-linecap="round" opacity="0.92" />
+  <path d="M22 43V31.5c0-5.4 4.4-9.8 9.8-9.8H38c2.8 0 5.2-2.3 5.2-5.2" fill="none" stroke="#f1eee7" stroke-width="3.3" stroke-linecap="round" />
+  <circle cx="44.8" cy="17" r="4.2" fill="#c97550" />
+  <path d="M43.2 17a9 9 0 0 1-9-9 9 9 0 1 0 9 9Z" fill="#ffe5d2" />
+  <circle cx="31.5" cy="31.5" r="3.4" fill="#ffe5d2" />
+  <path d="M31.5 31.5v-5.2m0 5.2 4.2 2.6" stroke="#1a1814" stroke-width="1.6" stroke-linecap="round" />
 </svg>
