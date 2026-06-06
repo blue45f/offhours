@@ -44,7 +44,7 @@ import { Button } from '../components/ui/Button'
 import { ReservationPanel } from '../components/reservation/ReservationPanel'
 import { Skeleton } from '../components/ui/Skeleton'
 import { formatDateKR, formatKRW } from '../utils/format'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 export default function SpaceDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -55,7 +55,15 @@ export default function SpaceDetailPage() {
   const toggle = useToggleFavorite()
   const isFavorited = data ? favoriteIds.includes(data.id) : false
   const pushRecent = useRecentlyViewedStore((s) => s.push)
-  useDocumentTitle(data?.title)
+  usePageMeta({
+    title: data?.title,
+    description: data
+      ? `${data.region} ${data.district} · ${VenueCategoryLabel[data.category]} · 최대 ${data.capacityMax}명. ${data.description}`.slice(
+          0,
+          200
+        )
+      : undefined,
+  })
   useEffect(() => {
     if (data?.slug) pushRecent(data.slug)
   }, [data?.slug, pushRecent])

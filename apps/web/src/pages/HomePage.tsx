@@ -33,7 +33,7 @@ import { ForYouSection } from '../components/space/ForYouSection'
 import { useSpacesSearch } from '../features/spaces/api'
 import { Button } from '../components/ui/Button'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 const categories: { value: VenueCategory; icon: typeof Coffee; hue: number }[] = [
   { value: 'CAFE', icon: Coffee, hue: 40 },
@@ -51,7 +51,7 @@ const categories: { value: VenueCategory; icon: typeof Coffee; hue: number }[] =
 ]
 
 export default function HomePage() {
-  useDocumentTitle()
+  usePageMeta({})
   const geo = useGeolocation()
   const popular = useSpacesSearch({ sort: 'popular', pageSize: 8 })
   const newest = useSpacesSearch({ sort: 'newest', pageSize: 4 })

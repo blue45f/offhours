@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
@@ -31,13 +31,18 @@ export function AppProviders() {
       {/* reducedMotion="user": Framer 진입/리빌 모션 전체가 prefers-reduced-motion 을 자동 존중
           (transform 애니메이션은 opacity-only 로 축약). CSS 토큰 분기만으론 JS 모션이 안 잡힌다. */}
       <MotionConfig reducedMotion="user">
-        <ErrorBoundary>
-          <ConfirmProvider>
-            <PromptProvider>
-              <RouterProvider router={router} />
-            </PromptProvider>
-          </ConfirmProvider>
-        </ErrorBoundary>
+        {/* QueryErrorResetBoundary: "다시 시도" 시 throw 된 쿼리의 에러 상태를 비워 refetch 를 허용한다. */}
+        <QueryErrorResetBoundary>
+          {({ reset }) => (
+            <ErrorBoundary onReset={reset}>
+              <ConfirmProvider>
+                <PromptProvider>
+                  <RouterProvider router={router} />
+                </PromptProvider>
+              </ConfirmProvider>
+            </ErrorBoundary>
+          )}
+        </QueryErrorResetBoundary>
       </MotionConfig>
       <Toaster
         position="top-center"
