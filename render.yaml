@@ -83,3 +83,5 @@ services:
         sync: false # Toss Payments secret key — NEVER commit
       - key: TOSS_WEBHOOK_SECRET
         sync: false # Toss webhook signature secret
+      - key: GOOGLE_CLIENT_ID
+        sync: false # Google OAuth Web client id (public); empty -> Google button hidden
