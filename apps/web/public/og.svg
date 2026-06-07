@@ -1,25 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Offhours — 비어 있던 그 시간, 가장 멋진 공간이 됩니다">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FAF8F4"/>
-      <stop offset="1" stop-color="#F1EDE4"/>
+    <!-- Deep night gradient -->
+    <linearGradient id="nightBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#111827"/> <!-- gray-900 -->
+      <stop offset="1" stop-color="#030712"/> <!-- gray-950 -->
     </linearGradient>
-    <radialGradient id="glow" cx="0.82" cy="0.22" r="0.55">
-      <stop offset="0" stop-color="#A15E40" stop-opacity="0.18"/>
-      <stop offset="1" stop-color="#A15E40" stop-opacity="0"/>
+    <!-- Soft warm glow on the right -->
+    <radialGradient id="warmGlow" cx="0.8" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#d97706" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#d97706" stop-opacity="0"/>
     </radialGradient>
+    <!-- Glowing neon amber/gold gradient -->
+    <linearGradient id="neonGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="neon" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#f59e0b" flood-opacity="0.8" />
+    </filter>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect width="1200" height="630" fill="url(#glow)"/>
-  <rect x="0" y="0" width="1200" height="8" fill="#5A6F4F"/>
-  <g transform="translate(96, 150)">
-    <rect x="0" y="0" width="72" height="72" rx="18" fill="#5A6F4F"/>
-    <text x="36" y="49" text-anchor="middle" font-family="Pretendard, 'Apple SD Gothic Neo', sans-serif" font-size="34" font-weight="700" fill="#FAF8F4">오</text>
-    <text x="92" y="50" font-family="Pretendard, 'Apple SD Gothic Neo', sans-serif" font-size="34" font-weight="700" fill="#5A6F4F" letter-spacing="1">Offhours</text>
+
+  <!-- Background surfaces -->
+  <rect width="1200" height="630" fill="url(#nightBg)"/>
+  <rect width="1200" height="630" fill="url(#warmGlow)"/>
+  
+  <!-- Neon top bar -->
+  <rect x="0" y="0" width="1200" height="8" fill="url(#neonGlow)"/>
+
+  <!-- Logo and brand header -->
+  <g transform="translate(96, 120)">
+    <!-- Logo block -->
+    <g transform="scale(1.25)">
+      <rect width="64" height="64" rx="18" fill="#1e1b4b"/>
+      <rect x="1" y="1" width="62" height="62" rx="17" stroke="#312e81" stroke-width="1.5"/>
+      <!-- Crescent moon + cocktail silhouette -->
+      <g filter="url(#neon)" transform="translate(2, 2)">
+        <!-- Crescent Moon -->
+        <path d="M 38 14 A 10 10 0 0 1 23 26 A 9 9 0 0 0 31 13 C 33 13 35.5 13.5 38 14 Z" fill="url(#neonGlow)" stroke="none" opacity="0.3"/>
+        <path d="M 38 14 A 10 10 0 0 1 23 26" stroke="url(#neonGlow)" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M 20 24 L 34 24 L 27 33 Z" stroke="url(#neonGlow)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 27 33 L 27 42 M 21 42 L 33 42" stroke="url(#neonGlow)" stroke-width="2.8" stroke-linecap="round"/>
+      </g>
+    </g>
+    <!-- Brand wordmark -->
+    <text x="100" y="52" font-family="Pretendard, 'Apple SD Gothic Neo', sans-serif" font-size="44" font-weight="800" fill="#ffffff" letter-spacing="0.5">Offhours</text>
   </g>
+
+  <!-- Main Copy -->
   <g transform="translate(96, 290)">
-    <text x="0" y="0" font-family="'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" font-size="76" font-weight="700" fill="#2A2620">비어 있던 그 시간,</text>
-    <text x="0" y="96" font-family="'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" font-size="76" font-weight="700" fill="#2A2620">가장 멋진 <tspan fill="#A15E40">공간</tspan>이 됩니다</text>
+    <text x="0" y="0" font-family="'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" font-size="76" font-weight="800" fill="#f8fafc">비어 있던 그 시간,</text>
+    <text x="0" y="96" font-family="'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" font-size="76" font-weight="800" fill="#f8fafc">가장 멋진 <tspan fill="url(#neonGlow)">공간</tspan>이 됩니다</text>
   </g>
-  <text x="96" y="520" font-family="Pretendard, 'Apple SD Gothic Neo', sans-serif" font-size="30" fill="#6B655B">카페·바·레스토랑의 영업 외 시간을 파티·스몰웨딩·모임·팝업 공간으로</text>
+
+  <!-- Tagline -->
+  <text x="96" y="520" font-family="Pretendard, 'Apple SD Gothic Neo', sans-serif" font-size="28" font-weight="500" fill="#94a3b8">카페·바·레스토랑의 영업 외 시간을 파티·스몰웨딩·모임·팝업 공간으로 매칭</text>
 </svg>
