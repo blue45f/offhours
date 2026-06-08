@@ -12,8 +12,8 @@ export interface Countdown {
   imminent: boolean
 }
 
-function diff(target: number): Countdown {
-  const ms = target - Date.now()
+function diff(target: number, now: number): Countdown {
+  const ms = target - now
   const past = ms <= 0
   const abs = Math.abs(ms)
   const days = Math.floor(abs / 86_400_000)
@@ -26,17 +26,13 @@ function diff(target: number): Countdown {
 /** 모임 시작까지 남은 시간을 매초 갱신 — prefers-reduced-motion이어도 값은 갱신(시각적 흔들림만 줄임) */
 export function useCountdown(startAt?: string): Countdown | null {
   const target = startAt ? new Date(startAt).getTime() : NaN
-  const [now, setNow] = useState(() => (Number.isNaN(target) ? null : diff(target)))
+  const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
-    if (Number.isNaN(target)) {
-      setNow(null)
-      return
-    }
-    setNow(diff(target))
-    const id = window.setInterval(() => setNow(diff(target)), 1000)
+    if (Number.isNaN(target)) return
+    const id = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(id)
   }, [target])
 
-  return now
+  return Number.isNaN(target) ? null : diff(target, now)
 }

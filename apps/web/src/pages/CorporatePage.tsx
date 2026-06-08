@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Building2, ReceiptText, Trash2, Wallet } from 'lucide-react'
 import {
   CorporateTaxTypeLabel,
   creditBonus,
+  type CorporateProfile,
   type CorporateTaxType,
   type UpsertCorporateProfileInput,
 } from '@offhours/shared'
@@ -23,6 +24,27 @@ import { getErrorMessage } from '../services/api'
 import { formatKRW } from '../utils/format'
 import { cn } from '../utils/cn'
 
+const EMPTY_CORPORATE_FORM: UpsertCorporateProfileInput = {
+  companyName: '',
+  businessNumber: '',
+  ceoName: '',
+  billingEmail: '',
+  taxOfficeAddress: '',
+  taxPayer: 'GENERAL',
+}
+
+function toCorporateForm(data?: CorporateProfile | null): UpsertCorporateProfileInput {
+  if (!data) return EMPTY_CORPORATE_FORM
+  return {
+    companyName: data.companyName,
+    businessNumber: data.businessNumber,
+    ceoName: data.ceoName,
+    billingEmail: data.billingEmail,
+    taxOfficeAddress: data.taxOfficeAddress ?? '',
+    taxPayer: data.taxPayer,
+  }
+}
+
 export default function CorporatePage() {
   const { data, isLoading } = useCorporateProfile()
   const upsert = useUpsertCorporateProfile()
@@ -30,27 +52,12 @@ export default function CorporatePage() {
   const topup = useTopupCredit()
   const confirm = useConfirm()
   const [topupAmount, setTopupAmount] = useState(1_000_000)
-  const [form, setForm] = useState<UpsertCorporateProfileInput>({
-    companyName: '',
-    businessNumber: '',
-    ceoName: '',
-    billingEmail: '',
-    taxOfficeAddress: '',
-    taxPayer: 'GENERAL',
-  })
-
-  useEffect(() => {
-    if (data) {
-      setForm({
-        companyName: data.companyName,
-        businessNumber: data.businessNumber,
-        ceoName: data.ceoName,
-        billingEmail: data.billingEmail,
-        taxOfficeAddress: data.taxOfficeAddress ?? '',
-        taxPayer: data.taxPayer,
-      })
-    }
-  }, [data])
+  const serverForm = useMemo(() => toCorporateForm(data), [data])
+  const [draftForm, setDraftForm] = useState<UpsertCorporateProfileInput | null>(null)
+  const form = draftForm ?? serverForm
+  const updateForm = (patch: Partial<UpsertCorporateProfileInput>) => {
+    setDraftForm((current) => ({ ...(current ?? serverForm), ...patch }))
+  }
 
   async function submit() {
     try {
@@ -83,14 +90,7 @@ export default function CorporatePage() {
     try {
       await del.mutateAsync()
       toast.success('삭제했어요')
-      setForm({
-        companyName: '',
-        businessNumber: '',
-        ceoName: '',
-        billingEmail: '',
-        taxOfficeAddress: '',
-        taxPayer: 'GENERAL',
-      })
+      setDraftForm(EMPTY_CORPORATE_FORM)
     } catch (e) {
       toast.error(getErrorMessage(e))
     }
@@ -123,7 +123,7 @@ export default function CorporatePage() {
             <Field label="회사명" required>
               <Input
                 value={form.companyName}
-                onChange={(e) => setForm((p) => ({ ...p, companyName: e.target.value }))}
+                onChange={(e) => updateForm({ companyName: e.target.value })}
                 placeholder="(주)예시컴퍼니"
               />
             </Field>
@@ -131,14 +131,14 @@ export default function CorporatePage() {
               <Field label="사업자번호" required helper="000-00-00000 형식">
                 <Input
                   value={form.businessNumber}
-                  onChange={(e) => setForm((p) => ({ ...p, businessNumber: e.target.value }))}
+                  onChange={(e) => updateForm({ businessNumber: e.target.value })}
                   placeholder="123-45-67890"
                 />
               </Field>
               <Field label="대표자명" required>
                 <Input
                   value={form.ceoName}
-                  onChange={(e) => setForm((p) => ({ ...p, ceoName: e.target.value }))}
+                  onChange={(e) => updateForm({ ceoName: e.target.value })}
                 />
               </Field>
             </div>
@@ -146,14 +146,14 @@ export default function CorporatePage() {
               <Input
                 type="email"
                 value={form.billingEmail}
-                onChange={(e) => setForm((p) => ({ ...p, billingEmail: e.target.value }))}
+                onChange={(e) => updateForm({ billingEmail: e.target.value })}
                 placeholder="finance@company.com"
               />
             </Field>
             <Field label="과세 유형">
               <Select
                 value={form.taxPayer}
-                onValueChange={(v) => setForm((p) => ({ ...p, taxPayer: v as CorporateTaxType }))}
+                onValueChange={(v) => updateForm({ taxPayer: v as CorporateTaxType })}
                 options={(Object.keys(CorporateTaxTypeLabel) as CorporateTaxType[]).map((t) => ({
                   value: t,
                   label: CorporateTaxTypeLabel[t],
@@ -163,7 +163,7 @@ export default function CorporatePage() {
             <Field label="관할 세무서 주소 (선택)">
               <Input
                 value={form.taxOfficeAddress ?? ''}
-                onChange={(e) => setForm((p) => ({ ...p, taxOfficeAddress: e.target.value }))}
+                onChange={(e) => updateForm({ taxOfficeAddress: e.target.value })}
                 placeholder="서울 강남구 ..."
               />
             </Field>

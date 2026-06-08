@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { format, parseISO } from 'date-fns'
 import { ko } from 'date-fns/locale/ko'
 import { Link, useParams } from 'react-router-dom'
@@ -20,6 +20,17 @@ import { Skeleton } from '../components/ui/Skeleton'
 
 const CONFIRMED = new Set(['APPROVED', 'PAID', 'CHECKED_IN', 'COMPLETED'])
 const EASE = [0.2, 0, 0, 1] as const
+
+function useMinuteNow(): number {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 60_000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  return now
+}
 
 function partOfDay(h: number): string {
   if (h < 5) return '새벽'
@@ -68,6 +79,7 @@ function EventHub({ event }: { event: EventSummary }) {
   const reduce = useReducedMotion()
   const rsvp = useRsvp(event.code)
   const countdown = useCountdown(event.startAt)
+  const now = useMinuteNow()
 
   const token = useMemo(() => getClientToken(), [])
   const [savedName, setSavedName] = useState(() => readSavedName())
@@ -95,7 +107,7 @@ function EventHub({ event }: { event: EventSummary }) {
 
   const confirmed = CONFIRMED.has(event.reservationStatus)
   // 종료 시각이 지났으면 "끝난 모임" — 카운트다운 카피와 캘린더 추가를 분기한다.
-  const ended = new Date(event.endAt).getTime() < Date.now()
+  const ended = new Date(event.endAt).getTime() < now
   const rise = reduce ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } }
 
   return (

@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 const CACHE_NAME = 'offhours-pwa-v1'
 
 self.addEventListener('install', () => {

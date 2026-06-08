@@ -8,7 +8,7 @@ import { Button } from '../ui/Button'
 import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
 import { useUnreadNotifications } from '../../features/notifications/useUnreadNotifications'
-import { openCommandPalette } from '../CommandPalette'
+import { openCommandPalette } from '../commandPaletteEvents'
 
 export function Header() {
   const me = useMe()

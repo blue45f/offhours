@@ -22,6 +22,8 @@ const SMART_PLACEHOLDERS = [
   '예: 성수 갤러리 팝업',
   '예: 강남 헬스 1:1 PT',
 ]
+const SMART_PLACEHOLDER =
+  SMART_PLACEHOLDERS[Math.floor(Date.now() / 1000 / 10) % SMART_PLACEHOLDERS.length]
 
 export function HeroSearch() {
   const navigate = useNavigate()
@@ -33,10 +35,6 @@ export function HeroSearch() {
 
   const parsed = useMemo(() => (mode === 'smart' ? parseSmartQuery(smart) : null), [mode, smart])
   const chips = useMemo(() => (parsed ? describeParse(parsed) : []), [parsed])
-  const placeholder = useMemo(
-    () => SMART_PLACEHOLDERS[Math.floor(Date.now() / 1000 / 10) % SMART_PLACEHOLDERS.length],
-    []
-  )
 
   function go() {
     if (mode === 'smart' && parsed) {
@@ -82,7 +80,7 @@ export function HeroSearch() {
               value={smart}
               onChange={(e) => setSmart(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && go()}
-              placeholder={placeholder}
+              placeholder={SMART_PLACEHOLDER}
               aria-describedby="hero-smart-parsed"
               className="bg-transparent w-full font-medium text-[var(--color-fg)] focus:outline-none"
             />

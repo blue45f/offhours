@@ -14,7 +14,6 @@ function axiosErrWith(message: string | string[] | undefined): AxiosError {
     status: 400,
     statusText: 'Bad Request',
     headers: {},
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     config: {} as any,
   }
   return e

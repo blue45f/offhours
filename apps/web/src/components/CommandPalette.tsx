@@ -1,18 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as RDialog from '@radix-ui/react-dialog'
 import { useNavigate } from 'react-router-dom'
 import { CornerDownLeft, Search } from 'lucide-react'
 
 import { useIsAdmin, useIsAuthed, useIsHost } from '../store/auth'
 import { cn } from '../utils/cn'
-
-/** 헤더 검색 버튼 등 외부 트리거가 팔레트를 열 때 쓰는 윈도우 이벤트. */
-export const COMMAND_PALETTE_OPEN_EVENT = 'offhours:open-command-palette'
-
-/** 외부(헤더 등)에서 명령 팔레트를 연다. */
-export function openCommandPalette(): void {
-  window.dispatchEvent(new Event(COMMAND_PALETTE_OPEN_EVENT))
-}
+import { COMMAND_PALETTE_OPEN_EVENT } from './commandPaletteEvents'
 
 type Command = {
   id: string
@@ -45,31 +38,41 @@ export function CommandPalette() {
   const [active, setActive] = useState(0)
   const listRef = useRef<HTMLUListElement>(null)
 
+  const openPalette = useCallback(() => {
+    setQuery('')
+    setActive(0)
+    setOpen(true)
+  }, [])
+
+  const setPaletteOpen = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        openPalette()
+        return
+      }
+      setOpen(false)
+    },
+    [openPalette]
+  )
+
   // ⌘K / Ctrl+K 로 토글. 입력 필드 포커스 중에도 동작하도록 전역에서 가로챈다.
   // 헤더 검색 버튼은 OPEN_EVENT 를 디스패치해 같은 팔레트를 연다(컴포넌트 결합 없이).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        setOpen((v) => !v)
+        if (open) setOpen(false)
+        else openPalette()
       }
     }
-    const onOpen = () => setOpen(true)
+    const onOpen = () => openPalette()
     window.addEventListener('keydown', onKey)
     window.addEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpen)
     return () => {
       window.removeEventListener('keydown', onKey)
       window.removeEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpen)
     }
-  }, [])
-
-  // 열릴 때마다 검색어/선택 위치 초기화.
-  useEffect(() => {
-    if (open) {
-      setQuery('')
-      setActive(0)
-    }
-  }, [open])
+  }, [open, openPalette])
 
   const commands = useMemo<Command[]>(() => {
     const list: Command[] = [
@@ -287,13 +290,10 @@ export function CommandPalette() {
     return [search, ...base]
   }, [commands, trimmed])
 
-  // 필터 결과가 줄어들면 활성 인덱스를 범위 안으로 보정.
-  useEffect(() => {
-    setActive((i) => Math.min(i, Math.max(0, filtered.length - 1)))
-  }, [filtered.length])
+  const safeActive = filtered.length ? Math.min(active, filtered.length - 1) : 0
 
   const runActive = () => {
-    const cmd = filtered[active]
+    const cmd = filtered[safeActive]
     if (!cmd) return
     setOpen(false)
     cmd.run(navigate)
@@ -314,14 +314,14 @@ export function CommandPalette() {
 
   // 활성 항목을 뷰포트 안으로 스크롤.
   useEffect(() => {
-    const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`)
+    const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${safeActive}"]`)
     el?.scrollIntoView({ block: 'nearest' })
-  }, [active])
+  }, [safeActive])
 
-  const activeId = filtered[active] ? `cmdk-opt-${filtered[active].id}` : undefined
+  const activeId = filtered[safeActive] ? `cmdk-opt-${filtered[safeActive].id}` : undefined
 
   return (
-    <RDialog.Root open={open} onOpenChange={setOpen}>
+    <RDialog.Root open={open} onOpenChange={setPaletteOpen}>
       <RDialog.Portal>
         <RDialog.Overlay className="fixed inset-0 z-[var(--z-overlay)] bg-[var(--color-overlay)] backdrop-blur-sm data-[state=open]:animate-[fadeIn_var(--duration-base)_var(--easing-standard)]" />
         <RDialog.Content
@@ -370,7 +370,7 @@ export function CommandPalette() {
               </li>
             ) : (
               filtered.map((cmd, i) => {
-                const selected = i === active
+                const selected = i === safeActive
                 const prev = filtered[i - 1]
                 const showGroup = !prev || prev.group !== cmd.group
                 return (

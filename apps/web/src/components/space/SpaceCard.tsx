@@ -374,18 +374,16 @@ function HoverCarousel({ space, className }: { space: SpaceCardType; className?:
     return () => clearInterval(t)
   }, [reduce, hovered, urls.length])
 
-  // 호버 해제 시 첫 사진으로 복귀 (UX 안정성)
-  useEffect(() => {
-    if (!hovered) setIdx(0)
-  }, [hovered])
-
   if (urls.length === 0) return <Thumbnail space={space} className={className} />
 
   return (
     <div
       className={cn('relative', className)}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={() => {
+        setHovered(false)
+        setIdx(0)
+      }}
     >
       {/* 폴백 베이스: 사진이 모두 깨져도 빈 회색 대신 따뜻한 플레이스홀더가 보이도록 항상 뒤에 둔다. */}
       <ThumbnailFallback className="absolute inset-0 size-full" />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import {
   AlertTriangle,
@@ -277,21 +277,17 @@ function CreateBlockDialog({
   venues: VenueOpt[]
 }) {
   const [venueId, setVenueId] = useState(venues[0]?.id ?? '')
-  // venues 는 비동기 로드 — 첫 렌더엔 빈 배열이라 venueId 가 ''. 로드되면 첫 공간으로 보정해
-  // 빈 Select·비활성 제출(특히 공간 1개인 호스트가 깨진 것처럼 보이던 문제) 방지.
-  useEffect(() => {
-    if (!venueId && venues[0]) setVenueId(venues[0].id)
-  }, [venues, venueId])
+  const selectedVenueId = venueId || venues[0]?.id || ''
   const [label, setLabel] = useState('')
   const [startAt, setStartAt] = useState('')
   const [endAt, setEndAt] = useState('')
   const create = useCreateBlock()
 
   async function submit() {
-    if (!venueId || !label || !startAt || !endAt) return
+    if (!selectedVenueId || !label || !startAt || !endAt) return
     try {
       await create.mutateAsync({
-        venueId,
+        venueId: selectedVenueId,
         label,
         startAt: new Date(startAt).toISOString(),
         endAt: new Date(endAt).toISOString(),
@@ -311,7 +307,7 @@ function CreateBlockDialog({
       <div className="space-y-4">
         <Field label="공간" required>
           <Select
-            value={venueId}
+            value={selectedVenueId}
             onValueChange={setVenueId}
             options={venues.map((v) => ({ value: v.id, label: v.name }))}
           />
@@ -342,7 +338,7 @@ function CreateBlockDialog({
           <Button
             onClick={submit}
             loading={create.isPending}
-            disabled={!venueId || !label || !startAt || !endAt}
+            disabled={!selectedVenueId || !label || !startAt || !endAt}
           >
             차단 추가
           </Button>
@@ -362,20 +358,16 @@ function ConnectCalendarDialog({
   venues: VenueOpt[]
 }) {
   const [venueId, setVenueId] = useState(venues[0]?.id ?? '')
-  // venues 는 비동기 로드 — 첫 렌더엔 빈 배열이라 venueId 가 ''. 로드되면 첫 공간으로 보정해
-  // 빈 Select·비활성 제출(특히 공간 1개인 호스트가 깨진 것처럼 보이던 문제) 방지.
-  useEffect(() => {
-    if (!venueId && venues[0]) setVenueId(venues[0].id)
-  }, [venues, venueId])
+  const selectedVenueId = venueId || venues[0]?.id || ''
   const [label, setLabel] = useState('')
   const [icsUrl, setIcsUrl] = useState('')
   const [color, setColor] = useState('#5b6f55')
   const connect = useConnectExternal()
 
   async function submit() {
-    if (!venueId || !label || !icsUrl) return
+    if (!selectedVenueId || !label || !icsUrl) return
     try {
-      await connect.mutateAsync({ venueId, label, icsUrl, color })
+      await connect.mutateAsync({ venueId: selectedVenueId, label, icsUrl, color })
       toast.success('연결 + 동기화 완료')
       onOpenChange(false)
       setLabel('')
@@ -390,7 +382,7 @@ function ConnectCalendarDialog({
       <div className="space-y-4">
         <Field label="공간" required>
           <Select
-            value={venueId}
+            value={selectedVenueId}
             onValueChange={setVenueId}
             options={venues.map((v) => ({ value: v.id, label: v.name }))}
           />
@@ -427,7 +419,7 @@ function ConnectCalendarDialog({
           <Button
             onClick={submit}
             loading={connect.isPending}
-            disabled={!venueId || !label || !icsUrl}
+            disabled={!selectedVenueId || !label || !icsUrl}
           >
             연결 + 동기화
           </Button>

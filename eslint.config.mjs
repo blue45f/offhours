@@ -49,12 +49,21 @@ export default defineConfig([
       // (useConfirm()/usePrompt() 같은 로컬 변수는 섀도잉이라 영향 없음)
       'no-restricted-globals': [
         'error',
-        { name: 'confirm', message: 'useConfirm()/ConfirmDialog를 사용하세요 (window.confirm 금지).' },
+        {
+          name: 'confirm',
+          message: 'useConfirm()/ConfirmDialog를 사용하세요 (window.confirm 금지).',
+        },
         { name: 'alert', message: 'Toast/Dialog를 사용하세요 (window.alert 금지).' },
         { name: 'prompt', message: 'usePrompt()/PromptDialog를 사용하세요 (window.prompt 금지).' },
       ],
       'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+          allowExportNames: ['router', 'useConfirm', 'usePrompt'],
+        },
+      ],
       // react-hooks v7 ships experimental React Compiler diagnostics as errors.
       // Keep them as advisory warnings (matching sibling repos) so the gate fails
       // on genuine rules-of-hooks bugs, not on idiomatic effect/render patterns.
@@ -65,6 +74,14 @@ export default defineConfig([
       'react-hooks/refs': 'warn',
       'react-hooks/preserve-manual-memoization': 'warn',
       'react-hooks/static-components': 'warn',
+    },
+  },
+
+  // Route tables intentionally mix lazy component references with router exports.
+  {
+    files: ['apps/web/src/router/index.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 
@@ -97,6 +114,7 @@ export default defineConfig([
       globals: { ...globals.node, ...globals.browser },
     },
     rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
       'react-refresh/only-export-components': 'off',
     },
   },

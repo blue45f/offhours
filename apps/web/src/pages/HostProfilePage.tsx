@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
 import {
@@ -49,9 +49,9 @@ export default function HostProfilePage() {
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CreateHostProfileInput>({
@@ -66,8 +66,6 @@ export default function HostProfilePage() {
     },
   })
 
-  const [bizDisplay, setBizDisplay] = useState('')
-
   useEffect(() => {
     if (existing) {
       reset({
@@ -79,13 +77,13 @@ export default function HostProfilePage() {
         taxType: existing.taxType as TaxType,
         payoutCycle: existing.payoutCycle as PayoutCycle,
       })
-      setBizDisplay(formatBizNumber(existing.businessNumber))
     }
   }, [existing, reset])
 
-  const taxType = watch('taxType')
-  const payoutCycle = watch('payoutCycle')
-  const bankName = watch('bankName')
+  const taxType = useWatch({ control, name: 'taxType' })
+  const payoutCycle = useWatch({ control, name: 'payoutCycle' })
+  const bankName = useWatch({ control, name: 'bankName' })
+  const businessNumber = useWatch({ control, name: 'businessNumber' }) ?? ''
 
   async function onSubmit(values: CreateHostProfileInput) {
     try {
@@ -156,11 +154,10 @@ export default function HostProfilePage() {
               <Input
                 placeholder="000-00-00000"
                 inputMode="numeric"
-                value={bizDisplay}
+                value={formatBizNumber(businessNumber)}
                 error={!!errors.businessNumber}
                 onChange={(e) => {
                   const next = formatBizNumber(e.target.value)
-                  setBizDisplay(next)
                   setValue('businessNumber', next, { shouldValidate: true })
                 }}
               />
