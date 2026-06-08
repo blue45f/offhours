@@ -21,6 +21,10 @@ model User {
   id             String   @id @default(cuid())
   email          String   @unique
   passwordHash   String?
+  // 가입·로그인 출처. 비밀번호 가입은 "password", Google(GIS) 가입은 "google".
+  provider       String   @default("password")
+  // Google 계정 고유 식별자(ID 토큰 payload.sub). OAuth 계정 연결·중복 가입 방지용.
+  googleSub      String?  @unique
   name           String
   phone          String?  @unique
   avatarUrl      String?

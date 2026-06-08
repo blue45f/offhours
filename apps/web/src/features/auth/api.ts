@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Me, SignInInput, SignUpInput } from '@offhours/shared'
 
 import { api } from '../../services/api'
@@ -7,6 +7,27 @@ import { useAuthStore } from '../../store/auth'
 interface AuthResult {
   accessToken: string
   user: Me
+}
+
+// 공개 설정(Google 클라이언트 ID). null 이면 버튼 숨김.
+export function useAuthConfig() {
+  return useQuery({
+    queryKey: ['auth', 'config'],
+    queryFn: () => api.get<{ googleClientId: string | null }>('/auth/config'),
+    staleTime: Infinity,
+  })
+}
+
+export function useGoogleSignIn() {
+  const setAuth = useAuthStore((s) => s.setAuth)
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (credential: string) => api.post<AuthResult>('/auth/google', { credential }),
+    onSuccess: (data) => {
+      setAuth(data.accessToken, data.user)
+      qc.clear()
+    },
+  })
 }
 
 export function useSignIn() {

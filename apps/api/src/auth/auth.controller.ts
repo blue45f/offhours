@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common'
 import { Throttle } from '@nestjs/throttler'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Request, Response } from 'express'
@@ -55,6 +65,27 @@ export class AuthController {
   ) {
     const meta = { ip: req.ip, userAgent: req.headers['user-agent'] }
     const result = await this.auth.signIn(body, meta)
+    setRefreshCookie(res, result.refreshToken, result.refreshExpiresAt)
+    return { accessToken: result.accessToken, user: result.user }
+  }
+
+  @Get('config')
+  config() {
+    return this.auth.publicConfig()
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(200)
+  @Post('google')
+  async google(
+    @Body() body: { credential?: unknown },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const credential = typeof body.credential === 'string' ? body.credential.trim() : ''
+    if (!credential) throw new BadRequestException('Google 인증 정보가 필요해요')
+    const meta = { ip: req.ip, userAgent: req.headers['user-agent'] }
+    const result = await this.auth.googleAuth(credential, meta)
     setRefreshCookie(res, result.refreshToken, result.refreshExpiresAt)
     return { accessToken: result.accessToken, user: result.user }
   }

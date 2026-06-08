@@ -76,6 +76,54 @@ export class AuthService {
     return this.issueTokens(user, meta)
   }
 
+  // 클라이언트가 Google 버튼 노출 여부를 판단하도록 공개 설정만 내려준다.
+  publicConfig() {
+    const googleClientId = this.config.get<string>('GOOGLE_CLIENT_ID')?.trim()
+    return { googleClientId: googleClientId ? googleClientId : null }
+  }
+
+  // Google ID 토큰(GIS credential) 검증 → 이메일 기준 find-or-create 후 동일 세션 발급.
+  // audience 를 항상 전달해 토큰 대상이 우리 클라이언트인지 확인하고, email_verified 가
+  // 아니면 거부한다(토큰 자체는 로깅하지 않는다).
+  async googleAuth(credential: string, meta: { ip?: string; userAgent?: string } = {}) {
+    const clientId = this.config.get<string>('GOOGLE_CLIENT_ID')?.trim()
+    if (!clientId) throw new UnauthorizedException('Google 로그인이 설정되지 않았어요')
+
+    const { OAuth2Client } = await import('google-auth-library')
+    const client = new OAuth2Client(clientId)
+    let payload: import('google-auth-library').TokenPayload | undefined
+    try {
+      const ticket = await client.verifyIdToken({ idToken: credential, audience: clientId })
+      payload = ticket.getPayload()
+    } catch {
+      throw new UnauthorizedException('Google 인증에 실패했어요')
+    }
+    if (!payload?.sub || !payload.email || !payload.email_verified)
+      throw new UnauthorizedException('Google 인증에 실패했어요')
+
+    const sub = payload.sub
+    const email = payload.email.toLowerCase()
+    const name = payload.name?.trim() || email.split('@')[0] || '게스트'
+
+    let user = await this.prisma.user.findUnique({ where: { email } })
+    if (user) {
+      if (user.isSuspended)
+        throw new ForbiddenException('정지된 계정이에요. 고객센터로 문의해주세요.')
+      // 기존 이메일 계정에 Google 식별자를 연결(최초 1회). passwordHash 는 그대로 둔다.
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date(), googleSub: user.googleSub ?? sub },
+      })
+    } else {
+      const referralCode = await this.uniqueReferralCode()
+      user = await this.prisma.user.create({
+        data: { email, name, provider: 'google', googleSub: sub, referralCode },
+      })
+    }
+
+    return this.issueTokens(user, meta)
+  }
+
   async signOut(refreshToken: string | undefined) {
     if (!refreshToken) return
     const tokenHash = this.hashToken(refreshToken)

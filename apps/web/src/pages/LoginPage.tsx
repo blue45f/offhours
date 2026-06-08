@@ -8,7 +8,8 @@ import { Eye, EyeOff, Mail } from 'lucide-react'
 
 import { Button } from '../components/ui/Button'
 import { Field, Input } from '../components/ui/Input'
-import { useSignIn } from '../features/auth/api'
+import { useAuthConfig, useGoogleSignIn, useSignIn } from '../features/auth/api'
+import { GoogleSignInButton } from '../features/auth/GoogleSignInButton'
 import { useIsAuthed } from '../store/auth'
 import { getErrorMessage } from '../services/api'
 
@@ -18,7 +19,19 @@ export default function LoginPage() {
   const location = useLocation()
   const [showPwd, setShowPwd] = useState(false)
   const signIn = useSignIn()
+  const authConfig = useAuthConfig()
+  const googleSignIn = useGoogleSignIn()
   const from = (location.state as { from?: string } | null)?.from ?? '/'
+
+  async function onGoogleCredential(credential: string) {
+    try {
+      await googleSignIn.mutateAsync(credential)
+      toast.success('환영합니다 ✨')
+      navigate(from)
+    } catch (e) {
+      toast.error(getErrorMessage(e, 'Google 로그인에 실패했어요'))
+    }
+  }
 
   const {
     register,
@@ -79,6 +92,21 @@ export default function LoginPage() {
             로그인
           </Button>
         </form>
+        {authConfig.data?.googleClientId && (
+          <div className="mt-6">
+            <div className="flex items-center gap-3 text-xs text-[var(--color-fg-muted)]">
+              <span className="h-px flex-1 bg-[var(--color-border)]" />
+              또는
+              <span className="h-px flex-1 bg-[var(--color-border)]" />
+            </div>
+            <div className="mt-4">
+              <GoogleSignInButton
+                clientId={authConfig.data.googleClientId}
+                onCredential={onGoogleCredential}
+              />
+            </div>
+          </div>
+        )}
         <div className="mt-6 text-center text-sm text-[var(--color-fg-muted)]">
           아직 계정이 없으신가요?{' '}
           <Link to="/signup" className="font-semibold text-[var(--color-primary)] hover:underline">
