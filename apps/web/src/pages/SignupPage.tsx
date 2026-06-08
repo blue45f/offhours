@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,6 +19,8 @@ export default function SignupPage() {
   const isAuthed = useIsAuthed()
   const navigate = useNavigate()
   const signUp = useSignUp()
+  const [policyChecks, setPolicyChecks] = useState({ terms: false, privacy: false, safety: false })
+  const policyReady = policyChecks.terms && policyChecks.privacy && policyChecks.safety
 
   const {
     register,
@@ -105,7 +108,27 @@ export default function SignupPage() {
             />
             <span>혜택·이벤트 알림을 받을게요. 언제든 해지할 수 있어요.</span>
           </label>
-          <Button type="submit" size="lg" full loading={isSubmitting}>
+          <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-4 text-sm text-[var(--color-fg-muted)]">
+            <p className="font-semibold text-[var(--color-fg)]">이용 전 필수 확인</p>
+            {[
+              ['terms', '공간 예약·호스트 정산 이용약관을 확인했습니다.'],
+              ['privacy', '예약자/호스트 연락처와 결제 정보 처리 범위를 확인했습니다.'],
+              ['safety', '공간 안전·취소·환불 정책을 확인했습니다.'],
+            ].map(([key, label]) => (
+              <label key={key} className="mt-2 flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={policyChecks[key as keyof typeof policyChecks]}
+                  onChange={(event) =>
+                    setPolicyChecks((current) => ({ ...current, [key]: event.target.checked }))
+                  }
+                  className="mt-0.5 size-4 rounded border-[var(--color-border-strong)] accent-[var(--color-primary)]"
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+          <Button type="submit" size="lg" full loading={isSubmitting} disabled={!policyReady}>
             가입하기
           </Button>
         </form>
