@@ -1,35 +1,25 @@
 {
-  "name": "Offhours",
-  "short_name": "Offhours",
-  "description": "영업 외 시간의 상업 공간을 파티·모임·팝업으로 매칭하는 양면시장 마켓플레이스.",
-  "lang": "ko",
-  "dir": "ltr",
+  "name": "OffHours",
+  "short_name": "OffHours",
+  "description": "오프아워 직장인 모임",
+  "lang": "ko-KR",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#faf8f4",
-  "theme_color": "#15140f",
-  "categories": ["business", "lifestyle", "shopping"],
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
   "icons": [
     {
       "src": "/favicon.svg",
-      "sizes": "any",
+      "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "공간 둘러보기",
-      "short_name": "공간",
-      "url": "/spaces",
-      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
     },
     {
-      "name": "요금 보기",
-      "short_name": "요금",
-      "url": "/pricing",
-      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

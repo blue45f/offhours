@@ -47,7 +47,6 @@ pnpm docker:down
 
 ```bash
 pnpm install --frozen-lockfile
-cd apps/web
 vercel deploy --prod --confirm --token "$VERCEL_TOKEN"
 ```
 
@@ -59,8 +58,8 @@ vercel deploy --prod --confirm --token "$VERCEL_TOKEN"
 
 ### Vercel 대시보드에서 직접 해야 하는 설정 (CI가 못 하는 부분)
 
-1. Vercel 프로젝트를 생성하고 이 저장소를 연결합니다. 모노레포이므로 빌드 컨텍스트를 `apps/web`로 잡거나 워크플로처럼 `apps/web`에서 `vercel deploy`를 실행합니다.
-2. **환경 변수(웹)**: `VITE_API_URL`(Render API 도메인), `VITE_TOSS_CLIENT_KEY`. 같은 도메인 뒤에서 서빙하지 않으면 Vercel `rewrites`로 `/api/*` → `https://offhours-api.onrender.com/api/*`를 가리키게 하세요.
+1. Vercel 프로젝트를 생성하고 이 저장소를 연결합니다. 모노레포이므로 레포 루트에서 배포하고, 루트 `vercel.json`이 `pnpm --filter @offhours/shared build && pnpm --filter @offhours/web build`와 `apps/web/dist` 산출물을 지정합니다.
+2. **환경 변수(웹)**: 기본적으로 `vercel.json`이 `VITE_API_URL=/api`와 `/api/*` → `https://offhours-api.onrender.com/api/*` rewrite를 설정합니다. Toss 공개 클라이언트 키 등 추가 웹 환경 변수가 생기면 Vercel Production 환경 변수로 설정하세요.
 3. `Settings → Git`에서 Production Branch를 `main`으로 둡니다.
 
 ---
@@ -74,13 +73,16 @@ vercel deploy --prod --confirm --token "$VERCEL_TOKEN"
 | 파일                                      | 역할                                                                                                |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `apps/api/Dockerfile`                     | 멀티스테이지 프로덕션 이미지(node:22-alpine, **non-root**, prod-only deps, `node dist/src/main.js`) |
-| `apps/api/.dockerignore`                  | 빌드 컨텍스트에서 `dist`/`node_modules`/`.env`/`*.tsbuildinfo` 제외 — `src`는 포함                  |
+| `.dockerignore`                           | 루트 Docker build context에서 `dist`/`node_modules`/`.env`/`*.tsbuildinfo` 제외 — `src`는 포함      |
+| `vercel.json`                             | 루트 Vercel 배포 설정 — workspace install/build, `apps/web/dist` output, `/api/*` → Render rewrite  |
 | `render.yaml`                             | Render Blueprint — Docker 웹 서비스 + 관리형 Postgres DB, `DATABASE_URL` 자동 주입, 헬스체크        |
 | `.github/workflows/deploy-render-api.yml` | CI 성공 후(`workflow_run`) Render Deploy Hook 호출. `RENDER_DEPLOY_HOOK_URL` 시크릿 없으면 스킵     |
 
-### `.dockerignore`의 `*.tsbuildinfo` 제외 (중요)
+### 루트 `.dockerignore`의 `*.tsbuildinfo` 제외 (중요)
 
-`apps/api`는 `incremental: true`라 `dist/tsconfig.tsbuildinfo`를 남깁니다. 이 파일이 빌드 컨텍스트로 들어가면 `nest build`가 "이미 최신"이라 판단해 **JS를 한 줄도 내보내지 않고**, 그 결과 `dist/src/main.js`가 없어 컨테이너가 부팅 직후 크래시합니다. `.dockerignore`가 `**/*.tsbuildinfo`를 제외해 매 빌드마다 깨끗하게 컴파일합니다. (반대로 `src`는 이미지 안에서 TypeScript를 컴파일해야 하므로 **포함**합니다.)
+`render.yaml`은 `dockerContext: .`로 레포 루트에서 이미지를 빌드합니다. 따라서 Docker가 실제로 읽는 ignore 파일은 `apps/api/.dockerignore`가 아니라 **루트 `.dockerignore`** 입니다.
+
+`apps/api`는 `incremental: true`라 `dist/tsconfig.tsbuildinfo`를 남깁니다. 이 파일이 빌드 컨텍스트로 들어가면 `nest build`가 "이미 최신"이라 판단해 **JS를 한 줄도 내보내지 않고**, 그 결과 `dist/src/main.js`가 없어 컨테이너가 부팅 직후 크래시합니다. 루트 `.dockerignore`가 `**/*.tsbuildinfo`를 제외해 매 빌드마다 깨끗하게 컴파일합니다. (반대로 `src`는 이미지 안에서 TypeScript를 컴파일해야 하므로 **포함**합니다.)
 
 ### 빌드/실행 방식
 
@@ -133,7 +135,7 @@ databases:
 1. **New → Blueprint**로 이 저장소를 연결합니다. Render가 `render.yaml`을 읽어 웹 서비스 + 관리형 Postgres를 프로비저닝하고 `DATABASE_URL`을 연결합니다.
 2. `sync: false`로 비워 둔 시크릿을 대시보드에서 입력합니다(아래 표).
    - `dev-secret-change-me` 류의 로컬 dev 값을 절대 재사용하지 말 것.
-3. 서비스의 **Deploy Hook URL**을 복사해 GitHub `RENDER_DEPLOY_HOOK_URL` 시크릿에 저장하면 push-to-deploy가 연결됩니다(또는 `autoDeploy: true`로 Render 자체 Git 연동만 사용해도 됩니다).
+3. 서비스의 **Deploy Hook URL**을 복사해 GitHub `RENDER_DEPLOY_HOOK_URL` 시크릿에 저장하면 push-to-deploy가 연결됩니다. `render.yaml`은 형제 운영 프로젝트처럼 `autoDeploy: false`로 두어 GitHub Actions의 CI 통과 후 deploy hook만 배포를 트리거하게 합니다.
 
 ### 운영에 필요한 백엔드 환경 변수 요약
 
@@ -161,7 +163,7 @@ databases:
 | 항목         | Preview                                    | Production                             |
 | ------------ | ------------------------------------------ | -------------------------------------- |
 | Web (Vercel) | Vercel Git 통합 시 PR마다 Preview URL      | `main` 푸시 → 워크플로 `vercel --prod` |
-| API (Render) | (선택) PR Preview Environments 활성화 가능 | CI 성공 후 → Deploy Hook/autoDeploy    |
+| API (Render) | (선택) PR Preview Environments 활성화 가능 | CI 성공 후 → Deploy Hook               |
 | 시크릿       | 프로바이더별 Preview 스코프 값 사용        | Production 스코프 값                   |
 | DB           | 별도 미리보기 DB 권장                      | 관리형 Postgres `offhours-postgres`    |
 
@@ -185,10 +187,10 @@ CI에서도 `.github/workflows/ci.yml`이 `pnpm run verify`를 실행하며, `de
 # 프론트엔드(로컬에서 강제 운영 배포)
 pnpm install --frozen-lockfile
 pnpm --filter @offhours/shared build
-cd apps/web && vercel deploy --prod --token "$VERCEL_TOKEN"
+vercel deploy --prod --token "$VERCEL_TOKEN"
 
 # 백엔드(Render Deploy Hook 직접 호출)
-curl -fsS "$RENDER_DEPLOY_HOOK_URL"
+curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
 
 # 백엔드 이미지 로컬 빌드/실행 (레포 루트에서)
 docker build -f apps/api/Dockerfile -t offhours-api .

@@ -46,7 +46,9 @@ services:
     plan: starter
     region: oregon
     branch: main
-    autoDeploy: true
+    # Match sibling production deploys: GitHub Actions triggers the Render
+    # Deploy Hook after CI, which avoids duplicate Render auto-deploys.
+    autoDeploy: false
     healthCheckPath: /health # HealthController, excluded from the /api prefix
     # Prod image is pruned to prod deps only, so the Prisma CLI (a devDependency)
     # is not present — fetch it on demand to sync the schema. The pruned bundle

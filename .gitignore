@@ -18,6 +18,9 @@ out
 .env.*.local
 !.env.example
 
+# Vercel local project link
+.vercel
+
 # Editor
 .DS_Store
 .idea

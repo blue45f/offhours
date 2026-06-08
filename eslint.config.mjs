@@ -11,6 +11,7 @@ export default defineConfig([
     '**/build/**',
     '**/coverage/**',
     '**/node_modules/**',
+    '**/.vercel/**',
     '**/*.d.ts',
     '**/*.tsbuildinfo',
     'apps/api/prisma/migrations/**',

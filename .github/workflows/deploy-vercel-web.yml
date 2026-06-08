@@ -52,6 +52,4 @@ jobs:
 
       - name: Deploy frontend to Vercel production
         if: env.VERCEL_TOKEN != ''
-        run: |
-          cd apps/web
-          vercel deploy --prod --confirm --token "$VERCEL_TOKEN"
+        run: vercel deploy --prod --confirm --token "$VERCEL_TOKEN"

@@ -24,6 +24,78 @@ for (const file of requiredPaths) {
   if (!exists(file)) issues.push(`missing file: ${file}`)
 }
 
+// The API production image is built with the repository root as the Docker
+// context (render.yaml dockerContext: .), so Docker only honors a root
+// .dockerignore. Guard the patterns that keep stale incremental build state and
+// local secrets out of the production build context.
+if (!exists('.dockerignore')) {
+  issues.push('missing file: .dockerignore')
+} else {
+  const dockerignore = read('.dockerignore')
+  const requiredDockerignorePatterns = [
+    '**/node_modules',
+    '**/dist',
+    '**/*.tsbuildinfo',
+    '**/.env',
+    'apps/web',
+  ]
+  for (const pattern of requiredDockerignorePatterns) {
+    if (!dockerignore.includes(pattern)) {
+      issues.push(`.dockerignore must include "${pattern}"`)
+    }
+  }
+}
+
+// Production Render deploys follow the sibling production pattern: Render does
+// not auto-deploy on every git push; GitHub Actions triggers the deploy hook
+// after CI and fails the run when the hook returns a non-2xx status.
+if (!exists('render.yaml')) {
+  issues.push('missing file: render.yaml')
+} else {
+  const render = read('render.yaml')
+  if (!render.includes('autoDeploy: false')) {
+    issues.push('render.yaml must set the API service autoDeploy to false')
+  }
+}
+if (!exists('.github/workflows/deploy-render-api.yml')) {
+  issues.push('missing file: .github/workflows/deploy-render-api.yml')
+} else {
+  const deployRender = read('.github/workflows/deploy-render-api.yml')
+  if (!deployRender.includes('-X POST')) {
+    issues.push('deploy-render-api.yml must POST to the Render deploy hook')
+  }
+  if (!deployRender.includes('if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then')) {
+    issues.push('deploy-render-api.yml must fail when the Render deploy hook returns non-2xx')
+  }
+}
+
+// Vercel deploys this monorepo from the repository root so the web build has
+// access to the pnpm workspace and @offhours/shared.
+if (!exists('vercel.json')) {
+  issues.push('missing file: vercel.json')
+} else {
+  const vercel = read('vercel.json')
+  const requiredVercelSnippets = [
+    '"installCommand": "corepack enable && pnpm install --frozen-lockfile"',
+    '"buildCommand": "pnpm --filter @offhours/shared build && pnpm --filter @offhours/web build"',
+    '"outputDirectory": "apps/web/dist"',
+    '"destination": "https://offhours-api.onrender.com/api/:path*"',
+  ]
+  for (const snippet of requiredVercelSnippets) {
+    if (!vercel.includes(snippet)) {
+      issues.push(`vercel.json must include ${snippet}`)
+    }
+  }
+}
+if (!exists('.github/workflows/deploy-vercel-web.yml')) {
+  issues.push('missing file: .github/workflows/deploy-vercel-web.yml')
+} else {
+  const deployVercel = read('.github/workflows/deploy-vercel-web.yml')
+  if (deployVercel.includes('cd apps/web')) {
+    issues.push('deploy-vercel-web.yml must deploy from the repository root')
+  }
+}
+
 // Required root scripts wired into the verify/CI chain
 const requiredScripts = [
   'build',
