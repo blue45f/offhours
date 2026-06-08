@@ -8,7 +8,7 @@ Offhours는 pnpm 모노레포로 구성된 풀스택 앱입니다.
 
 | 계층                     | 패키지            | 런타임                     | 호스팅                                 | 트리거                                                  |
 | ------------------------ | ----------------- | -------------------------- | -------------------------------------- | ------------------------------------------------------- |
-| **Frontend (web)**       | `apps/web`        | Vite + React SPA (정적)    | **Vercel**                             | `.github/workflows/deploy-vercel-web.yml`               |
+| **Frontend (web)**       | `apps/web`        | Vite + React SPA (정적)    | **Vercel**                             | Vercel Git 연결(`main`) + `vercel.json`                 |
 | **Backend (api)**        | `apps/api`        | NestJS 11 (Node 22)        | **Render** (Docker) — 또는 자체 호스트 | `.github/workflows/deploy-render-api.yml` + render.yaml |
 | **Database**             | (관리형)          | PostgreSQL 16              | **Render PostgreSQL** (관리형 DB)      | render.yaml `databases:` 블록                           |
 | **공유 패키지 (shared)** | `packages/shared` | Zod 스키마/타입 라이브러리 | 퍼블리시하지 않음(workspace link)      | 빌드 시 `shared → api → web` 위상 정렬                  |
@@ -39,28 +39,31 @@ pnpm docker:down
 
 ## 3. 프론트엔드 배포 (Vercel)
 
-### 워크플로
+### 운영 배포 경로
 
-`.github/workflows/deploy-vercel-web.yml`이 `main` 푸시 시 동작합니다. **`VERCEL_TOKEN` 시크릿이 없으면 자동으로 스킵**되므로, 시크릿을 넣기 전까지는 안전하게 머지됩니다.
+형제 운영 프로젝트와 같이 **Vercel Git 연결**을 기본 production 배포 경로로 사용합니다. Vercel 프로젝트는 이 GitHub 저장소를 루트 디렉터리(`.`)로 연결하고, `main` 푸시를 production branch로 배포합니다.
 
-빌드/배포 핵심 명령(워크플로 내부):
+루트 `vercel.json`이 Vercel 빌드 설정을 담당합니다.
 
-```bash
-pnpm install --frozen-lockfile
-vercel deploy --prod --confirm --token "$VERCEL_TOKEN"
-```
+- `installCommand`: `corepack enable && pnpm install --frozen-lockfile`
+- `buildCommand`: `pnpm --filter @offhours/shared build && pnpm --filter @offhours/web build`
+- `outputDirectory`: `apps/web/dist`
+- `/api/*` rewrite: `https://offhours-api.onrender.com/api/*`
+
+`.github/workflows/deploy-vercel-web.yml`은 선택적 CLI 배포 워크플로입니다. **`VERCEL_TOKEN` 시크릿이 없으면 자동으로 스킵**되므로, Vercel Git 연결만 쓰는 운영에서는 비워 둬도 workflow가 green으로 끝납니다.
 
 ### 필요한 GitHub Secret
 
-| Secret         | 용도                 | 없을 때        |
-| -------------- | -------------------- | -------------- |
-| `VERCEL_TOKEN` | Vercel CLI 인증 토큰 | 배포 단계 스킵 |
+| Secret         | 용도                          | 없을 때                    |
+| -------------- | ----------------------------- | -------------------------- |
+| `VERCEL_TOKEN` | 선택적 Vercel CLI 강제 배포용 | CLI 배포 workflow만 스킵됨 |
 
 ### Vercel 대시보드에서 직접 해야 하는 설정 (CI가 못 하는 부분)
 
 1. Vercel 프로젝트를 생성하고 이 저장소를 연결합니다. 모노레포이므로 레포 루트에서 배포하고, 루트 `vercel.json`이 `pnpm --filter @offhours/shared build && pnpm --filter @offhours/web build`와 `apps/web/dist` 산출물을 지정합니다.
 2. **환경 변수(웹)**: 기본적으로 `vercel.json`이 `VITE_API_URL=/api`와 `/api/*` → `https://offhours-api.onrender.com/api/*` rewrite를 설정합니다. Toss 공개 클라이언트 키 등 추가 웹 환경 변수가 생기면 Vercel Production 환경 변수로 설정하세요.
 3. `Settings → Git`에서 Production Branch를 `main`으로 둡니다.
+4. Vercel Git 연결을 주 배포 경로로 쓸 때는 GitHub `VERCEL_TOKEN` secret을 등록하지 않아도 됩니다. 등록하면 Actions CLI 배포와 Vercel Git 배포가 중복될 수 있습니다.
 
 ---
 
@@ -160,12 +163,12 @@ databases:
 
 ## 5. 미리보기 vs 운영 차이 한눈에
 
-| 항목         | Preview                                    | Production                             |
-| ------------ | ------------------------------------------ | -------------------------------------- |
-| Web (Vercel) | Vercel Git 통합 시 PR마다 Preview URL      | `main` 푸시 → 워크플로 `vercel --prod` |
-| API (Render) | (선택) PR Preview Environments 활성화 가능 | CI 성공 후 → Deploy Hook               |
-| 시크릿       | 프로바이더별 Preview 스코프 값 사용        | Production 스코프 값                   |
-| DB           | 별도 미리보기 DB 권장                      | 관리형 Postgres `offhours-postgres`    |
+| 항목         | Preview                                    | Production                          |
+| ------------ | ------------------------------------------ | ----------------------------------- |
+| Web (Vercel) | Vercel Git 통합 시 PR마다 Preview URL      | `main` 푸시 → Vercel Git production |
+| API (Render) | (선택) PR Preview Environments 활성화 가능 | CI 성공 후 → Deploy Hook            |
+| 시크릿       | 프로바이더별 Preview 스코프 값 사용        | Production 스코프 값                |
+| DB           | 별도 미리보기 DB 권장                      | 관리형 Postgres `offhours-postgres` |
 
 ---
 
@@ -184,7 +187,7 @@ CI에서도 `.github/workflows/ci.yml`이 `pnpm run verify`를 실행하며, `de
 ## 7. 수동 배포 치트시트
 
 ```bash
-# 프론트엔드(로컬에서 강제 운영 배포)
+# 프론트엔드(로컬에서 강제 운영 배포 — 보통은 Vercel Git 연결 사용)
 pnpm install --frozen-lockfile
 pnpm --filter @offhours/shared build
 vercel deploy --prod --token "$VERCEL_TOKEN"

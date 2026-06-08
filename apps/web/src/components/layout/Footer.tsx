@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom'
 
+const TERMSDESK_BASE = 'https://termsdesk.vercel.app'
+const TERMS_URL = `${TERMSDESK_BASE}/p/offhours/terms-of-service`
+const PRIVACY_URL = `${TERMSDESK_BASE}/p/offhours/privacy-policy`
+const REFUND_URL = `${TERMSDESK_BASE}/p/offhours/refund-policy`
+const SUPPORT_URL = `${TERMSDESK_BASE}/support/offhours`
+
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
@@ -48,7 +54,9 @@ export function Footer() {
                 <Link to="/help/guest">게스트 가이드</Link>
               </li>
               <li>
-                <Link to="/contact">문의하기</Link>
+                <a href={`${SUPPORT_URL}?category=site-inquiry`} target="_blank" rel="noreferrer">
+                  문의하기
+                </a>
               </li>
             </ul>
           </div>
@@ -56,13 +64,19 @@ export function Footer() {
             <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">정책</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
-                <Link to="/terms">이용약관</Link>
+                <a href={TERMS_URL} target="_blank" rel="noreferrer">
+                  이용약관
+                </a>
               </li>
               <li>
-                <Link to="/privacy">개인정보 처리방침</Link>
+                <a href={PRIVACY_URL} target="_blank" rel="noreferrer">
+                  개인정보 처리방침
+                </a>
               </li>
               <li>
-                <Link to="/cancel-policy">취소·환불 정책</Link>
+                <a href={REFUND_URL} target="_blank" rel="noreferrer">
+                  취소·환불 정책
+                </a>
               </li>
               <li>
                 <Link to="/safety">안전·신뢰</Link>

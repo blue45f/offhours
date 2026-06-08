@@ -91,8 +91,14 @@ if (!exists('.github/workflows/deploy-vercel-web.yml')) {
   issues.push('missing file: .github/workflows/deploy-vercel-web.yml')
 } else {
   const deployVercel = read('.github/workflows/deploy-vercel-web.yml')
+  if (!deployVercel.includes("'vercel.json'")) {
+    issues.push('deploy-vercel-web.yml must include vercel.json in its path filters')
+  }
   if (deployVercel.includes('cd apps/web')) {
     issues.push('deploy-vercel-web.yml must deploy from the repository root')
+  }
+  if (deployVercel.includes('--confirm')) {
+    issues.push('deploy-vercel-web.yml must use vercel --yes instead of deprecated --confirm')
   }
 }
 

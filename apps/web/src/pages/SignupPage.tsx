@@ -11,6 +11,9 @@ import { useSignUp } from '../features/auth/api'
 import { useIsAuthed } from '../store/auth'
 import { getErrorMessage } from '../services/api'
 
+const TERMS_URL = 'https://termsdesk.vercel.app/p/offhours/terms-of-service'
+const PRIVACY_URL = 'https://termsdesk.vercel.app/p/offhours/privacy-policy'
+
 export default function SignupPage() {
   const isAuthed = useIsAuthed()
   const navigate = useNavigate()
@@ -108,13 +111,13 @@ export default function SignupPage() {
         </form>
         <p className="mt-4 text-xs text-[var(--color-fg-subtle)] text-center">
           가입 시{' '}
-          <Link to="/terms" className="underline">
+          <a href={TERMS_URL} target="_blank" rel="noreferrer" className="underline">
             이용약관
-          </Link>{' '}
+          </a>{' '}
           및{' '}
-          <Link to="/privacy" className="underline">
+          <a href={PRIVACY_URL} target="_blank" rel="noreferrer" className="underline">
             개인정보 처리방침
-          </Link>
+          </a>
           에 동의합니다.
         </p>
         <div className="mt-6 text-center text-sm text-[var(--color-fg-muted)]">

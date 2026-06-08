@@ -20,6 +20,8 @@ import { cn } from '../utils/cn'
 import { getErrorMessage } from '../services/api'
 import { useHostProfile, useUpsertHostProfile } from '../features/host/api'
 
+const TERMS_URL = 'https://termsdesk.vercel.app/p/offhours/terms-of-service'
+
 function formatBizNumber(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 10)
   if (digits.length < 4) return digits
@@ -255,7 +257,7 @@ export default function HostProfilePage() {
             <p className="text-xs text-[var(--color-fg-muted)] leading-relaxed bg-[var(--color-bg-subtle)] rounded-[var(--radius-lg)] p-3.5">
               플랫폼 수수료 12% 차감 후 입금됩니다. 분쟁 발생 시 정산이 보류될 수 있어요. 자세한
               내용은{' '}
-              <a href="/terms" className="underline">
+              <a href={TERMS_URL} target="_blank" rel="noreferrer" className="underline">
                 이용약관
               </a>
               을 참고해주세요.
