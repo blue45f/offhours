@@ -95,18 +95,26 @@ pnpm docker:down
 - `pnpm --filter @offhours/shared build && pnpm --filter @offhours/api db:generate && pnpm --filter @offhours/api build`
 - `pnpm --filter @offhours/api --prod --legacy deploy /app`로 **prod 의존성만** 가진 격리 런타임 생성, 생성된 Prisma client(`.prisma/client`)를 `/app`으로 복사
 - **non-root**: 런타임 스테이지는 빌트인 `node` 유저로 실행(컨테이너 내 root 없음)
-- 시작 명령: `node dist/src/main.js`
+- 시작 명령: `/app/docker-entrypoint.sh`
 - 외부 포트: Render는 `PORT` 환경변수(여기선 `10000`)로 트래픽을 라우팅하며, `main.ts`가 `process.env.PORT`를 읽어 바인딩합니다.
 
 ### 헬스체크
 
-`render.yaml`의 `healthCheckPath`는 **`/health`** 입니다.
+`render.yaml`의 `healthCheckPath`는 **`/api/health`** 입니다.
 
-> 주의: `main.ts`는 `setGlobalPrefix('api', { exclude: ['health'] })`로 health 라우트를 전역 prefix에서 **제외**합니다. 따라서 경로는 `/api/health`가 아니라 **`/health`** 입니다 (`apps/api/src/common/health.controller.ts`, `GET /health → { status: 'ok', timestamp }`).
+> 주의: `main.ts`는 현재 `/api` 전역 prefix를 적용하므로 health 라우트는 `/api/health` 계열로 노출됩니다 (`apps/api/src/common/health.controller.ts`, `GET /api/health`, `GET /api/health/ready`).
 
 ### 마이그레이션/스키마 동기화 (배포 시)
 
 운영 이미지는 prod 의존성만 포함하므로 **Prisma CLI(devDependency)가 없습니다.** 따라서 `render.yaml`의 `preDeployCommand`에서 온디맨드로 CLI를 받아 스키마를 반영합니다(이미지에는 `apps/api/prisma`가 포함됨). **마이그레이션 히스토리가 없으므로 `db push`** 를 씁니다.
+
+> 참고: Render의 무료 인스턴스(free plan)에서는 `preDeployCommand` 실행이 제한될 수 있습니다(현재 배포 로그에서 확인됨). 이 경우 배포 직후 `RENDER_DEPLOY_HOOK_URL`로만 자동 트리거되더라도 DB 동기화가 누락될 수 있으므로,
+> **운영에서는 모니터링 로그를 확인해 DB 스키마 상태를 검증하고**, 필요 시 CI 또는 수동으로 `prisma db push`를 한 번 실행하세요.
+
+현재 백엔드 컨테이너에는 런타임 폴백으로도 스키마 동기화가 들어있습니다. `apps/api/docker-entrypoint.sh`가 기동 시 `DATABASE_URL`이 존재하면 `npx -y prisma@7 db push --schema ./prisma/schema.prisma --skip-generate`를 실행합니다.
+
+- 기본 동작: 기동 시 자동 `db push`
+- 회피 플래그: `SKIP_DB_PUSH=1` (필요할 경우에만 사용)
 
 ```yaml
 preDeployCommand: npx -y prisma@7 db push --schema ./prisma/schema.prisma --skip-generate

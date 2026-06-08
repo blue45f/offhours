@@ -68,6 +68,11 @@ ENV NODE_ENV=production
 RUN apk add --no-cache libc6-compat
 # Prod bundle: package.json, node_modules (incl. .prisma client), dist/, prisma/.
 COPY --from=build /app ./
+# Copy startup script that keeps schema sync safe on free-tier renders where
+# pre-deploy hooks may be skipped. Keep it simple and idempotent: on startup,
+# run prisma db push if DATABASE_URL is present and SKIP_DB_PUSH != 1.
+COPY --from=build /repo/apps/api/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 # Run as the built-in unprivileged `node` user (no root in the container).
 RUN chown -R node:node /app
 USER node
@@ -75,8 +80,9 @@ USER node
 # Render injects PORT (render.yaml sets 10000); locally defaults to 3000.
 ENV PORT=3000
 EXPOSE 3000
-# Entrypoint is dist/src/main.js (apps/api tsconfig: rootDir ./, include src).
-# Schema sync (`prisma db push`) is run by render.yaml preDeployCommand / the
-# manual deploy flow in docs/DEPLOYMENT.md — not baked here so the image stays a
-# pure app server. main.ts binds the port from process.env.PORT.
-CMD ["node", "dist/src/main.js"]
+# Entrypoint is dist/src/main.js (apps/api tsconfig: rootDir ./, include src),
+# with runtime fallback schema sync via docker-entrypoint.sh.
+# `prisma db push` is first attempted in render.yaml preDeployCommand; on tier
+# limits (eg free plan), docker-entrypoint also runs it at process start unless
+# SKIP_DB_PUSH=1.
+CMD ["/bin/sh", "/app/docker-entrypoint.sh"]
