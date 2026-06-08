@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
-import { lazy, Suspense, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 
 import { AppLayout } from '../components/layout/AppLayout'
 import { useAuthHydrated, useIsAdmin, useIsAuthed, useIsHost } from '../store/auth'
@@ -42,6 +42,20 @@ const AdminAuditPage = lazy(() => import('../pages/admin/AdminAuditPage'))
 const AdminBroadcastPage = lazy(() => import('../pages/admin/AdminBroadcastPage'))
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
 const ComingSoonPage = lazy(() => import('../pages/ComingSoonPage'))
+
+const TERMSDESK_BASE = 'https://termsdesk.vercel.app'
+const SUPPORT_URL = `${TERMSDESK_BASE}/support/offhours`
+const TERMS_URL = `${TERMSDESK_BASE}/p/offhours/terms-of-service`
+const PRIVACY_URL = `${TERMSDESK_BASE}/p/offhours/privacy-policy`
+const REFUND_URL = `${TERMSDESK_BASE}/p/offhours/refund-policy`
+
+function ExternalRedirect({ to }: { to: string }) {
+  useEffect(() => {
+    window.location.replace(to)
+  }, [to])
+
+  return <PageLoader />
+}
 
 function Protected({ children }: { children: ReactNode }) {
   const hydrated = useAuthHydrated()
@@ -93,10 +107,13 @@ export const router = createBrowserRouter([
           { path: 'help', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/host', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/guest', element: lazyEl(<ComingSoonPage />) },
-          { path: 'contact', element: lazyEl(<ComingSoonPage />) },
-          { path: 'terms', element: lazyEl(<ComingSoonPage />) },
-          { path: 'privacy', element: lazyEl(<ComingSoonPage />) },
-          { path: 'cancel-policy', element: lazyEl(<ComingSoonPage />) },
+          {
+            path: 'contact',
+            element: lazyEl(<ExternalRedirect to={`${SUPPORT_URL}?category=site-inquiry`} />),
+          },
+          { path: 'terms', element: lazyEl(<ExternalRedirect to={TERMS_URL} />) },
+          { path: 'privacy', element: lazyEl(<ExternalRedirect to={PRIVACY_URL} />) },
+          { path: 'cancel-policy', element: lazyEl(<ExternalRedirect to={REFUND_URL} />) },
           { path: 'safety', element: lazyEl(<ComingSoonPage />) },
 
           {

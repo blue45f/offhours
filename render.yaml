@@ -23,9 +23,8 @@
 #   is DURABLE: it lives in the Render managed Postgres database below (a real
 #   managed DB, not a SQLite file on a disk), so it survives deploys and restarts.
 #
-# HEALTH CHECK NOTE: main.ts sets the global prefix to `api` but EXCLUDES `health`
-#   (setGlobalPrefix('api', { exclude: ['health'] })), so the liveness route is
-#   /health (NOT /api/health). healthCheckPath below matches that.
+# HEALTH CHECK NOTE: main.ts sets the global prefix to `api`; health endpoints are
+#   effectively exposed under `/api/health` (ex: `/api/health`, `/api/health/ready`).
 
 databases:
   - name: offhours-postgres
@@ -49,11 +48,13 @@ services:
     # Match sibling production deploys: GitHub Actions triggers the Render
     # Deploy Hook after CI, which avoids duplicate Render auto-deploys.
     autoDeploy: false
-    healthCheckPath: /health # HealthController, excluded from the /api prefix
+    healthCheckPath: /api/health # HealthController is under /api prefix
     # Prod image is pruned to prod deps only, so the Prisma CLI (a devDependency)
-    # is not present — fetch it on demand to sync the schema. The pruned bundle
-    # still ships apps/api/prisma (schema). `db push` because there is no
-    # migration history; it is idempotent.
+    # is not present in the container runtime. We sync with `db push` in
+    # preDeployCommand, and keep a runtime fallback in docker-entrypoint.sh for
+    # free-tier environments where pre-deploy hooks can be skipped.
+    # The pruned bundle still ships apps/api/prisma (schema). `db push` because
+    # there is no migration history; it is idempotent.
     preDeployCommand: npx -y prisma@7 db push --schema ./prisma/schema.prisma --skip-generate
     envVars:
       - key: NODE_ENV
