@@ -9,10 +9,11 @@ import { Button } from '../components/ui/Button'
 import { Avatar } from '../components/ui/Avatar'
 import { EmptyState } from '../components/ui/EmptyState'
 import { usePrompt } from '../components/ui/PromptDialog'
-import { PageLoader } from '../components/layout/PageLoader'
+import { Skeleton } from '../components/ui/Skeleton'
 import { useCastCollectionVote, useCollectionBySlug } from '../features/collections/api'
 import { getErrorMessage } from '../services/api'
 import { formatDateKR } from '../utils/format'
+import { usePageMeta } from '../hooks/usePageMeta'
 import { cn } from '../utils/cn'
 
 const VOTER_TOKEN_KEY = 'offhours.voter.token'
@@ -43,7 +44,14 @@ export default function CollectionDetailPage() {
 
   const tally = useMemo(() => summarizeVotes(data?.items ?? []), [data])
 
-  if (isLoading) return <PageLoader />
+  usePageMeta({
+    title: data?.name,
+    description: data
+      ? (data.description ?? `${data.ownerName}님의 공간 컬렉션 · ${data.itemCount}개 공간`)
+      : undefined,
+  })
+
+  if (isLoading) return <CollectionDetailSkeleton />
   if (error || !data) {
     return (
       <div className="container-page py-16">
@@ -274,4 +282,21 @@ function summarizeVotes(items: CollectionDetail['items']) {
     totalDown,
     leader: leaderScore > 0 ? leader.title : null,
   }
+}
+
+function CollectionDetailSkeleton() {
+  return (
+    <div className="container-page py-8 md:py-12">
+      <Skeleton className="h-44 w-full rounded-[var(--radius-2xl)] md:h-56" />
+      <div className="mt-8 grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="space-y-3">
+            <Skeleton className="aspect-[4/3] w-full rounded-[var(--radius-xl)]" />
+            <Skeleton variant="text" className="w-3/4" />
+            <Skeleton variant="text" className="w-1/2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }

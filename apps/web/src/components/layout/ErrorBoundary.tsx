@@ -4,6 +4,8 @@ import { Button } from '../ui/Button'
 
 type ErrorBoundaryProps = {
   children: ReactNode
+  /** 바운더리 리셋(다시 시도) 시 함께 호출 — TanStack Query 에러 리셋(refetch 허용) 연결용. */
+  onReset?: () => void
 }
 
 type ErrorBoundaryState = {
@@ -28,6 +30,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   private handleReset = (): void => {
+    // 쿼리 에러 캐시를 먼저 비워(있다면) 자식이 재마운트될 때 throw 한 쿼리가 refetch 되도록 한다.
+    this.props.onReset?.()
     this.setState({ error: null })
   }
 

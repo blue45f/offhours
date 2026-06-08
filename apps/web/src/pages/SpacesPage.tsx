@@ -22,14 +22,18 @@ import { EmptyState } from '../components/ui/EmptyState'
 import { Dialog } from '../components/ui/Dialog'
 import { formatKRWShort } from '../utils/format'
 import { useGeolocation } from '../hooks/useGeolocation'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { usePageMeta } from '../hooks/usePageMeta'
 import { cn } from '../utils/cn'
 
 export default function SpacesPage() {
   const [params, setParams] = useSearchParams()
   const [filterOpen, setFilterOpen] = useState(false)
   const geo = useGeolocation()
-  useDocumentTitle('공간 둘러보기')
+  usePageMeta({
+    title: '공간 둘러보기',
+    description:
+      '지역·인원·용도·예산으로 영업 외 시간 통대관 공간을 찾아보세요. 즉시 예약, 내 위치 기준 라이브 공간까지.',
+  })
 
   const radiusKm = params.get('radiusKm') ? Number(params.get('radiusKm')) : undefined
   const liveWithinHours = params.get('liveWithinHours')

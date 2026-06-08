@@ -73,160 +73,168 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     errorElement: <RouteError />,
     children: [
-      { index: true, element: lazyEl(<HomePage />) },
-      { path: 'spaces', element: lazyEl(<SpacesPage />) },
-      { path: 'spaces/:slug', element: lazyEl(<SpaceDetailPage />) },
-      { path: 'compare', element: lazyEl(<ComparePage />) },
-      { path: 'login', element: lazyEl(<LoginPage />) },
-      { path: 'signup', element: lazyEl(<SignupPage />) },
-      { path: 'logout', element: lazyEl(<LogoutPage />) },
-      { path: 'about', element: lazyEl(<AboutPage />) },
-      { path: 'host', element: lazyEl(<HostLandingPage />) },
-      // 푸터가 가리키던 미작성 페이지들 — 404 대신 "준비 중" 임시 페이지로(깨진 링크 방지)
-      { path: 'pricing', element: lazyEl(<ComingSoonPage />) },
-      { path: 'help', element: lazyEl(<ComingSoonPage />) },
-      { path: 'help/host', element: lazyEl(<ComingSoonPage />) },
-      { path: 'help/guest', element: lazyEl(<ComingSoonPage />) },
-      { path: 'contact', element: lazyEl(<ComingSoonPage />) },
-      { path: 'terms', element: lazyEl(<ComingSoonPage />) },
-      { path: 'privacy', element: lazyEl(<ComingSoonPage />) },
-      { path: 'cancel-policy', element: lazyEl(<ComingSoonPage />) },
-      { path: 'safety', element: lazyEl(<ComingSoonPage />) },
-
+      // 페이지 렌더 throw(또는 lazy 청크 로드 실패)를 Outlet 안에서 잡는 per-route 바운더리.
+      // 루트(layout) errorElement 가 잡으면 Header/Footer 까지 통째로 RouteError 로 대체되지만,
+      // 이 중첩 pathless 라우트의 errorElement 는 셸을 유지한 채 본문만 폴백으로 바꾼다.
       {
-        path: 'me',
-        element: (
-          <Protected>
-            <Outlet />
-          </Protected>
-        ),
+        errorElement: <RouteError />,
         children: [
-          { index: true, element: lazyEl(<MePage />) },
-          { path: 'reservations', element: lazyEl(<MyReservationsPage />) },
-          { path: 'reservations/:id', element: lazyEl(<ReservationDetailPage />) },
-          { path: 'corporate', element: lazyEl(<CorporatePage />) },
-        ],
-      },
-      {
-        path: 'favorites',
-        element: lazyEl(
-          <Protected>
-            <FavoritesPage />
-          </Protected>
-        ),
-      },
-      {
-        path: 'collections',
-        element: lazyEl(
-          <Protected>
-            <CollectionsPage />
-          </Protected>
-        ),
-      },
-      // 공개 슬러그 — 로그인 없이 접근 가능. 본인 컬렉션이 비공개여도 토큰 있으면 보임
-      { path: 'c/:slug', element: lazyEl(<CollectionDetailPage />) },
-      // 1/N 분담 결제 청구 링크 — 토큰으로만 접근, 로그인 불필요
-      { path: 'pay/:token', element: lazyEl(<PayTokenPage />) },
-      // 공개 모임 허브 — 친구가 로그인 없이 초대장을 열고 RSVP
-      { path: 'event/:code', element: lazyEl(<EventHubPage />) },
-      {
-        path: 'notifications',
-        element: lazyEl(
-          <Protected>
-            <NotificationsPage />
-          </Protected>
-        ),
-      },
-      {
-        path: 'chat',
-        element: lazyEl(
-          <Protected>
-            <ChatPage />
-          </Protected>
-        ),
-      },
+          { index: true, element: lazyEl(<HomePage />) },
+          { path: 'spaces', element: lazyEl(<SpacesPage />) },
+          { path: 'spaces/:slug', element: lazyEl(<SpaceDetailPage />) },
+          { path: 'compare', element: lazyEl(<ComparePage />) },
+          { path: 'login', element: lazyEl(<LoginPage />) },
+          { path: 'signup', element: lazyEl(<SignupPage />) },
+          { path: 'logout', element: lazyEl(<LogoutPage />) },
+          { path: 'about', element: lazyEl(<AboutPage />) },
+          { path: 'host', element: lazyEl(<HostLandingPage />) },
+          // 푸터가 가리키던 미작성 페이지들 — 404 대신 "준비 중" 임시 페이지로(깨진 링크 방지)
+          { path: 'pricing', element: lazyEl(<ComingSoonPage />) },
+          { path: 'help', element: lazyEl(<ComingSoonPage />) },
+          { path: 'help/host', element: lazyEl(<ComingSoonPage />) },
+          { path: 'help/guest', element: lazyEl(<ComingSoonPage />) },
+          { path: 'contact', element: lazyEl(<ComingSoonPage />) },
+          { path: 'terms', element: lazyEl(<ComingSoonPage />) },
+          { path: 'privacy', element: lazyEl(<ComingSoonPage />) },
+          { path: 'cancel-policy', element: lazyEl(<ComingSoonPage />) },
+          { path: 'safety', element: lazyEl(<ComingSoonPage />) },
 
-      {
-        path: 'host',
-        children: [
           {
-            path: 'profile',
+            path: 'me',
+            element: (
+              <Protected>
+                <Outlet />
+              </Protected>
+            ),
+            children: [
+              { index: true, element: lazyEl(<MePage />) },
+              { path: 'reservations', element: lazyEl(<MyReservationsPage />) },
+              { path: 'reservations/:id', element: lazyEl(<ReservationDetailPage />) },
+              { path: 'corporate', element: lazyEl(<CorporatePage />) },
+            ],
+          },
+          {
+            path: 'favorites',
             element: lazyEl(
               <Protected>
-                <HostProfilePage />
+                <FavoritesPage />
               </Protected>
             ),
           },
           {
-            path: 'dashboard',
+            path: 'collections',
             element: lazyEl(
-              <HostOnly>
-                <HostDashboardPage />
-              </HostOnly>
+              <Protected>
+                <CollectionsPage />
+              </Protected>
+            ),
+          },
+          // 공개 슬러그 — 로그인 없이 접근 가능. 본인 컬렉션이 비공개여도 토큰 있으면 보임
+          { path: 'c/:slug', element: lazyEl(<CollectionDetailPage />) },
+          // 1/N 분담 결제 청구 링크 — 토큰으로만 접근, 로그인 불필요
+          { path: 'pay/:token', element: lazyEl(<PayTokenPage />) },
+          // 공개 모임 허브 — 친구가 로그인 없이 초대장을 열고 RSVP
+          { path: 'event/:code', element: lazyEl(<EventHubPage />) },
+          {
+            path: 'notifications',
+            element: lazyEl(
+              <Protected>
+                <NotificationsPage />
+              </Protected>
             ),
           },
           {
-            path: 'spaces',
+            path: 'chat',
             element: lazyEl(
-              <HostOnly>
-                <HostSpacesPage />
-              </HostOnly>
+              <Protected>
+                <ChatPage />
+              </Protected>
             ),
           },
+
           {
-            path: 'spaces/new',
-            element: lazyEl(
-              <HostOnly>
-                <HostNewSpacePage />
-              </HostOnly>
-            ),
+            path: 'host',
+            children: [
+              {
+                path: 'profile',
+                element: lazyEl(
+                  <Protected>
+                    <HostProfilePage />
+                  </Protected>
+                ),
+              },
+              {
+                path: 'dashboard',
+                element: lazyEl(
+                  <HostOnly>
+                    <HostDashboardPage />
+                  </HostOnly>
+                ),
+              },
+              {
+                path: 'spaces',
+                element: lazyEl(
+                  <HostOnly>
+                    <HostSpacesPage />
+                  </HostOnly>
+                ),
+              },
+              {
+                path: 'spaces/new',
+                element: lazyEl(
+                  <HostOnly>
+                    <HostNewSpacePage />
+                  </HostOnly>
+                ),
+              },
+              {
+                path: 'reservations',
+                element: lazyEl(
+                  <HostOnly>
+                    <HostReservationsPage />
+                  </HostOnly>
+                ),
+              },
+              {
+                path: 'reviews',
+                element: lazyEl(
+                  <HostOnly>
+                    <HostReviewsPage />
+                  </HostOnly>
+                ),
+              },
+              {
+                path: 'calendar',
+                element: lazyEl(
+                  <HostOnly>
+                    <HostCalendarPage />
+                  </HostOnly>
+                ),
+              },
+            ],
           },
+
           {
-            path: 'reservations',
-            element: lazyEl(
-              <HostOnly>
-                <HostReservationsPage />
-              </HostOnly>
+            path: 'admin',
+            element: (
+              <AdminOnly>
+                <Outlet />
+              </AdminOnly>
             ),
+            children: [
+              { index: true, element: lazyEl(<AdminDashboardPage />) },
+              { path: 'users', element: lazyEl(<AdminUsersPage />) },
+              { path: 'spaces', element: lazyEl(<AdminSpacesPage />) },
+              { path: 'reports', element: lazyEl(<AdminReportsPage />) },
+              { path: 'disputes', element: lazyEl(<AdminDisputesPage />) },
+              { path: 'audit', element: lazyEl(<AdminAuditPage />) },
+              { path: 'broadcast', element: lazyEl(<AdminBroadcastPage />) },
+            ],
           },
-          {
-            path: 'reviews',
-            element: lazyEl(
-              <HostOnly>
-                <HostReviewsPage />
-              </HostOnly>
-            ),
-          },
-          {
-            path: 'calendar',
-            element: lazyEl(
-              <HostOnly>
-                <HostCalendarPage />
-              </HostOnly>
-            ),
-          },
+
+          { path: '*', element: lazyEl(<NotFoundPage />) },
         ],
       },
-
-      {
-        path: 'admin',
-        element: (
-          <AdminOnly>
-            <Outlet />
-          </AdminOnly>
-        ),
-        children: [
-          { index: true, element: lazyEl(<AdminDashboardPage />) },
-          { path: 'users', element: lazyEl(<AdminUsersPage />) },
-          { path: 'spaces', element: lazyEl(<AdminSpacesPage />) },
-          { path: 'reports', element: lazyEl(<AdminReportsPage />) },
-          { path: 'disputes', element: lazyEl(<AdminDisputesPage />) },
-          { path: 'audit', element: lazyEl(<AdminAuditPage />) },
-          { path: 'broadcast', element: lazyEl(<AdminBroadcastPage />) },
-        ],
-      },
-
-      { path: '*', element: lazyEl(<NotFoundPage />) },
     ],
   },
 ])
