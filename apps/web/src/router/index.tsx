@@ -43,12 +43,9 @@ const AdminAuditPage = lazy(() => import('../pages/admin/AdminAuditPage'))
 const AdminBroadcastPage = lazy(() => import('../pages/admin/AdminBroadcastPage'))
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
 const ComingSoonPage = lazy(() => import('../pages/ComingSoonPage'))
+const PolicyPage = lazy(() => import('../pages/PolicyPage'))
 
-const TERMSDESK_BASE = 'https://termsdesk.vercel.app'
-const SUPPORT_URL = `${TERMSDESK_BASE}/support/offhours`
-const TERMS_URL = `${TERMSDESK_BASE}/p/offhours/terms-of-service`
-const PRIVACY_URL = `${TERMSDESK_BASE}/p/offhours/privacy-policy`
-const REFUND_URL = `${TERMSDESK_BASE}/p/offhours/refund-policy`
+const SUPPORT_URL = 'https://termsdesk.vercel.app/support/offhours'
 
 function ExternalRedirect({ to }: { to: string }) {
   useEffect(() => {
@@ -112,9 +109,10 @@ export const router = createBrowserRouter([
             path: 'contact',
             element: lazyEl(<ExternalRedirect to={`${SUPPORT_URL}?category=site-inquiry`} />),
           },
-          { path: 'terms', element: lazyEl(<ExternalRedirect to={TERMS_URL} />) },
-          { path: 'privacy', element: lazyEl(<ExternalRedirect to={PRIVACY_URL} />) },
-          { path: 'cancel-policy', element: lazyEl(<ExternalRedirect to={REFUND_URL} />) },
+          // 약관·정책은 TermsDesk 공개 API 를 내부에서 렌더(외부 리다이렉트 제거)
+          { path: 'terms', element: lazyEl(<PolicyPage slug="terms-of-service" />) },
+          { path: 'privacy', element: lazyEl(<PolicyPage slug="privacy-policy" />) },
+          { path: 'cancel-policy', element: lazyEl(<PolicyPage slug="refund-policy" />) },
           { path: 'safety', element: lazyEl(<ComingSoonPage />) },
 
           {

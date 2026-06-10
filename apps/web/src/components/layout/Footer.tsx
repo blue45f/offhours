@@ -1,10 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const TERMSDESK_BASE = 'https://termsdesk.vercel.app'
-const TERMS_URL = `${TERMSDESK_BASE}/p/offhours/terms-of-service`
-const PRIVACY_URL = `${TERMSDESK_BASE}/p/offhours/privacy-policy`
-const REFUND_URL = `${TERMSDESK_BASE}/p/offhours/refund-policy`
-const SUPPORT_URL = `${TERMSDESK_BASE}/support/offhours`
+const SUPPORT_URL = 'https://termsdesk.vercel.app/support/offhours'
 
 export function Footer() {
   return (
@@ -64,19 +60,13 @@ export function Footer() {
             <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">정책</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
-                <a href={TERMS_URL} target="_blank" rel="noreferrer">
-                  이용약관
-                </a>
+                <Link to="/terms">이용약관</Link>
               </li>
               <li>
-                <a href={PRIVACY_URL} target="_blank" rel="noreferrer">
-                  개인정보 처리방침
-                </a>
+                <Link to="/privacy">개인정보 처리방침</Link>
               </li>
               <li>
-                <a href={REFUND_URL} target="_blank" rel="noreferrer">
-                  취소·환불 정책
-                </a>
+                <Link to="/cancel-policy">취소·환불 정책</Link>
               </li>
               <li>
                 <Link to="/safety">안전·신뢰</Link>
