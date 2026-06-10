@@ -14,6 +14,7 @@ const LoginPage = lazy(() => import('../pages/LoginPage'))
 const SignupPage = lazy(() => import('../pages/SignupPage'))
 const LogoutPage = lazy(() => import('../pages/LogoutPage'))
 const AboutPage = lazy(() => import('../pages/AboutPage'))
+const PricingPage = lazy(() => import('../pages/PricingPage'))
 const MePage = lazy(() => import('../pages/MePage'))
 const CorporatePage = lazy(() => import('../pages/CorporatePage'))
 const MyReservationsPage = lazy(() => import('../pages/MyReservationsPage'))
@@ -102,8 +103,8 @@ export const router = createBrowserRouter([
           { path: 'logout', element: lazyEl(<LogoutPage />) },
           { path: 'about', element: lazyEl(<AboutPage />) },
           { path: 'host', element: lazyEl(<HostLandingPage />) },
+          { path: 'pricing', element: lazyEl(<PricingPage />) },
           // 푸터가 가리키던 미작성 페이지들 — 404 대신 "준비 중" 임시 페이지로(깨진 링크 방지)
-          { path: 'pricing', element: lazyEl(<ComingSoonPage />) },
           { path: 'help', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/host', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/guest', element: lazyEl(<ComingSoonPage />) },

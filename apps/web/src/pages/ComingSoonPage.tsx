@@ -7,7 +7,6 @@ import { Button } from '../components/ui/Button'
  * 깨진 링크 경험을 막는다. 실제 콘텐츠가 생기면 해당 라우트를 정식 페이지로 교체.
  */
 const TITLES: Record<string, string> = {
-  '/pricing': '수수료 안내',
   '/help': '도움말',
   '/help/host': '호스트 가이드',
   '/help/guest': '게스트 가이드',
