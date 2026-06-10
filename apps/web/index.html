@@ -66,6 +66,30 @@
       content="카페·바·레스토랑의 영업 외 시간을 파티·스몰웨딩·모임·팝업 공간으로. 호스트는 부가 수익, 게스트는 감성 통대관."
     />
     <meta name="twitter:image" content="https://offhours.vercel.app/og.png" />
+
+    <!-- JSON-LD 구조화 데이터 (WebSite·Organization) — 검색엔진에 사이트명·로고·도메인을 알린다.
+         공간 상세 등 라우트별 엔티티는 useJsonLd 가 데이터 로드 후 런타임에 주입한다. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Offhours",
+        "url": "https://offhours.vercel.app/",
+        "inLanguage": "ko",
+        "description": "카페·바·레스토랑의 영업 외 시간을 파티·스몰웨딩·모임·팝업 공간으로. 호스트는 부가 수익, 게스트는 감성 통대관.",
+        "publisher": { "@id": "https://offhours.vercel.app/#organization" }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://offhours.vercel.app/#organization",
+        "name": "Offhours",
+        "url": "https://offhours.vercel.app/",
+        "logo": "https://offhours.vercel.app/favicon.svg"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
