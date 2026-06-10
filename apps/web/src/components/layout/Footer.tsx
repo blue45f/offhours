@@ -5,9 +5,9 @@ const SUPPORT_URL = 'https://termsdesk.vercel.app/support/offhours'
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
-      <div className="container-page py-12 md:py-16">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          <div className="col-span-2 md:col-span-1">
+      <div className="container-page break-keep py-12 md:py-16">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-4">
+          <div className="col-span-2 sm:col-span-3 md:col-span-1">
             <div className="flex items-center gap-2.5">
               <span className="inline-flex size-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-fg)] font-bold serif">
                 오

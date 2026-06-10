@@ -21,8 +21,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-[var(--z-sticky)] glass border-b border-[var(--color-border)]">
-      <div className="container-page flex h-16 items-center justify-between gap-4 md:h-18">
-        <Link to="/" className="flex items-center gap-2.5">
+      <div className="container-page flex h-16 items-center justify-between gap-3 lg:gap-4 md:h-18">
+        <Link to="/" className="flex shrink-0 items-center gap-2.5">
           <span
             aria-hidden
             className="inline-flex size-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-fg)] font-bold serif"
@@ -43,7 +43,7 @@ export function Header() {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'px-3 py-2 rounded-[var(--radius-md)] text-sm font-medium transition-colors',
+                  'px-2 py-2 lg:px-3 rounded-[var(--radius-md)] text-sm font-medium whitespace-nowrap transition-colors',
                   isActive
                     ? 'text-[var(--color-fg)]'
                     : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)]'
@@ -55,7 +55,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={openCommandPalette}
