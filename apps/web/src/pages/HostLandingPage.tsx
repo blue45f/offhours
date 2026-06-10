@@ -35,7 +35,7 @@ export default function HostLandingPage() {
               쌓여요. 슬롯 생성·청소·정산은 플랫폼이 자동 처리합니다.
             </p>
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-              <Stat label="첫 예약까지" value="평균 48시간" />
+              <Stat label="첫 예약까지" value="빠르면 48시간" />
               <Stat label="플랫폼 수수료" value="12%" />
               <Stat label="정산 주기" value="7·14일 선택" />
             </div>

@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import * as RDropdown from '@radix-ui/react-dropdown-menu'
 import { Bell, Heart, LogIn, Menu, Moon, Search, Sun } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 import { useIsAdmin, useIsAuthed, useIsHost, useMe } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
@@ -17,18 +17,7 @@ export function Header() {
   const isAdmin = useIsAdmin()
   const navigate = useNavigate()
   const { theme, toggle } = useThemeStore()
-  const [open, setOpen] = useState(false)
   const { data: unread = 0 } = useUnreadNotifications()
-
-  // 계정 메뉴 열렸을 때 Esc 로 닫기(키보드 접근성)
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open])
 
   return (
     <header className="sticky top-0 z-[var(--z-sticky)] glass border-b border-[var(--color-border)]">
@@ -79,7 +68,7 @@ export function Header() {
           <button
             type="button"
             onClick={toggle}
-            aria-label="테마 전환"
+            aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
             className="hidden md:inline-flex size-10 items-center justify-center rounded-full text-[var(--color-fg-muted)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)]"
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -105,83 +94,50 @@ export function Header() {
                   </span>
                 )}
               </Link>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setOpen((o) => !o)}
+              <RDropdown.Root>
+                <RDropdown.Trigger
                   aria-label="내 계정 메뉴"
-                  aria-haspopup="menu"
-                  aria-expanded={open}
                   className="flex items-center gap-2 rounded-full pl-2 pr-1 py-1 hover:bg-[var(--color-bg-subtle)]"
                 >
                   <Menu size={16} className="text-[var(--color-fg-muted)]" />
                   <Avatar name={me?.name} src={me?.avatarUrl} size="sm" />
-                </button>
-                {open && (
-                  <>
-                    <button
-                      type="button"
-                      aria-label="메뉴 닫기"
-                      tabIndex={-1}
-                      onClick={() => setOpen(false)}
-                      className="fixed inset-0 z-[var(--z-overlay)] cursor-default"
-                    />
-                    <div className="absolute right-0 mt-2 z-[var(--z-popover)] min-w-[220px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] py-2 shadow-[var(--shadow-popover)]">
-                      <div className="px-4 py-2 text-sm">
-                        <div className="font-semibold">{me?.name}</div>
-                        <div className="text-xs text-[var(--color-fg-muted)]">{me?.email}</div>
-                      </div>
-                      <div className="my-1 h-px bg-[var(--color-border-subtle)]" />
-                      <DropItem to="/me" label="마이페이지" onSelect={() => setOpen(false)} />
-                      <DropItem
-                        to="/me/reservations"
-                        label="예약 내역"
-                        onSelect={() => setOpen(false)}
-                      />
-                      <DropItem to="/favorites" label="찜한 공간" onSelect={() => setOpen(false)} />
-                      <DropItem
-                        to="/collections"
-                        label="내 컬렉션"
-                        onSelect={() => setOpen(false)}
-                      />
-                      <DropItem to="/chat" label="채팅" onSelect={() => setOpen(false)} />
-                      {isHost && (
-                        <>
-                          <div className="my-1 h-px bg-[var(--color-border-subtle)]" />
-                          <DropItem
-                            to="/host"
-                            label="호스트 대시보드"
-                            onSelect={() => setOpen(false)}
-                          />
-                          <DropItem
-                            to="/host/spaces"
-                            label="내 공간"
-                            onSelect={() => setOpen(false)}
-                          />
-                          <DropItem
-                            to="/host/reviews"
-                            label="리뷰 관리"
-                            onSelect={() => setOpen(false)}
-                          />
-                          <DropItem
-                            to="/host/calendar"
-                            label="캘린더 차단"
-                            onSelect={() => setOpen(false)}
-                          />
-                        </>
-                      )}
-                      {isAdmin && (
-                        <>
-                          <div className="my-1 h-px bg-[var(--color-border-subtle)]" />
-                          <DropItem to="/admin" label="관리자" onSelect={() => setOpen(false)} />
-                        </>
-                      )}
-                      <div className="my-1 h-px bg-[var(--color-border-subtle)]" />
-                      <DropItem to="/logout" label="로그아웃" onSelect={() => setOpen(false)} />
-                    </div>
-                  </>
-                )}
-              </div>
+                </RDropdown.Trigger>
+                <RDropdown.Portal>
+                  <RDropdown.Content
+                    align="end"
+                    sideOffset={8}
+                    className="z-[var(--z-popover)] min-w-[220px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-elevated)] py-2 shadow-[var(--shadow-popover)]"
+                  >
+                    <RDropdown.Label className="px-4 py-2 text-sm">
+                      <div className="font-semibold">{me?.name}</div>
+                      <div className="text-xs text-[var(--color-fg-muted)]">{me?.email}</div>
+                    </RDropdown.Label>
+                    <MenuSeparator />
+                    <DropItem to="/me" label="마이페이지" />
+                    <DropItem to="/me/reservations" label="예약 내역" />
+                    <DropItem to="/favorites" label="찜한 공간" />
+                    <DropItem to="/collections" label="내 컬렉션" />
+                    <DropItem to="/chat" label="채팅" />
+                    {isHost && (
+                      <>
+                        <MenuSeparator />
+                        <DropItem to="/host" label="호스트 대시보드" />
+                        <DropItem to="/host/spaces" label="내 공간" />
+                        <DropItem to="/host/reviews" label="리뷰 관리" />
+                        <DropItem to="/host/calendar" label="캘린더 차단" />
+                      </>
+                    )}
+                    {isAdmin && (
+                      <>
+                        <MenuSeparator />
+                        <DropItem to="/admin" label="관리자" />
+                      </>
+                    )}
+                    <MenuSeparator />
+                    <DropItem to="/logout" label="로그아웃" />
+                  </RDropdown.Content>
+                </RDropdown.Portal>
+              </RDropdown.Root>
             </>
           ) : (
             <Button
@@ -199,14 +155,19 @@ export function Header() {
   )
 }
 
-function DropItem({ to, label, onSelect }: { to: string; label: string; onSelect: () => void }) {
+function MenuSeparator() {
+  return <RDropdown.Separator className="my-1 h-px bg-[var(--color-border-subtle)]" />
+}
+
+function DropItem({ to, label }: { to: string; label: string }) {
   return (
-    <Link
-      to={to}
-      onClick={onSelect}
-      className="block px-4 py-2 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)]"
-    >
-      {label}
-    </Link>
+    <RDropdown.Item asChild>
+      <Link
+        to={to}
+        className="block cursor-pointer px-4 py-2 text-sm text-[var(--color-fg)] outline-none data-[highlighted]:bg-[var(--color-bg-subtle)]"
+      >
+        {label}
+      </Link>
+    </RDropdown.Item>
   )
 }

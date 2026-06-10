@@ -13,6 +13,7 @@ import {
   isSuperHost,
   type ProtectionTier,
   type Purpose,
+  type SpaceDetail,
   type UseCase,
 } from '@offhours/shared'
 import {
@@ -45,6 +46,7 @@ import { ReservationPanel } from '../components/reservation/ReservationPanel'
 import { Skeleton } from '../components/ui/Skeleton'
 import { formatDateKR, formatKRW } from '../utils/format'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { useJsonLd } from '../hooks/useJsonLd'
 
 export default function SpaceDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -64,6 +66,7 @@ export default function SpaceDetailPage() {
         )
       : undefined,
   })
+  useJsonLd(data ? spaceJsonLd(data) : null)
   useEffect(() => {
     if (data?.slug) pushRecent(data.slug)
   }, [data?.slug, pushRecent])
@@ -348,6 +351,34 @@ export default function SpaceDetailPage() {
       </div>
     </div>
   )
+}
+
+/** 공간 상세를 schema.org EventVenue 로 직렬화 — 검색엔진이 이름·위치·평점을 구조적으로 읽는다. */
+function spaceJsonLd(data: SpaceDetail): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'EventVenue',
+    name: data.title,
+    description: data.summary,
+    url: `${window.location.origin}/spaces/${data.slug}`,
+    ...(data.photos.length > 0 && { image: data.photos.map((p) => p.url) }),
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: data.venue.addressRoad,
+      addressLocality: data.district,
+      addressRegion: data.region,
+      addressCountry: 'KR',
+    },
+    geo: { '@type': 'GeoCoordinates', latitude: data.venue.lat, longitude: data.venue.lng },
+    maximumAttendeeCapacity: data.capacityMax,
+    ...(data.ratingCount > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: data.ratingAvg,
+        reviewCount: data.ratingCount,
+      },
+    }),
+  }
 }
 
 function TrustGauge({ score }: { score: number }) {

@@ -1,18 +1,21 @@
 import { Link } from 'react-router-dom'
-import { Building2, Calendar, Heart, MessageCircle, Sparkles } from 'lucide-react'
+import { Building2, Calendar, Heart, MessageCircle, Moon, Sparkles } from 'lucide-react'
 
 import { REFERRAL_BONUS_KRW } from '@offhours/shared'
 
 import { useMe } from '../store/auth'
+import { useThemeStore } from '../store/theme'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { Avatar } from '../components/ui/Avatar'
 import { Card, CardBody } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { RecentlyViewedRow } from '../components/space/RecentlyViewedRow'
+import { cn } from '../utils/cn'
 
 export default function MePage() {
   useDocumentTitle('마이페이지')
   const me = useMe()
+  const { theme, toggle } = useThemeStore()
   if (!me) return null
 
   const items = [
@@ -71,6 +74,47 @@ export default function MePage() {
             </Card>
           </Link>
         ))}
+        {/* Header 테마 토글이 데스크톱 전용(hidden md:)이라 모바일은 여기가 유일한 전환 동선 */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={theme === 'dark'}
+          aria-label="다크 모드"
+          onClick={toggle}
+          className="text-left"
+        >
+          <Card interactive className="h-full">
+            <CardBody>
+              <div className="flex items-start gap-4">
+                <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
+                  <Moon size={20} />
+                </span>
+                <div className="flex-1">
+                  <div className="font-semibold">다크 모드</div>
+                  <div className="text-sm text-[var(--color-fg-muted)]">
+                    {theme === 'dark' ? '어두운 테마 사용 중' : '밝은 테마 사용 중'}
+                  </div>
+                </div>
+                <span
+                  aria-hidden
+                  className={cn(
+                    'inline-flex h-6 w-10 shrink-0 self-center rounded-full p-0.5 transition-colors',
+                    theme === 'dark'
+                      ? 'bg-[var(--color-primary)]'
+                      : 'bg-[var(--color-border-strong)]'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'block size-5 rounded-full bg-white shadow-[var(--shadow-sm)] transition-transform',
+                      theme === 'dark' && 'translate-x-4'
+                    )}
+                  />
+                </span>
+              </div>
+            </CardBody>
+          </Card>
+        </button>
       </div>
 
       <div className="mt-12">
