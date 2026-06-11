@@ -29,7 +29,9 @@ COPY --from=build /app ./
 # 부팅 시 db push 용 prisma CLI — 번들 package.json 의 workspace:* 때문에 격리 설치.
 RUN mkdir -p /opt/prisma && cd /opt/prisma \
  && npm init -y >/dev/null \
- && npm install --no-audit --no-fund prisma@7 >/dev/null 2>&1
+ && npm install --no-audit --no-fund prisma@7 @prisma/engines >/dev/null 2>&1
+# prisma.config.ts 가 `prisma/config` 를 import 하므로 격리 설치본을 require 경로에 노출한다.
+ENV NODE_PATH=/opt/prisma/node_modules
 ENV PATH=/opt/prisma/node_modules/.bin:$PATH
 EXPOSE 3000
 # 스키마 동기화(db push, 멱등 — migrations 디렉터리 없는 db push 컨벤션) 후 기동.
