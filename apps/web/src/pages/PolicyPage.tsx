@@ -105,7 +105,7 @@ function PolicyArticle({ policy, slug }: { policy: PublicPolicy; slug: PolicySlu
           </div>
         </dl>
         <p className="mt-4 text-xs text-[var(--color-fg-subtle)]">
-          이 문서는 TermsDesk에 게시된 원본을 그대로 가져온 것입니다.{' '}
+          TermsDesk 공개 게시본에서 버전과 콘텐츠 해시를 대조할 수 있습니다.{' '}
           <a
             href={policyExternalUrl(slug)}
             target="_blank"
