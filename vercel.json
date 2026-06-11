@@ -12,7 +12,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://offhours-api.onrender.com/api/:path*"
+      "destination": "https://offhours.3.107.235.143.nip.io/api/:path*"
     },
     {
       "source": "/(.*)",
