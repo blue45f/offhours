@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma, type Role } from '@prisma/client'
 import type {
   BroadcastNotificationInput,
+  ModerateContentInput,
+  ReportTargetSummary,
   ResolveDisputeInput,
   ResolveReportInput,
   SetSuspendedInput,
@@ -9,12 +11,14 @@ import type {
 
 import { PrismaService } from '../prisma/prisma.service'
 import { NotificationsService } from '../notifications/notifications.service'
+import { ReviewsService } from '../reviews/reviews.service'
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly notifications: NotificationsService
+    private readonly notifications: NotificationsService,
+    private readonly reviews: ReviewsService
   ) {}
 
   async kpi() {
@@ -215,7 +219,100 @@ export class AdminService {
       }),
       this.prisma.report.count(),
     ])
-    return { items, total, page, pageSize }
+    // 신고 큐에서 대상 내용을 바로 보고 처리하도록 타깃 미리보기를 배치로 붙인다 (N+1 방지)
+    const reviewIds = items.filter((r) => r.targetType === 'REVIEW').map((r) => r.targetId)
+    const messageIds = items.filter((r) => r.targetType === 'MESSAGE').map((r) => r.targetId)
+    const [reviews, messages] = await Promise.all([
+      reviewIds.length
+        ? this.prisma.review.findMany({
+            where: { id: { in: reviewIds } },
+            include: { author: { select: { name: true } } },
+          })
+        : [],
+      messageIds.length
+        ? this.prisma.chatMessage.findMany({
+            where: { id: { in: messageIds } },
+            include: { sender: { select: { name: true } } },
+          })
+        : [],
+    ])
+    const reviewMap = new Map(reviews.map((r) => [r.id, r]))
+    const messageMap = new Map(messages.map((m) => [m.id, m]))
+    const withTargets = items.map((report) => {
+      let target: ReportTargetSummary | null = null
+      if (report.targetType === 'REVIEW') {
+        const rv = reviewMap.get(report.targetId)
+        if (rv) {
+          target = {
+            excerpt: rv.comment.slice(0, 140),
+            authorName: rv.author.name,
+            isHidden: rv.isHidden,
+            attachmentCount: ((rv.attachments as string[] | null) ?? []).length,
+          }
+        }
+      } else if (report.targetType === 'MESSAGE') {
+        const msg = messageMap.get(report.targetId)
+        if (msg) {
+          target = {
+            excerpt: msg.body.slice(0, 140),
+            authorName: msg.sender.name,
+            isHidden: msg.isHidden,
+            attachmentCount: ((msg.attachments as string[] | null) ?? []).length,
+          }
+        }
+      }
+      return { ...report, target }
+    })
+    return { items: withTargets, total, page, pageSize }
+  }
+
+  /**
+   * 신고된 후기 모더레이션 — 삭제 대신 숨김(평점 재집계 포함) + 첨부 제거.
+   * 숨김 토글 시 공간 평점·호스트 답글률 캐시가 stale 해지므로 함께 재계산한다.
+   */
+  async moderateReview(actorId: string, reviewId: string, input: ModerateContentInput) {
+    const before = await this.prisma.review.findUnique({ where: { id: reviewId } })
+    if (!before) throw new NotFoundException()
+    const after = await this.prisma.review.update({
+      where: { id: reviewId },
+      data: {
+        ...(input.hidden !== undefined ? { isHidden: input.hidden } : {}),
+        ...(input.stripAttachments ? { attachments: Prisma.DbNull } : {}),
+      },
+    })
+    if (input.hidden !== undefined && before.spaceId) {
+      await this.reviews.refreshSpaceRating(before.spaceId)
+      const host = await this.prisma.user.findUnique({
+        where: { id: before.subjectId },
+        select: { reviewStatsUpdatedAt: true },
+      })
+      if (host?.reviewStatsUpdatedAt) {
+        await this.reviews.recomputeHostResponseStats(before.subjectId)
+      }
+    }
+    await this.audit(actorId, 'REVIEW_MODERATE', 'REVIEW', reviewId, before, {
+      isHidden: after.isHidden,
+      strippedAttachments: !!input.stripAttachments,
+    })
+    return { id: after.id, isHidden: after.isHidden }
+  }
+
+  /** 신고된 채팅 메시지 모더레이션 — 스레드 흐름 보존을 위해 삭제 대신 숨김 + 첨부 제거 */
+  async moderateMessage(actorId: string, messageId: string, input: ModerateContentInput) {
+    const before = await this.prisma.chatMessage.findUnique({ where: { id: messageId } })
+    if (!before) throw new NotFoundException()
+    const after = await this.prisma.chatMessage.update({
+      where: { id: messageId },
+      data: {
+        ...(input.hidden !== undefined ? { isHidden: input.hidden } : {}),
+        ...(input.stripAttachments ? { attachments: Prisma.DbNull } : {}),
+      },
+    })
+    await this.audit(actorId, 'MESSAGE_MODERATE', 'MESSAGE', messageId, before, {
+      isHidden: after.isHidden,
+      strippedAttachments: !!input.stripAttachments,
+    })
+    return { id: after.id, isHidden: after.isHidden }
   }
 
   async resolveReport(actorId: string, reportId: string, input: ResolveReportInput) {

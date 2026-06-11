@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
-import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { lazy, Suspense, type ReactNode } from 'react'
 
 import { AppLayout } from '../components/layout/AppLayout'
 import { useAuthHydrated, useIsAdmin, useIsAuthed, useIsHost } from '../store/auth'
@@ -26,6 +26,8 @@ const PayTokenPage = lazy(() => import('../pages/PayTokenPage'))
 const EventHubPage = lazy(() => import('../pages/EventHubPage'))
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage'))
 const ChatPage = lazy(() => import('../pages/ChatPage'))
+const ChatThreadPage = lazy(() => import('../pages/ChatThreadPage'))
+const ContactPage = lazy(() => import('../pages/ContactPage'))
 const HostLandingPage = lazy(() => import('../pages/HostLandingPage'))
 const HostProfilePage = lazy(() => import('../pages/HostProfilePage'))
 const HostDashboardPage = lazy(() => import('../pages/HostDashboardPage'))
@@ -44,16 +46,6 @@ const AdminBroadcastPage = lazy(() => import('../pages/admin/AdminBroadcastPage'
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
 const ComingSoonPage = lazy(() => import('../pages/ComingSoonPage'))
 const PolicyPage = lazy(() => import('../pages/PolicyPage'))
-
-const SUPPORT_URL = 'https://termsdesk.vercel.app/support/offhours'
-
-function ExternalRedirect({ to }: { to: string }) {
-  useEffect(() => {
-    window.location.replace(to)
-  }, [to])
-
-  return <PageLoader />
-}
 
 function Protected({ children }: { children: ReactNode }) {
   const hydrated = useAuthHydrated()
@@ -105,10 +97,8 @@ export const router = createBrowserRouter([
           { path: 'help', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/host', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/guest', element: lazyEl(<ComingSoonPage />) },
-          {
-            path: 'contact',
-            element: lazyEl(<ExternalRedirect to={`${SUPPORT_URL}?category=site-inquiry`} />),
-          },
+          // 인앱 문의 폼 — TermsDesk 공개 문의 API 접수(외부 리다이렉트 대체)
+          { path: 'contact', element: lazyEl(<ContactPage />) },
           // 약관·정책은 TermsDesk 공개 API 를 내부에서 렌더(외부 리다이렉트 제거)
           { path: 'terms', element: lazyEl(<PolicyPage slug="terms-of-service" />) },
           { path: 'privacy', element: lazyEl(<PolicyPage slug="privacy-policy" />) },
@@ -164,6 +154,15 @@ export const router = createBrowserRouter([
             element: lazyEl(
               <Protected>
                 <ChatPage />
+              </Protected>
+            ),
+          },
+          // 알림 딥링크 착지점 — 목록 없이 스레드로 바로 진입
+          {
+            path: 'chat/:id',
+            element: lazyEl(
+              <Protected>
+                <ChatThreadPage />
               </Protected>
             ),
           },

@@ -8,14 +8,27 @@ import {
   TRUST_SCORE,
   clampTrust,
   type CreateReviewInput,
+  type CreateReviewReplyInput,
   type RespondReviewInput,
+  type ReviewReply,
 } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { NotificationsService } from '../notifications/notifications.service'
+
+/** 후기에 항상 따라붙는 1단 답글 스레드 — 숨김 답글 제외, 시간순 */
+const REPLIES_INCLUDE = {
+  where: { isHidden: false },
+  orderBy: { createdAt: 'asc' as const },
+  include: { author: { select: { id: true, name: true, avatarUrl: true } } },
+} as const
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService
+  ) {}
 
   async create(authorId: string, input: CreateReviewInput) {
     const reservation = await this.prisma.reservation.findUnique({
@@ -45,6 +58,8 @@ export class ReviewsService {
         spaceId: isGuest ? reservation.spaceId : null,
         rating: input.rating,
         comment: input.comment,
+        attachments:
+          input.attachments && input.attachments.length > 0 ? input.attachments : undefined,
       },
     })
 
@@ -168,6 +183,7 @@ export class ReviewsService {
         include: {
           author: { select: { id: true, name: true, avatarUrl: true } },
           space: { select: { id: true, slug: true, title: true } },
+          replies: REPLIES_INCLUDE,
         },
         orderBy: [{ hostResponse: 'asc' }, { createdAt: 'desc' }],
         skip: (page - 1) * pageSize,
@@ -177,21 +193,9 @@ export class ReviewsService {
     ])
     return {
       items: items.map((r) => ({
-        id: r.id,
-        reservationId: r.reservationId,
-        authorId: r.authorId,
-        authorName: r.author.name,
-        authorAvatarUrl: r.author.avatarUrl,
-        subjectId: r.subjectId,
-        spaceId: r.spaceId,
+        ...this.toReviewShape(r),
         spaceSlug: r.space?.slug ?? null,
         spaceTitle: r.space?.title ?? null,
-        rating: r.rating,
-        comment: r.comment,
-        hostResponse: r.hostResponse,
-        hostResponseAt: r.hostResponseAt?.toISOString() ?? null,
-        publishedAt: r.publishedAt?.toISOString() ?? null,
-        createdAt: r.createdAt.toISOString(),
       })),
       total,
       page,
@@ -206,6 +210,7 @@ export class ReviewsService {
         where,
         include: {
           author: { select: { id: true, name: true, avatarUrl: true } },
+          replies: REPLIES_INCLUDE,
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
@@ -214,28 +219,116 @@ export class ReviewsService {
       this.prisma.review.count({ where }),
     ])
     return {
-      items: items.map((r) => ({
-        id: r.id,
-        reservationId: r.reservationId,
-        authorId: r.authorId,
-        authorName: r.author.name,
-        authorAvatarUrl: r.author.avatarUrl,
-        subjectId: r.subjectId,
-        spaceId: r.spaceId,
-        rating: r.rating,
-        comment: r.comment,
-        hostResponse: r.hostResponse,
-        hostResponseAt: r.hostResponseAt?.toISOString() ?? null,
-        publishedAt: r.publishedAt?.toISOString() ?? null,
-        createdAt: r.createdAt.toISOString(),
-      })),
+      items: items.map((r) => this.toReviewShape(r)),
       total,
       page,
       pageSize,
     }
   }
 
-  private async refreshSpaceRating(spaceId: string) {
+  /**
+   * 후기 1단 답글 — 후기 작성자와 공간 호스트만 이어갈 수 있다. 공개(published)된
+   * 후기에만 허용하고, 상대에게 알림을 보낸다.
+   */
+  async addReply(userId: string, reviewId: string, input: CreateReviewReplyInput) {
+    const review = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      include: {
+        reservation: {
+          include: { space: { include: { venue: { include: { host: true } } } } },
+        },
+      },
+    })
+    if (!review || review.isHidden) throw new NotFoundException()
+    if (!review.isPublished) {
+      throw new BadRequestException('공개된 후기에만 답글을 달 수 있어요')
+    }
+    const hostUserId = review.reservation.space.venue.host.userId
+    if (userId !== review.authorId && userId !== hostUserId) throw new ForbiddenException()
+
+    const reply = await this.prisma.reviewReply.create({
+      data: { reviewId, authorId: userId, body: input.body },
+      include: { author: { select: { id: true, name: true, avatarUrl: true } } },
+    })
+
+    const otherId = userId === review.authorId ? hostUserId : review.authorId
+    await this.notifications.create(otherId, {
+      type: 'SYSTEM',
+      title: '후기에 새 답글이 달렸어요',
+      body: input.body.slice(0, 80),
+      data: { spaceSlug: review.reservation.space.slug, reviewId },
+    })
+
+    return this.toReplyShape(reply, hostUserId)
+  }
+
+  private toReviewShape(r: {
+    id: string
+    reservationId: string
+    authorId: string
+    author: { name: string; avatarUrl: string | null }
+    subjectId: string
+    spaceId: string | null
+    rating: number
+    comment: string
+    attachments: unknown
+    hostResponse: string | null
+    hostResponseAt: Date | null
+    publishedAt: Date | null
+    createdAt: Date
+    replies: Array<{
+      id: string
+      reviewId: string
+      authorId: string
+      body: string
+      createdAt: Date
+      author: { id: string; name: string; avatarUrl: string | null }
+    }>
+  }) {
+    return {
+      id: r.id,
+      reservationId: r.reservationId,
+      authorId: r.authorId,
+      authorName: r.author.name,
+      authorAvatarUrl: r.author.avatarUrl,
+      subjectId: r.subjectId,
+      spaceId: r.spaceId,
+      rating: r.rating,
+      comment: r.comment,
+      attachments: (r.attachments as string[] | null) ?? [],
+      hostResponse: r.hostResponse,
+      hostResponseAt: r.hostResponseAt?.toISOString() ?? null,
+      // 공간 후기의 subject 는 항상 호스트 유저 — 답글 작성자의 호스트 여부 판별 기준
+      replies: r.replies.map((reply) => this.toReplyShape(reply, r.subjectId)),
+      publishedAt: r.publishedAt?.toISOString() ?? null,
+      createdAt: r.createdAt.toISOString(),
+    }
+  }
+
+  private toReplyShape(
+    reply: {
+      id: string
+      reviewId: string
+      authorId: string
+      body: string
+      createdAt: Date
+      author: { id: string; name: string; avatarUrl: string | null }
+    },
+    hostUserId: string
+  ): ReviewReply {
+    return {
+      id: reply.id,
+      reviewId: reply.reviewId,
+      authorId: reply.authorId,
+      authorName: reply.author.name,
+      authorAvatarUrl: reply.author.avatarUrl,
+      isHost: reply.authorId === hostUserId,
+      body: reply.body,
+      createdAt: reply.createdAt.toISOString(),
+    }
+  }
+
+  async refreshSpaceRating(spaceId: string) {
     const agg = await this.prisma.review.aggregate({
       _avg: { rating: true },
       _count: true,

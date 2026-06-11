@@ -61,6 +61,7 @@ model User {
   reservations    Reservation[]    @relation("GuestReservations")
   reviewsAuthored Review[]         @relation("AuthorReviews")
   reviewsAbout    Review[]         @relation("SubjectReviews")
+  reviewReplies   ReviewReply[]    @relation("ReviewReplies")
   favorites       Favorite[]
   collections     Collection[]
   waitlists       SpaceWaitlist[]
@@ -367,6 +368,7 @@ model Space {
   favorites    Favorite[]
   waitlist     SpaceWaitlist[]
   addons       SpaceAddon[]
+  inquiryChats Chat[]
 
   @@index([status, createdAt])
   @@index([venueId])
@@ -638,10 +640,31 @@ model Review {
   hostResponse   String?
   hostResponseAt DateTime?
   isHidden       Boolean     @default(false)
+  /** 이미지 첨부 — 업로드 인프라 없이 data-URL(≤1600px, ≤2MB) 배열로 인라인 저장 */
+  attachments    Json?
   createdAt      DateTime    @default(now())
+
+  replies ReviewReply[]
 
   @@unique([reservationId, authorId])
   @@index([spaceId, isPublished])
+}
+
+/**
+ * 후기 1단 답글 스레드 — 호스트 공식 답변(hostResponse)과 별개로 후기 작성자·호스트가
+ * 이어가는 평면 답글. 중첩 없이 후기 바로 아래 1단으로만 쌓인다.
+ */
+model ReviewReply {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("ReviewReplies", fields: [authorId], references: [id])
+  body      String
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([reviewId, createdAt])
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -652,10 +675,15 @@ model Chat {
   id            String       @id @default(cuid())
   reservationId String?      @unique
   reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  /** 예약 전 문의 쪽지 — 공간 기준 게스트↔호스트 스레드. reservationId 와 상호 배타 */
+  spaceId       String?
+  space         Space?       @relation(fields: [spaceId], references: [id], onDelete: SetNull)
   createdAt     DateTime     @default(now())
 
   members  ChatMembership[]
   messages ChatMessage[]
+
+  @@index([spaceId])
 }
 
 model ChatMembership {
@@ -678,6 +706,8 @@ model ChatMessage {
   sender      User     @relation(fields: [senderId], references: [id])
   body        String
   attachments Json?
+  /** 신고 처리로 관리자 숨김 — 스레드 흐름 보존을 위해 삭제 대신 마스킹 */
+  isHidden    Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   @@index([chatId, createdAt])

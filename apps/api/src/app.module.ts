@@ -27,7 +27,6 @@ import { WaitlistModule } from './waitlist/waitlist.module'
 import { ReportsModule } from './reports/reports.module'
 import { AdminModule } from './admin/admin.module'
 import { SeoModule } from './seo/seo.module'
-import { UploadsModule } from './uploads/uploads.module'
 import { EventsModule } from './events/events.module'
 import { HealthController } from './common/health.controller'
 
@@ -70,7 +69,6 @@ import { HealthController } from './common/health.controller'
     ReportsModule,
     AdminModule,
     SeoModule,
-    UploadsModule,
     EventsModule,
   ],
   controllers: [HealthController],

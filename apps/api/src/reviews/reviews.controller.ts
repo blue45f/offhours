@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import {
+  CreateReviewReplySchema,
   CreateReviewSchema,
   RespondReviewSchema,
   type CreateReviewInput,
+  type CreateReviewReplyInput,
   type RespondReviewInput,
 } from '@offhours/shared'
 
@@ -64,5 +66,17 @@ export class ReviewsController {
     @Body(new ZodValidationPipe(RespondReviewSchema)) body: RespondReviewInput
   ) {
     return this.reviews.respond(user.id, id, body)
+  }
+
+  /** 후기 1단 답글 — 후기 작성자·호스트가 이어가는 평면 스레드 */
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/replies')
+  async reply(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(CreateReviewReplySchema)) body: CreateReviewReplyInput
+  ) {
+    return this.reviews.addReply(user.id, id, body)
   }
 }

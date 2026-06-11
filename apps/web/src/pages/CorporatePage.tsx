@@ -20,6 +20,7 @@ import {
   useTopupCredit,
   useUpsertCorporateProfile,
 } from '../features/corporate/api'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getErrorMessage } from '../services/api'
 import { formatKRW } from '../utils/format'
 import { cn } from '../utils/cn'
@@ -46,6 +47,7 @@ function toCorporateForm(data?: CorporateProfile | null): UpsertCorporateProfile
 }
 
 export default function CorporatePage() {
+  useDocumentTitle('법인 결제·세금계산서')
   const { data, isLoading } = useCorporateProfile()
   const upsert = useUpsertCorporateProfile()
   const del = useDeleteCorporateProfile()

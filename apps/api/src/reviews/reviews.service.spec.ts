@@ -25,16 +25,27 @@ function makeReviews(opts: {
   agg?: any
   hostStatsAt?: Date | null
   reviewCount?: number
+  reviewRow?: any
 }) {
   const prisma: any = {
     reservation: { findUnique: vi.fn().mockResolvedValue(opts.reservation ?? null) },
     review: {
-      findUnique: vi.fn().mockResolvedValue(opts.existing ?? null),
+      findUnique: vi.fn().mockResolvedValue(opts.reviewRow ?? opts.existing ?? null),
       create: vi.fn().mockResolvedValue({ id: 'rv1' }),
       findFirst: vi.fn().mockResolvedValue(opts.counterpart ?? null),
       updateMany: vi.fn().mockResolvedValue({ count: 2 }),
       aggregate: vi.fn().mockResolvedValue(opts.agg ?? { _avg: { rating: 4.5 }, _count: 2 }),
       count: vi.fn().mockResolvedValue(opts.reviewCount ?? 3),
+    },
+    reviewReply: {
+      create: vi.fn().mockResolvedValue({
+        id: 'rp1',
+        reviewId: 'rv1',
+        authorId: 'g1',
+        body: '재방문 의사 있어요',
+        createdAt: new Date('2026-06-01T00:00:00Z'),
+        author: { id: 'g1', name: '게스트', avatarUrl: null },
+      }),
     },
     space: { update: vi.fn().mockResolvedValue({}) },
     user: {
@@ -44,10 +55,16 @@ function makeReviews(opts: {
       update: vi.fn().mockResolvedValue({}),
     },
   }
-  return { svc: new ReviewsService(prisma), prisma }
+  const notifications: any = { create: vi.fn().mockResolvedValue({}) }
+  return { svc: new ReviewsService(prisma, notifications), prisma, notifications }
 }
 
-const input = { reservationId: 'res1', rating: 5, comment: '정말 깨끗하고 좋았어요 추천합니다' }
+const input = {
+  reservationId: 'res1',
+  rating: 5,
+  comment: '정말 깨끗하고 좋았어요 추천합니다',
+  attachments: [],
+}
 
 const updatedWith = (mockFn: any, key: string) =>
   mockFn.mock.calls.some((c: any[]) => c[0]?.data && key in c[0].data)
@@ -114,5 +131,65 @@ describe('ReviewsService.create', () => {
   it('예약 당사자(게스트/호스트)가 아니면 Forbidden', async () => {
     const { svc } = makeReviews({ reservation: { ...completed, guestId: 'someoneelse' } })
     await expect(svc.create('g1', input)).rejects.toThrow()
+  })
+})
+
+/**
+ * 후기 1단 답글 — 참여자(작성자·호스트)만, 공개 후기에만. 답글이 달리면 상대에게 알림.
+ */
+const publishedReview = {
+  id: 'rv1',
+  authorId: 'g1',
+  subjectId: 'h1',
+  isPublished: true,
+  isHidden: false,
+  reservation: { space: { slug: 'space-1', venue: { host: { userId: 'h1' } } } },
+}
+
+describe('ReviewsService.addReply', () => {
+  it('후기 작성자(게스트)가 답글 → 생성 + 호스트에게 알림', async () => {
+    const { svc, prisma, notifications } = makeReviews({ reviewRow: publishedReview })
+    const reply = await svc.addReply('g1', 'rv1', { body: '재방문 의사 있어요' })
+    expect(prisma.reviewReply.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { reviewId: 'rv1', authorId: 'g1', body: '재방문 의사 있어요' },
+      })
+    )
+    expect(notifications.create).toHaveBeenCalledWith(
+      'h1',
+      expect.objectContaining({ data: expect.objectContaining({ spaceSlug: 'space-1' }) })
+    )
+    expect(reply.isHost).toBe(false)
+  })
+
+  it('호스트가 답글 → isHost 플래그 + 게스트에게 알림', async () => {
+    const { svc, prisma, notifications } = makeReviews({ reviewRow: publishedReview })
+    prisma.reviewReply.create.mockResolvedValue({
+      id: 'rp2',
+      reviewId: 'rv1',
+      authorId: 'h1',
+      body: '다음에도 환영합니다',
+      createdAt: new Date('2026-06-02T00:00:00Z'),
+      author: { id: 'h1', name: '호스트', avatarUrl: null },
+    })
+    const reply = await svc.addReply('h1', 'rv1', { body: '다음에도 환영합니다' })
+    expect(notifications.create).toHaveBeenCalledWith('g1', expect.anything())
+    expect(reply.isHost).toBe(true)
+  })
+
+  it('참여자가 아니면 Forbidden — 답글 미생성', async () => {
+    const { svc, prisma } = makeReviews({ reviewRow: publishedReview })
+    await expect(svc.addReply('stranger', 'rv1', { body: '나도 한마디' })).rejects.toThrow()
+    expect(prisma.reviewReply.create).not.toHaveBeenCalled()
+  })
+
+  it('비공개(더블 블라인드 대기) 후기에는 답글 불가', async () => {
+    const { svc } = makeReviews({ reviewRow: { ...publishedReview, isPublished: false } })
+    await expect(svc.addReply('g1', 'rv1', { body: '아직 비공개인데요' })).rejects.toThrow()
+  })
+
+  it('숨김 처리된 후기에는 답글 불가 (NotFound)', async () => {
+    const { svc } = makeReviews({ reviewRow: { ...publishedReview, isHidden: true } })
+    await expect(svc.addReply('g1', 'rv1', { body: '숨김 후기 답글' })).rejects.toThrow()
   })
 })

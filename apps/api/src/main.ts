@@ -20,6 +20,10 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api', { exclude: ['health'] })
 
+  // 채팅·후기 이미지 첨부가 data-URL(개당 ≤2MB, 최대 3장 ≈ base64 8.4MB)로 본문에 실리므로
+  // 기본 100kb json 한도를 올린다. 첨부 형식·개수·용량은 Zod(AttachmentListSchema)가 재검증.
+  app.useBodyParser('json', { limit: '12mb' })
+
   app.use(compression())
   app.use(
     helmet({

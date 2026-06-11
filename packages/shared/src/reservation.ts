@@ -8,6 +8,7 @@ import {
 import { AddonLineSchema, AddonSelectionSchema } from './addon'
 import { DisputeSummarySchema } from './protection'
 import { CleaningJobSummarySchema } from './cleaning'
+import { MyReservationReviewSchema } from './review'
 
 // 베이스 오브젝트(미정제) — refine 이 붙은 스키마에는 .omit()/.extend() 를 쓸 수 없으므로
 // (Zod v4 런타임 가드) 파생 스키마는 이 오브젝트에서 만든 뒤 각자 refine 을 다시 적용한다.
@@ -150,6 +151,10 @@ export const ReservationSchema = z.object({
     })
     .nullable()
     .optional(),
+  /** 상세 조회 전용 — 내가 이 예약에 쓴 후기(없으면 null). 목록에는 내려가지 않는다 */
+  myReview: MyReservationReviewSchema.nullable().optional(),
+  /** 상세 조회 전용 — 상대(게스트↔호스트)가 후기를 이미 썼는지 (더블 블라인드 안내용) */
+  counterpartReviewed: z.boolean().optional(),
 })
 export type Reservation = z.infer<typeof ReservationSchema>
 

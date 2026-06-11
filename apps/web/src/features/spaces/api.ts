@@ -7,6 +7,7 @@ import type {
   Paginated,
   ProtectionTier,
   Purpose,
+  Review,
   SpaceCard,
   SpaceDetail,
   Slot,
@@ -168,19 +169,7 @@ export function useSpaceReviews(spaceId?: string) {
   return useQuery({
     queryKey: spacesKeys.reviews(spaceId ?? ''),
     enabled: !!spaceId,
-    queryFn: () =>
-      api.get<{
-        items: Array<{
-          id: string
-          authorName: string
-          authorAvatarUrl: string | null
-          rating: number
-          comment: string
-          hostResponse: string | null
-          createdAt: string
-        }>
-        total: number
-      }>(`/reviews/space/${spaceId}`),
+    queryFn: () => api.get<{ items: Review[]; total: number }>(`/reviews/space/${spaceId}`),
   })
 }
 

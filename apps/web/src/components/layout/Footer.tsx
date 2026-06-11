@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom'
 
-const SUPPORT_URL = 'https://termsdesk.vercel.app/support/offhours'
-
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
@@ -64,14 +62,10 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href={`${SUPPORT_URL}?category=site-inquiry`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline-offset-4 hover:underline"
-                >
+                {/* 인앱 문의 폼 — 외부 지원 센터 새 창 대신 같은 탭에서 접수 */}
+                <Link to="/contact" className="underline-offset-4 hover:underline">
                   문의하기
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

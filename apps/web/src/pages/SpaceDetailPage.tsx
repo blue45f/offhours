@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import {
   AlcoholPolicyLabel,
   CANCELLATION_POLICIES,
@@ -36,7 +37,10 @@ import {
   useSpaceReviews,
 } from '../features/spaces/api'
 import { useRecentlyViewedStore } from '../store/recentlyViewed'
+import { useMe } from '../store/auth'
+import { useOpenSpaceInquiry } from '../features/chat/api'
 import { SpaceCard } from '../components/space/SpaceCard'
+import { ReviewThread } from '../components/space/ReviewThread'
 import { useToggleFavorite, useFavoriteIds } from '../features/favorites/api'
 import { StarRating } from '../components/ui/StarRating'
 import { Badge } from '../components/ui/Badge'
@@ -44,7 +48,8 @@ import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
 import { ReservationPanel } from '../components/reservation/ReservationPanel'
 import { Skeleton } from '../components/ui/Skeleton'
-import { formatDateKR, formatKRW } from '../utils/format'
+import { formatKRW } from '../utils/format'
+import { getErrorMessage } from '../services/api'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useJsonLd } from '../hooks/useJsonLd'
 
@@ -203,6 +208,7 @@ export default function SpaceDetailPage() {
                     </p>
                   )}
               </div>
+              <InquiryButton spaceId={data.id} hostUserId={data.venue.host.id} />
             </div>
             <TrustGauge score={data.venue.host.trustScore} />
           </section>
@@ -316,29 +322,7 @@ export default function SpaceDetailPage() {
             ) : (
               <ul className="space-y-6">
                 {reviews?.items.map((r) => (
-                  <li key={r.id} className="hairline rounded-[var(--radius-xl)] p-5">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={r.authorName} src={r.authorAvatarUrl} size="sm" />
-                      <div className="flex-1 flex items-center justify-between">
-                        <div>
-                          <div className="text-sm font-semibold">{r.authorName}</div>
-                          <StarRating value={r.rating} size={12} />
-                        </div>
-                        <span className="text-xs text-[var(--color-fg-muted)]">
-                          {formatDateKR(r.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed whitespace-pre-line">{r.comment}</p>
-                    {r.hostResponse && (
-                      <div className="mt-3 rounded-[var(--radius-md)] bg-[var(--color-primary-soft)] p-3">
-                        <div className="text-xs font-semibold text-[var(--color-primary)] mb-1">
-                          호스트 답변
-                        </div>
-                        <p className="text-sm whitespace-pre-line">{r.hostResponse}</p>
-                      </div>
-                    )}
-                  </li>
+                  <ReviewThread key={r.id} review={r} hostUserId={data.venue.host.id} />
                 ))}
               </ul>
             )}
@@ -379,6 +363,44 @@ function spaceJsonLd(data: SpaceDetail): Record<string, unknown> {
       },
     }),
   }
+}
+
+/**
+ * 예약 전 문의 쪽지 진입점 — 로그인 전이면 로그인으로, 본인 공간이면 숨김.
+ * 스레드는 공간 기준으로 재사용되므로 여러 번 눌러도 같은 대화로 이어진다.
+ */
+function InquiryButton({ spaceId, hostUserId }: { spaceId: string; hostUserId: string }) {
+  const me = useMe()
+  const navigate = useNavigate()
+  const openInquiry = useOpenSpaceInquiry()
+  if (me?.id === hostUserId) return null
+
+  async function onClick() {
+    if (!me) {
+      toast('로그인하면 호스트에게 문의할 수 있어요', { icon: '💬' })
+      navigate('/login')
+      return
+    }
+    try {
+      const chat = await openInquiry.mutateAsync(spaceId)
+      navigate(`/chat/${chat.id}`)
+    } catch (e) {
+      toast.error(getErrorMessage(e))
+    }
+  }
+
+  return (
+    <Button
+      variant="secondary"
+      size="sm"
+      className="shrink-0 self-start"
+      leading={<MessageCircle size={14} />}
+      loading={openInquiry.isPending}
+      onClick={onClick}
+    >
+      문의하기
+    </Button>
+  )
 }
 
 function TrustGauge({ score }: { score: number }) {

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
+import { Eye, EyeOff, ImageOff } from 'lucide-react'
+import type { ModerateContentInput, ReportTargetSummary } from '@offhours/shared'
 
-import { api } from '../../services/api'
+import { api, getErrorMessage } from '../../services/api'
 import { AdminShell } from '../../components/admin/AdminShell'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -21,7 +23,12 @@ interface Report {
   status: string
   createdAt: string
   reporter: { id: string; name: string }
+  /** 신고 대상 미리보기 — REVIEW/MESSAGE 만 서버가 채워준다 */
+  target: ReportTargetSummary | null
 }
+
+/** 모더레이션 가능한 대상 — 후기·채팅 메시지만 숨김/첨부 제거를 지원한다 */
+const MODERATABLE = new Set(['REVIEW', 'MESSAGE'])
 
 type ResolveStatus = 'RESOLVED' | 'DISMISSED'
 const ACTION_LABEL: Record<ResolveStatus, string> = { RESOLVED: '해결', DISMISSED: '기각' }
@@ -37,6 +44,28 @@ export default function AdminReportsPage() {
       api.patch(`/admin/reports/${vars.id}/resolve`, vars),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'reports'] }),
   })
+  // 신고 대상 모더레이션 — 삭제 대신 숨김(흐름 보존) + 첨부 제거. 감사 로그에 남는다
+  const moderate = useMutation({
+    mutationFn: (vars: { targetType: string; targetId: string; input: ModerateContentInput }) =>
+      vars.targetType === 'REVIEW'
+        ? api.patch(`/admin/reviews/${vars.targetId}/moderate`, vars.input)
+        : api.patch(`/admin/chat-messages/${vars.targetId}/moderate`, vars.input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'reports'] }),
+  })
+
+  async function onModerate(report: Report, input: ModerateContentInput, done: string) {
+    if (!MODERATABLE.has(report.targetType)) return
+    try {
+      await moderate.mutateAsync({
+        targetType: report.targetType,
+        targetId: report.targetId,
+        input,
+      })
+      toast.success(done)
+    } catch (e) {
+      toast.error(getErrorMessage(e))
+    }
+  }
 
   // 처리 다이얼로그 — 신고 맥락을 유지한 채 사유를 입력받는다(native prompt 대체)
   const [acting, setActing] = useState<{ report: Report; status: ResolveStatus } | null>(null)
@@ -92,6 +121,66 @@ export default function AdminReportsPage() {
                     <p className="mt-2 text-xs text-[var(--color-fg-muted)]">
                       신고자: {r.reporter.name} · 대상 ID: {r.targetId}
                     </p>
+                    {r.target && (
+                      <div className="mt-3 rounded-[var(--radius-md)] bg-[var(--color-bg-subtle)] p-3">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className="font-semibold">
+                            {r.target.authorName ?? '알 수 없음'} 님의{' '}
+                            {r.targetType === 'REVIEW' ? '후기' : '메시지'}
+                          </span>
+                          {r.target.isHidden && (
+                            <Badge tone="warning" soft>
+                              숨김 처리됨
+                            </Badge>
+                          )}
+                          {(r.target.attachmentCount ?? 0) > 0 && (
+                            <Badge tone="neutral" soft>
+                              첨부 {r.target.attachmentCount}장
+                            </Badge>
+                          )}
+                        </div>
+                        <p
+                          className={
+                            'mt-1.5 text-sm leading-relaxed' +
+                            (r.target.isHidden
+                              ? ' italic text-[var(--color-fg-subtle)] line-through'
+                              : ' text-[var(--color-fg-muted)]')
+                          }
+                        >
+                          {r.target.excerpt || '(내용 없음 — 사진 전용)'}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            leading={r.target.isHidden ? <Eye size={12} /> : <EyeOff size={12} />}
+                            loading={moderate.isPending}
+                            onClick={() =>
+                              onModerate(
+                                r,
+                                { hidden: !r.target?.isHidden },
+                                r.target?.isHidden ? '숨김을 해제했어요' : '숨김 처리했어요'
+                              )
+                            }
+                          >
+                            {r.target.isHidden ? '숨김 해제' : '숨기기'}
+                          </Button>
+                          {(r.target.attachmentCount ?? 0) > 0 && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              leading={<ImageOff size={12} />}
+                              loading={moderate.isPending}
+                              onClick={() =>
+                                onModerate(r, { stripAttachments: true }, '첨부를 제거했어요')
+                              }
+                            >
+                              첨부 제거
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {r.status !== 'RESOLVED' && r.status !== 'DISMISSED' && (
                     <div className="flex flex-col gap-2">

@@ -4,13 +4,16 @@ import toast from 'react-hot-toast'
 import { MessageCircleReply, Send, ShieldCheck, Star } from 'lucide-react'
 
 import { Avatar } from '../components/ui/Avatar'
+import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
 import { EmptyState } from '../components/ui/EmptyState'
 import { StarRating } from '../components/ui/StarRating'
 import { Tabs } from '../components/ui/Tabs'
 import { Textarea } from '../components/ui/Input'
+import { AttachmentThumbs } from '../components/ui/AttachmentInput'
 import {
+  useAddReviewReply,
   useHostReviews,
   useRespondReview,
   type HostReviewFilter,
@@ -118,6 +121,7 @@ function ReviewRow({ review }: { review: HostReviewItem }) {
               </Link>
             )}
             <p className="mt-2 text-sm leading-relaxed whitespace-pre-line">{review.comment}</p>
+            <AttachmentThumbs attachments={review.attachments} className="mt-2" />
           </div>
         </div>
 
@@ -170,7 +174,97 @@ function ReviewRow({ review }: { review: HostReviewItem }) {
             </div>
           </div>
         )}
+
+        {/* 공식 답변 이후 게스트와 이어가는 1단 스레드 — 공개 후기에서만 동작 */}
+        {(review.replies.length > 0 || (review.hostResponse && review.publishedAt)) && (
+          <ReplyThread review={review} />
+        )}
       </CardBody>
     </Card>
+  )
+}
+
+function ReplyThread({ review }: { review: HostReviewItem }) {
+  const addReply = useAddReviewReply()
+  const [composing, setComposing] = useState(false)
+  const [text, setText] = useState('')
+
+  async function submit() {
+    if (text.trim().length < 2) {
+      toast.error('댓글은 2자 이상 적어주세요')
+      return
+    }
+    try {
+      await addReply.mutateAsync({ reviewId: review.id, body: text.trim() })
+      setText('')
+      setComposing(false)
+      toast.success('댓글을 남겼어요')
+    } catch (e) {
+      toast.error(getErrorMessage(e))
+    }
+  }
+
+  return (
+    <div className="ml-11 space-y-2.5 border-l-2 border-[var(--color-border-subtle)] pl-3">
+      {review.replies.map((reply) => (
+        <div key={reply.id} className="flex items-start gap-2">
+          <Avatar name={reply.authorName} src={reply.authorAvatarUrl} size="xs" />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold">{reply.authorName}</span>
+              {reply.isHost && (
+                <Badge tone="primary" soft className="px-1.5 py-0.5 text-[10px]">
+                  호스트
+                </Badge>
+              )}
+              <span className="text-[11px] text-[var(--color-fg-subtle)]">
+                {formatDateKR(reply.createdAt)}
+              </span>
+            </div>
+            <p className="mt-0.5 text-sm leading-relaxed whitespace-pre-line">{reply.body}</p>
+          </div>
+        </div>
+      ))}
+      {composing ? (
+        <div className="space-y-2">
+          <Textarea
+            rows={2}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="이어서 댓글 달기 (2자 이상)"
+            className="min-h-[60px]"
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setComposing(false)
+                setText('')
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              size="sm"
+              leading={<Send size={12} />}
+              loading={addReply.isPending}
+              disabled={text.trim().length < 2}
+              onClick={submit}
+            >
+              댓글 등록
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setComposing(true)}
+          className="text-xs font-medium text-[var(--color-fg-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
+        >
+          이어서 댓글 달기
+        </button>
+      )}
+    </div>
   )
 }

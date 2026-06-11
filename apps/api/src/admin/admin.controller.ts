@@ -3,11 +3,13 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Role } from '@prisma/client'
 import {
   BroadcastNotificationSchema,
+  ModerateContentSchema,
   ResolveDisputeSchema,
   ResolveReportSchema,
   SetRoleSchema,
   SetSuspendedSchema,
   type BroadcastNotificationInput,
+  type ModerateContentInput,
   type ResolveDisputeInput,
   type ResolveReportInput,
   type SetRoleInput,
@@ -104,6 +106,26 @@ export class AdminController {
     @Body(new ZodValidationPipe(ResolveReportSchema)) body: ResolveReportInput
   ) {
     return this.admin.resolveReport(actor.id, id, body)
+  }
+
+  /** 신고된 후기 숨김/해제 + 첨부 제거 */
+  @Patch('reviews/:id/moderate')
+  async moderateReview(
+    @CurrentUser() actor: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(ModerateContentSchema)) body: ModerateContentInput
+  ) {
+    return this.admin.moderateReview(actor.id, id, body)
+  }
+
+  /** 신고된 채팅 메시지 숨김/해제 + 첨부 제거 */
+  @Patch('chat-messages/:id/moderate')
+  async moderateMessage(
+    @CurrentUser() actor: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(ModerateContentSchema)) body: ModerateContentInput
+  ) {
+    return this.admin.moderateMessage(actor.id, id, body)
   }
 
   @Get('disputes')

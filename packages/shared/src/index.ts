@@ -1,5 +1,7 @@
 export * from './enums'
 export * from './pagination'
+export * from './attachment'
+export * from './inquiry'
 export * from './user'
 export * from './host'
 export * from './venue'

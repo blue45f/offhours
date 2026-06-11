@@ -34,6 +34,7 @@ import { getErrorMessage } from '../services/api'
 import { useTossPayment } from '../features/payments/useTossPayment'
 import { SplitPaymentPanel } from '../components/reservation/SplitPaymentPanel'
 import { ArrivalKitCard } from '../components/reservation/ArrivalKitCard'
+import { ReservationReviewCard } from '../components/reservation/ReservationReviewCard'
 
 export default function ReservationDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -134,7 +135,7 @@ export default function ReservationDetailPage() {
   async function onOpenChat() {
     try {
       const chat = await openChat.mutateAsync(reservation.id)
-      navigate(`/chat?c=${chat.id}`)
+      navigate(`/chat/${chat.id}`)
     } catch (e) {
       toast.error(getErrorMessage(e))
     }
@@ -396,6 +397,15 @@ export default function ReservationDetailPage() {
           />
         )}
 
+        {reservation.status === 'COMPLETED' && (
+          <ReservationReviewCard
+            reservationId={reservation.id}
+            myReview={reservation.myReview ?? null}
+            counterpartReviewed={!!reservation.counterpartReviewed}
+            isHost={isHost}
+          />
+        )}
+
         {['APPROVED', 'PAID', 'CHECKED_IN', 'COMPLETED'].includes(reservation.status) && (
           <SplitPaymentPanel
             reservationId={reservation.id}
@@ -412,6 +422,19 @@ export default function ReservationDetailPage() {
             onClick={() => setExtendOpen(true)}
           >
             이용 시간 연장
+          </Button>
+        )}
+
+        {/* 분실물·정산 문의 등 이용 후에도 대화 동선은 유지한다 */}
+        {['CHECKED_IN', 'CHECKED_OUT', 'COMPLETED'].includes(reservation.status) && (
+          <Button
+            variant="secondary"
+            size="lg"
+            leading={<MessageCircle size={14} />}
+            loading={openChat.isPending}
+            onClick={onOpenChat}
+          >
+            {isHost ? '게스트와 채팅' : '호스트와 채팅'}
           </Button>
         )}
 

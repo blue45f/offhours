@@ -740,6 +740,9 @@ export class ReservationsService {
     const row = this.toRow(r, true)
     // 결제 완료된 게스트에게만 호스트의 도착 가이드 노출 (PAID/CHECKED_IN/COMPLETED).
     const showArrival = ['PAID', 'CHECKED_IN', 'CHECKED_OUT', 'COMPLETED'].includes(r.status)
+    // 후기 작성 CTA 용 — 내가 쓴 후기와 상대 작성 여부(더블 블라인드 공개 안내)
+    const reviews = await this.prisma.review.findMany({ where: { reservationId: r.id } })
+    const mine = reviews.find((rv) => rv.authorId === userId) ?? null
     return {
       ...row,
       dispute: r.dispute ? this.toDisputeSummary(r.dispute) : null,
@@ -753,6 +756,20 @@ export class ReservationsService {
         : null,
       venueAddressRoad: showArrival ? r.space.venue.addressRoad : null,
       arrivalGuide: showArrival ? (r.space.venue.arrivalGuide as object | null) : null,
+      myReview: mine
+        ? {
+            id: mine.id,
+            rating: mine.rating,
+            comment: mine.comment,
+            attachments: (mine.attachments as string[] | null) ?? [],
+            isPublished: mine.isPublished,
+            publishedAt: mine.publishedAt?.toISOString() ?? null,
+            hostResponse: mine.hostResponse,
+            hostResponseAt: mine.hostResponseAt?.toISOString() ?? null,
+            createdAt: mine.createdAt.toISOString(),
+          }
+        : null,
+      counterpartReviewed: reviews.some((rv) => rv.authorId !== userId),
     }
   }
 

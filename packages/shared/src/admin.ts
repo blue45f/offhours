@@ -94,3 +94,26 @@ export const ResolveDisputeSchema = z.object({
   resolution: z.string().trim().max(1000).optional(),
 })
 export type ResolveDisputeInput = z.infer<typeof ResolveDisputeSchema>
+
+/**
+ * 신고된 후기·채팅 메시지 모더레이션 — 삭제 대신 숨김(흐름 보존) + 첨부 제거.
+ * 숨김 해제를 위해 hidden 은 boolean 으로 받는다.
+ */
+export const ModerateContentSchema = z
+  .object({
+    hidden: z.boolean().optional(),
+    stripAttachments: z.boolean().optional(),
+  })
+  .refine((v) => v.hidden !== undefined || v.stripAttachments === true, {
+    message: '숨김 여부 또는 첨부 제거 중 하나는 지정해야 해요',
+  })
+export type ModerateContentInput = z.infer<typeof ModerateContentSchema>
+
+/** 신고 큐에서 대상 내용을 바로 보고 처리하기 위한 타깃 미리보기 */
+export const ReportTargetSummarySchema = z.object({
+  excerpt: z.string().nullable(),
+  authorName: z.string().nullable(),
+  isHidden: z.boolean().nullable(),
+  attachmentCount: z.number().nullable(),
+})
+export type ReportTargetSummary = z.infer<typeof ReportTargetSummarySchema>
