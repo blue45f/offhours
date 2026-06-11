@@ -3,17 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 
 /**
- * 아직 콘텐츠가 없는 푸터 링크(약관·정책·도움말 등)의 임시 페이지. 404 대신 "준비 중"을 보여줘
+ * 아직 콘텐츠가 없는 푸터 링크(도움말·안전 등)의 임시 페이지. 404 대신 "준비 중"을 보여줘
  * 깨진 링크 경험을 막는다. 실제 콘텐츠가 생기면 해당 라우트를 정식 페이지로 교체.
  */
 const TITLES: Record<string, string> = {
   '/help': '도움말',
   '/help/host': '호스트 가이드',
   '/help/guest': '게스트 가이드',
-  '/contact': '문의하기',
-  '/terms': '이용약관',
-  '/privacy': '개인정보 처리방침',
-  '/cancel-policy': '취소·환불 정책',
   '/safety': '안전·신뢰',
 }
 
