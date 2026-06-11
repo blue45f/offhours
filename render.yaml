@@ -76,7 +76,7 @@ services:
         value: 30d
       - key: APP_URL
         # CORS allow-origin read by app.enableCors in main.ts. Set to your Vercel
-        # web origin, e.g. https://offhours.vercel.app
+        # web origin, e.g. https://offhours-nine.vercel.app
         sync: false
       - key: API_URL
         sync: false # public URL of this API service (e.g. https://offhours-api.onrender.com)
