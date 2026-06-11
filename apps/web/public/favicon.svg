@@ -1,28 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Offhours">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Offhours">
   <defs>
-    <linearGradient id="bg" x1="70" y1="40" x2="442" y2="476" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2f2a22"/>
-      <stop offset=".56" stop-color="#15140f"/>
-      <stop offset="1" stop-color="#2f2a22"/>
+    <linearGradient id="room" x1="9" y1="7" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6f835f" />
+      <stop offset="0.72" stop-color="#4a5f3f" />
+      <stop offset="1" stop-color="#3a4b32" />
     </linearGradient>
-    <radialGradient id="glow" cx="72%" cy="23%" r="68%">
-      <stop stop-color="#ffcf70" stop-opacity=".72"/>
-      <stop offset=".58" stop-color="#f9735b" stop-opacity=".24"/>
-      <stop offset="1" stop-color="#15140f" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#15140f" flood-opacity=".34"/>
-    </filter>
   </defs>
-  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="116" fill="url(#glow)"/>
-  <path d="M46 342C154 278 238 414 466 292" fill="none" stroke="#faf8f4" stroke-opacity=".1" stroke-width="26" stroke-linecap="round"/>
-  <g filter="url(#shadow)">
-        <g transform="translate(0 0) scale(1)">
-          <circle cx="256" cy="210" r="92" fill="#ffcf70"/>
-          <circle cx="292" cy="178" r="92" fill="#2f2a22"/>
-          <path d="M112 360h288" stroke="#faf8f4" stroke-width="26" stroke-linecap="round"/>
-          <rect x="146" y="258" width="54" height="102" rx="14" fill="#faf8f4"/><rect x="230" y="228" width="54" height="132" rx="14" fill="#faf8f4"/><rect x="314" y="282" width="54" height="78" rx="14" fill="#faf8f4"/>
-          <path d="M256 120v42l32 22" stroke="#f9735b" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
-        </g></g>
+  <rect x="5" y="5" width="54" height="54" rx="16" fill="url(#room)" />
+  <path d="M14 42.5c4.8-9.8 12.1-15 21.9-15.6 5.4-.3 10.1.8 14.1 3.2" fill="none" stroke="#faf8f4" stroke-width="3.3" stroke-linecap="round" />
+  <path d="M16 43.5h33" stroke="#faf8f4" stroke-width="3.3" stroke-linecap="round" opacity="0.92" />
+  <path d="M22 43V31.5c0-5.4 4.4-9.8 9.8-9.8H38c2.8 0 5.2-2.3 5.2-5.2" fill="none" stroke="#f1eee7" stroke-width="3.3" stroke-linecap="round" />
+  <circle cx="44.8" cy="17" r="4.2" fill="#c97550" />
+  <path d="M43.2 17a9 9 0 0 1-9-9 9 9 0 1 0 9 9Z" fill="#ffe5d2" />
+  <circle cx="31.5" cy="31.5" r="3.4" fill="#ffe5d2" />
+  <path d="M31.5 31.5v-5.2m0 5.2 4.2 2.6" stroke="#1a1814" stroke-width="1.6" stroke-linecap="round" />
 </svg>
