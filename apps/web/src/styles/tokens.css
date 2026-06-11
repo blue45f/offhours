@@ -81,6 +81,10 @@
   /* Overlay */
   --color-overlay: rgba(26, 24, 20, 0.48);
 
+  /* Category tint — 카테고리 칩의 oklch L·C 페어 (hue 는 컴포넌트가 주입) */
+  --category-tint-bg: 0.93 0.07;
+  --category-tint-fg: 0.45 0.12;
+
   /* Radius */
   --radius-xs: 2px;
   --radius-sm: 6px;
@@ -154,6 +158,10 @@
 
   --color-overlay: rgba(0, 0, 0, 0.6);
 
+  /* 다크: 라이트용 파스텔 원이 그대로 뜨면 눈부심 — 명도·채도를 낮춰 무드 유지 */
+  --category-tint-bg: 0.3 0.05;
+  --category-tint-fg: 0.8 0.08;
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.36);
   --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.45);
@@ -195,6 +203,9 @@
     --color-accent-soft: rgba(220, 162, 132, 0.18);
 
     --color-overlay: rgba(0, 0, 0, 0.6);
+
+    --category-tint-bg: 0.3 0.05;
+    --category-tint-fg: 0.8 0.08;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.36);

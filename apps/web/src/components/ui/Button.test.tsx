@@ -13,4 +13,11 @@ describe('Button', () => {
     render(<Button loading>...</Button>)
     expect(screen.getByRole('button')).toBeDisabled()
   })
+
+  it('loading 시 aria-busy 를 노출하고 평상시엔 없다', () => {
+    const { rerender } = render(<Button loading>저장</Button>)
+    expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true')
+    rerender(<Button>저장</Button>)
+    expect(screen.getByRole('button')).not.toHaveAttribute('aria-busy')
+  })
 })

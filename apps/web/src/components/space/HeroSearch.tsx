@@ -76,7 +76,6 @@ export function HeroSearch() {
             </label>
             <input
               id="hero-smart-search"
-              autoFocus
               value={smart}
               onChange={(e) => setSmart(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && go()}

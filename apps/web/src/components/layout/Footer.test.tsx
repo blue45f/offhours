@@ -42,6 +42,24 @@ describe('Footer 구조/접근성', () => {
   })
 })
 
+describe('Footer 법적 고지', () => {
+  it('placeholder 사업자 정보 대신 데모 서비스 고지를 노출한다 (정직성 원칙)', () => {
+    renderFooter()
+    expect(
+      screen.getByText(/데모 서비스 — 사업자 정보는 정식 오픈 시 게시됩니다/)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/000-00-00000/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/○○○/)).not.toBeInTheDocument()
+  })
+
+  it('푸터 링크는 hover 밑줄 어포던스를 가진다', () => {
+    renderFooter()
+    for (const link of screen.getAllByRole('link')) {
+      expect(link).toHaveClass('underline-offset-4', 'hover:underline')
+    }
+  })
+})
+
 describe('Footer 중간 브레이크포인트(640~1023) 레이아웃 가드', () => {
   it('링크 칼럼 그리드는 sm 3열 → md 4열 티어를 가진다 (640~767px 정책 칼럼 고아 방지)', () => {
     const { container } = renderFooter()

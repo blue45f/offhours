@@ -24,6 +24,12 @@ describe('HeroSearch 접근성', () => {
     expect(screen.getByRole('textbox', { name: '자유 검색' })).toBeInTheDocument()
   })
 
+  it('마운트 시 검색 입력이 포커스를 강탈하지 않는다', () => {
+    renderHeroSearch()
+    // autoFocus 금지: 모바일 키보드 강제 팝업과 스크린리더의 문서 시작(스킵링크) 건너뜀 방지
+    expect(screen.getByRole('textbox', { name: '자유 검색' })).not.toHaveFocus()
+  })
+
   it('모드 토글이 aria-pressed 로 선택 상태를 노출한다', () => {
     renderHeroSearch()
 

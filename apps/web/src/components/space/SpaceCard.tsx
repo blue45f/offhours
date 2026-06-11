@@ -191,11 +191,7 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
             </Badge>
           )}
           {space.isHot && (
-            <Badge
-              tone="accent"
-              soft={false}
-              className="!bg-[#e76f5119] !text-[var(--color-accent)] !shadow-[var(--shadow-sm)]"
-            >
+            <Badge tone="accent" className="!shadow-[var(--shadow-sm)]">
               🔥 인기
             </Badge>
           )}

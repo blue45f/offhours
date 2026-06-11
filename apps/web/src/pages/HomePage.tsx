@@ -256,8 +256,8 @@ function CategoryRow() {
             <span
               className="inline-flex size-10 items-center justify-center rounded-full group-hover:scale-110 transition-transform"
               style={{
-                background: `oklch(0.93 0.07 ${hue})`,
-                color: `oklch(0.45 0.12 ${hue})`,
+                background: `oklch(var(--category-tint-bg) ${hue})`,
+                color: `oklch(var(--category-tint-fg) ${hue})`,
               }}
             >
               <Icon size={18} />

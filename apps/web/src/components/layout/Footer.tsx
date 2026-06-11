@@ -24,16 +24,24 @@ export function Footer() {
             <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">서비스</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
-                <Link to="/spaces">공간 둘러보기</Link>
+                <Link to="/spaces" className="underline-offset-4 hover:underline">
+                  공간 둘러보기
+                </Link>
               </li>
               <li>
-                <Link to="/host">호스트 되기</Link>
+                <Link to="/host" className="underline-offset-4 hover:underline">
+                  호스트 되기
+                </Link>
               </li>
               <li>
-                <Link to="/about">서비스 소개</Link>
+                <Link to="/about" className="underline-offset-4 hover:underline">
+                  서비스 소개
+                </Link>
               </li>
               <li>
-                <Link to="/pricing">수수료 안내</Link>
+                <Link to="/pricing" className="underline-offset-4 hover:underline">
+                  수수료 안내
+                </Link>
               </li>
             </ul>
           </div>
@@ -41,16 +49,27 @@ export function Footer() {
             <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">고객 지원</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
-                <Link to="/help">도움말</Link>
+                <Link to="/help" className="underline-offset-4 hover:underline">
+                  도움말
+                </Link>
               </li>
               <li>
-                <Link to="/help/host">호스트 가이드</Link>
+                <Link to="/help/host" className="underline-offset-4 hover:underline">
+                  호스트 가이드
+                </Link>
               </li>
               <li>
-                <Link to="/help/guest">게스트 가이드</Link>
+                <Link to="/help/guest" className="underline-offset-4 hover:underline">
+                  게스트 가이드
+                </Link>
               </li>
               <li>
-                <a href={`${SUPPORT_URL}?category=site-inquiry`} target="_blank" rel="noreferrer">
+                <a
+                  href={`${SUPPORT_URL}?category=site-inquiry`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline-offset-4 hover:underline"
+                >
                   문의하기
                 </a>
               </li>
@@ -60,23 +79,31 @@ export function Footer() {
             <h2 className="text-sm font-semibold mb-3 text-[var(--color-fg)]">정책</h2>
             <ul className="space-y-2 text-sm text-[var(--color-fg-muted)]">
               <li>
-                <Link to="/terms">이용약관</Link>
+                <Link to="/terms" className="underline-offset-4 hover:underline">
+                  이용약관
+                </Link>
               </li>
               <li>
-                <Link to="/privacy">개인정보 처리방침</Link>
+                <Link to="/privacy" className="underline-offset-4 hover:underline">
+                  개인정보 처리방침
+                </Link>
               </li>
               <li>
-                <Link to="/cancel-policy">취소·환불 정책</Link>
+                <Link to="/cancel-policy" className="underline-offset-4 hover:underline">
+                  취소·환불 정책
+                </Link>
               </li>
               <li>
-                <Link to="/safety">안전·신뢰</Link>
+                <Link to="/safety" className="underline-offset-4 hover:underline">
+                  안전·신뢰
+                </Link>
               </li>
             </ul>
           </div>
         </div>
         <div className="mt-12 border-t border-[var(--color-border)] pt-6 text-xs text-[var(--color-fg-subtle)]">
-          © {new Date().getFullYear()} Offhours. All rights reserved. · 사업자등록번호 000-00-00000
-          · 대표 ○○○ · 서울특별시 ○○구 ○○로 0
+          © {new Date().getFullYear()} Offhours. All rights reserved. · 데모 서비스 — 사업자 정보는
+          정식 오픈 시 게시됩니다
         </div>
       </div>
     </footer>
