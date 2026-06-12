@@ -6,7 +6,7 @@
 # 런타임은 `pnpm deploy --prod` 슬림 번들만 담는다 — 풀 워크스페이스 node_modules 를
 # 복사하면 t3.micro 디스크가 터진다(검증된 rotifolk apps/api/Dockerfile 패턴).
 
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /repo
 RUN corepack enable && apk add --no-cache libc6-compat openssl
 COPY . .
@@ -22,7 +22,7 @@ RUN GEN_SRC=$(node -e "const p=require.resolve('@prisma/client',{paths:['/repo/a
  && DEST=$(node -e "const p=require.resolve('@prisma/client',{paths:['/app']});const m=p.match(/(.*\/node_modules)\/@prisma\/client/);process.stdout.write(m[1]+'/.prisma')") \
  && rm -rf "$DEST" && cp -R "$GEN_SRC" "$DEST"
 
-FROM node:22-alpine AS runtime
+FROM node:24-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
