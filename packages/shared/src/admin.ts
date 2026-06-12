@@ -44,6 +44,7 @@ export const AdminUserRowSchema = z.object({
   email: z.string(),
   role: RoleSchema,
   isSuspended: z.boolean(),
+  withdrawnAt: z.string().nullable(),
   isVerified: z.boolean(),
   trustScore: z.number(),
   createdAt: z.string(),

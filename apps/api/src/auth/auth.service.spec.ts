@@ -31,6 +31,7 @@ const user = {
   role: 'USER',
   isVerified: false,
   isSuspended: false,
+  withdrawnAt: null,
   marketingOptIn: false,
   referralCode: 'REF123',
   pointsKRW: 0,
@@ -40,6 +41,7 @@ const user = {
 
 const validRecord = {
   id: 'rt1',
+  userId: 'u1',
   family: 'famA',
   revokedAt: null,
   expiresAt: new Date('2099-01-01T00:00:00Z'),
@@ -84,6 +86,19 @@ describe('AuthService.refresh', () => {
     })
     await expect(svc.refresh('expired-token')).rejects.toThrow()
     expect(prisma.refreshToken.updateMany).not.toHaveBeenCalled()
+    expect(prisma.refreshToken.create).not.toHaveBeenCalled()
+  })
+
+  it('탈퇴한 계정 refresh → 사용자 활성 토큰 전체 폐기 + 거부', async () => {
+    const { svc, prisma } = makeAuth({
+      ...validRecord,
+      user: { ...user, withdrawnAt: new Date('2026-06-01T00:00:00Z') },
+    })
+    await expect(svc.refresh('withdrawn-token')).rejects.toThrow('탈퇴한 계정이에요.')
+    expect(prisma.refreshToken.updateMany).toHaveBeenCalledWith({
+      where: { userId: 'u1', revokedAt: null },
+      data: { revokedAt: expect.any(Date) },
+    })
     expect(prisma.refreshToken.create).not.toHaveBeenCalled()
   })
 

@@ -140,6 +140,7 @@ export class AdminService {
         email: u.email,
         role: u.role,
         isSuspended: u.isSuspended,
+        withdrawnAt: u.withdrawnAt?.toISOString() ?? null,
         isVerified: u.isVerified,
         trustScore: u.trustScore,
         createdAt: u.createdAt.toISOString(),

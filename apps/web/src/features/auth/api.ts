@@ -69,3 +69,16 @@ export function useSignOut() {
     onError: reset,
   })
 }
+
+export function useWithdrawAccount() {
+  const clear = useAuthStore((s) => s.clear)
+  const qc = useQueryClient()
+  const reset = () => {
+    clear()
+    qc.clear()
+  }
+  return useMutation({
+    mutationFn: () => api.delete<void>('/users/me'),
+    onSuccess: reset,
+  })
+}

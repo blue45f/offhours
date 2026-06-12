@@ -3,31 +3,44 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import type { AdminUserRow, Paginated, Role } from '@offhours/shared'
 
-import { api } from '../../services/api'
+import { api, getErrorMessage } from '../../services/api'
 import { AdminShell } from '../../components/admin/AdminShell'
 import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { formatDateKR } from '../../utils/format'
+import { useMe } from '../../store/auth'
 
 export default function AdminUsersPage() {
   const [q, setQ] = useState('')
   // Radix Select 는 빈 문자열 value 를 던지므로 'ALL' 센티넬 사용(빈 옵션 = 앱 전체 크래시 방지)
-  const [role, setRole] = useState<Role | 'ALL'>('ALL')
+  const [roleFilter, setRoleFilter] = useState<Role | 'ALL'>('ALL')
+  const me = useMe()
   const qc = useQueryClient()
+  const canManageRoles = me?.role === 'SUPERADMIN'
 
   const { data } = useQuery({
-    queryKey: ['admin', 'users', q, role],
+    queryKey: ['admin', 'users', q, roleFilter],
     queryFn: () =>
       api.get<Paginated<AdminUserRow>>('/admin/users', {
-        params: { q: q || undefined, role: role === 'ALL' ? undefined : role, pageSize: 40 },
+        params: {
+          q: q || undefined,
+          role: roleFilter === 'ALL' ? undefined : roleFilter,
+          pageSize: 40,
+        },
       }),
   })
 
   const suspend = useMutation({
     mutationFn: (vars: { id: string; suspended: boolean }) =>
       api.patch(`/admin/users/${vars.id}/suspend`, { suspended: vars.suspended }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'users'] }),
+  })
+
+  const changeRole = useMutation({
+    mutationFn: (vars: { id: string; role: Role }) =>
+      api.patch(`/admin/users/${vars.id}/role`, { role: vars.role }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'users'] }),
   })
 
@@ -44,8 +57,8 @@ export default function AdminUsersPage() {
           className="flex-1"
         />
         <Select
-          value={role}
-          onValueChange={(v) => setRole(v as Role | 'ALL')}
+          value={roleFilter}
+          onValueChange={(v) => setRoleFilter(v as Role | 'ALL')}
           options={[
             { value: 'ALL', label: '전체 역할' },
             { value: 'USER', label: 'USER' },
@@ -78,10 +91,34 @@ export default function AdminUsersPage() {
                 <Td>{u.name}</Td>
                 <Td className="text-[var(--color-fg-muted)]">{u.email}</Td>
                 <Td>
-                  <Badge tone="neutral">{u.role}</Badge>
+                  {canManageRoles && u.id !== me?.id && !u.withdrawnAt ? (
+                    <Select
+                      value={u.role}
+                      onValueChange={async (next) => {
+                        if (next === u.role) return
+                        try {
+                          await changeRole.mutateAsync({ id: u.id, role: next as Role })
+                          toast.success('역할을 변경했어요')
+                        } catch (err) {
+                          toast.error(getErrorMessage(err, '역할 변경에 실패했어요'))
+                        }
+                      }}
+                      options={[
+                        { value: 'USER', label: 'USER' },
+                        { value: 'HOST', label: 'HOST' },
+                        { value: 'ADMIN', label: 'ADMIN' },
+                        { value: 'SUPERADMIN', label: 'SUPERADMIN' },
+                      ]}
+                      className="h-9 min-w-[136px]"
+                    />
+                  ) : (
+                    <Badge tone="neutral">{u.role}</Badge>
+                  )}
                 </Td>
                 <Td>
-                  {u.isSuspended ? (
+                  {u.withdrawnAt ? (
+                    <Badge tone="neutral">탈퇴</Badge>
+                  ) : u.isSuspended ? (
                     <Badge tone="error">정지</Badge>
                   ) : u.isVerified ? (
                     <Badge tone="success" dot>
@@ -94,21 +131,26 @@ export default function AdminUsersPage() {
                 <Td>{formatDateKR(u.createdAt)}</Td>
                 <Td>{u.reservationCount}</Td>
                 <Td>
-                  <Button
-                    size="sm"
-                    variant={u.isSuspended ? 'secondary' : 'ghost'}
-                    onClick={async () => {
-                      try {
-                        await suspend.mutateAsync({ id: u.id, suspended: !u.isSuspended })
-                        toast.success(u.isSuspended ? '정지 해제' : '정지')
-                      } catch {
-                        toast.error('실패')
-                      }
-                    }}
-                    className={!u.isSuspended ? 'text-[var(--color-error)]' : ''}
-                  >
-                    {u.isSuspended ? '해제' : '정지'}
-                  </Button>
+                  {u.withdrawnAt ? (
+                    <span className="text-xs text-[var(--color-fg-muted)]">-</span>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant={u.isSuspended ? 'secondary' : 'ghost'}
+                      loading={suspend.isPending}
+                      onClick={async () => {
+                        try {
+                          await suspend.mutateAsync({ id: u.id, suspended: !u.isSuspended })
+                          toast.success(u.isSuspended ? '정지 해제' : '정지')
+                        } catch (err) {
+                          toast.error(getErrorMessage(err, '실패'))
+                        }
+                      }}
+                      className={!u.isSuspended ? 'text-[var(--color-error)]' : ''}
+                    >
+                      {u.isSuspended ? '해제' : '정지'}
+                    </Button>
+                  )}
                 </Td>
               </tr>
             ))}

@@ -25,16 +25,16 @@ export default defineConfig(
       files: ['**/*.{ts,tsx}'],
       extends: [js.configs.recommended, tseslint.configs.recommended],
       rules: {
-        '@typescript-eslint/no-explicit-any': 'warn',
+        '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-unused-vars': [
-          'warn',
+          'error',
           { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
         ],
-        '@typescript-eslint/no-unsafe-function-type': 'warn',
-        '@typescript-eslint/no-require-imports': 'warn',
-        '@typescript-eslint/no-unused-expressions': 'warn',
-        'no-empty': ['warn', { allowEmptyCatch: true }],
-        'no-useless-escape': 'warn',
+        '@typescript-eslint/no-unsafe-function-type': 'error',
+        '@typescript-eslint/no-require-imports': 'error',
+        '@typescript-eslint/no-unused-expressions': 'error',
+        'no-empty': ['error', { allowEmptyCatch: true }],
+        'no-useless-escape': 'error',
       },
     },
 
@@ -61,24 +61,22 @@ export default defineConfig(
             message: 'usePrompt()/PromptDialog를 사용하세요 (window.prompt 금지).',
           },
         ],
-        'react-hooks/exhaustive-deps': 'warn',
+        'react-hooks/exhaustive-deps': 'error',
         'react-refresh/only-export-components': [
-          'warn',
+          'error',
           {
             allowConstantExport: true,
             allowExportNames: ['router', 'useConfirm', 'usePrompt'],
           },
         ],
-        // react-hooks v7 ships experimental React Compiler diagnostics as errors.
-        // Keep them as advisory warnings (matching sibling repos) so the gate fails
-        // on genuine rules-of-hooks bugs, not on idiomatic effect/render patterns.
-        'react-hooks/set-state-in-effect': 'warn',
-        'react-hooks/purity': 'warn',
-        'react-hooks/incompatible-library': 'warn',
-        'react-hooks/immutability': 'warn',
-        'react-hooks/refs': 'warn',
-        'react-hooks/preserve-manual-memoization': 'warn',
-        'react-hooks/static-components': 'warn',
+        // react-hooks v7 ships React Compiler diagnostics; enforce them as errors.
+        'react-hooks/set-state-in-effect': 'error',
+        'react-hooks/purity': 'error',
+        'react-hooks/incompatible-library': 'error',
+        'react-hooks/immutability': 'error',
+        'react-hooks/refs': 'error',
+        'react-hooks/preserve-manual-memoization': 'error',
+        'react-hooks/static-components': 'error',
       },
     },
 
@@ -125,7 +123,7 @@ export default defineConfig(
     },
   ],
   // React Compiler correctness gate — apps/web compiles with the compiler, so
-  // patterns it cannot safely compile are hard errors (not advisory).
+  // patterns it cannot safely compile are hard errors.
   {
     files: ['apps/web/**/*.{ts,tsx}'],
     plugins: {

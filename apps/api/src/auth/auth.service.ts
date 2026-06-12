@@ -16,6 +16,7 @@ import { randomReferralCode } from '../common/util/code'
 import { getAccessTokenExpiresIn } from './jwt-options'
 
 const REFRESH_TTL_DAYS = 30
+const WITHDRAWN_ACCOUNT_MESSAGE = '탈퇴한 계정이에요.'
 
 @Injectable()
 export class AuthService {
@@ -61,7 +62,9 @@ export class AuthService {
 
   async signIn(input: SignInInput, meta: { ip?: string; userAgent?: string } = {}) {
     const user = await this.prisma.user.findUnique({ where: { email: input.email } })
-    if (!user || !user.passwordHash)
+    if (!user) throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않아요')
+    if (user.withdrawnAt) throw new ForbiddenException(WITHDRAWN_ACCOUNT_MESSAGE)
+    if (!user.passwordHash)
       throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않아요')
     const ok = await argon2.verify(user.passwordHash, input.password)
     if (!ok) throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않아요')
@@ -107,6 +110,7 @@ export class AuthService {
 
     let user = await this.prisma.user.findUnique({ where: { email } })
     if (user) {
+      if (user.withdrawnAt) throw new ForbiddenException(WITHDRAWN_ACCOUNT_MESSAGE)
       if (user.isSuspended)
         throw new ForbiddenException('정지된 계정이에요. 고객센터로 문의해주세요.')
       // 기존 이메일 계정에 Google 식별자를 연결(최초 1회). passwordHash 는 그대로 둔다.
@@ -150,6 +154,13 @@ export class AuthService {
       })
       throw new UnauthorizedException('Refresh token invalid')
     }
+    if (record.user.withdrawnAt) {
+      await this.prisma.refreshToken.updateMany({
+        where: { userId: record.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      })
+      throw new ForbiddenException(WITHDRAWN_ACCOUNT_MESSAGE)
+    }
     if (record.expiresAt.getTime() < Date.now())
       throw new UnauthorizedException('Refresh token expired')
 
@@ -161,7 +172,10 @@ export class AuthService {
   }
 
   async me(userId: string) {
-    return this.prisma.user.findUnique({ where: { id: userId } })
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) throw new UnauthorizedException('User not found')
+    if (user.withdrawnAt) throw new ForbiddenException(WITHDRAWN_ACCOUNT_MESSAGE)
+    return user
   }
 
   serialize(user: User) {

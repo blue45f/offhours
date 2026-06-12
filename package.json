@@ -32,10 +32,14 @@
     "shared:build": "pnpm --filter @offhours/shared build",
     "shared:dev": "pnpm --filter @offhours/shared dev",
     "postinstall": "pnpm --filter @offhours/shared build",
-    "ci": "pnpm run format:check && pnpm run test:api-contracts && pnpm run test:frontend-a11y && pnpm run audit:api-contracts && pnpm run audit:frontend-a11y && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
+    "ci": "pnpm run format:check && pnpm run test:api-contracts && pnpm run test:frontend-a11y && pnpm run audit:api-contracts && pnpm run audit:frontend-a11y && pnpm run lint:ci && pnpm run typecheck && pnpm run test:run && pnpm run build",
     "validate:architecture": "node scripts/validate-architecture.mjs",
     "verify": "pnpm run validate:architecture && pnpm run ci",
     "verify:push": "pnpm run verify",
+    "sonar": "sonar-scanner",
+    "lint:strict": "eslint . --max-warnings=0",
+    "lint:ci": "pnpm run lint:strict",
+    "sonar:ci": "sonar-scanner -Dsonar.qualitygate.wait=true",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "prepare": "husky"
@@ -56,6 +60,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0 --fix",
       "prettier --write"
     ],
     "*.{json,md,yml,yaml,html,css}": [

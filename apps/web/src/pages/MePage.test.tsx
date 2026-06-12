@@ -2,10 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import type { Me } from '@offhours/shared'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import MePage from './MePage'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
+import { ConfirmProvider } from '../components/ui/ConfirmDialog'
 
 // RecentlyViewedRow 는 react-query 훅을 쓰므로 페이지 단위 테스트에서는 잘라낸다
 vi.mock('../components/space/RecentlyViewedRow', () => ({
@@ -29,10 +31,15 @@ const me: Me = {
 }
 
 function renderPage() {
+  const queryClient = new QueryClient()
   return render(
-    <MemoryRouter initialEntries={['/me']}>
-      <MePage />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <ConfirmProvider>
+        <MemoryRouter initialEntries={['/me']}>
+          <MePage />
+        </MemoryRouter>
+      </ConfirmProvider>
+    </QueryClientProvider>
   )
 }
 
@@ -79,5 +86,6 @@ describe('MePage 다크 모드 토글', () => {
     ] as const) {
       expect(screen.getByRole('link', { name: new RegExp(pattern) })).toHaveAttribute('href', href)
     }
+    expect(screen.getByRole('button', { name: '계정 탈퇴' })).toBeInTheDocument()
   })
 })

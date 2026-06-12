@@ -32,6 +32,7 @@ model User {
   isVerified     Boolean  @default(false)
   isSuspended    Boolean  @default(false)
   suspendReason  String?
+  withdrawnAt    DateTime?
   marketingOptIn Boolean  @default(false)
   referralCode   String   @unique
   referredById   String?

@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import type { UpdateProfileInput } from '@offhours/shared'
+import type { User } from '@prisma/client'
 
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -20,6 +21,35 @@ export class UsersService {
     return user
   }
 
+  async withdraw(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) throw new NotFoundException('User not found')
+
+    const withdrawnAt = user.withdrawnAt ?? new Date()
+    const [withdrawn] = await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          email: this.withdrawnEmail(userId),
+          passwordHash: null,
+          provider: 'withdrawn',
+          googleSub: null,
+          name: '탈퇴한 사용자',
+          phone: null,
+          avatarUrl: null,
+          isVerified: false,
+          marketingOptIn: false,
+          withdrawnAt,
+        },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: withdrawnAt },
+      }),
+    ])
+    return withdrawn
+  }
+
   async getPublic(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -36,5 +66,9 @@ export class UsersService {
     })
     if (!user) throw new NotFoundException('User not found')
     return { ...user, createdAt: user.createdAt.toISOString() }
+  }
+
+  private withdrawnEmail(userId: User['id']) {
+    return `withdrawn-${userId}@withdrawn.offhours.local`
   }
 }

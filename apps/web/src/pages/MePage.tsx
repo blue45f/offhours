@@ -1,22 +1,47 @@
-import { Link } from 'react-router-dom'
-import { Building2, Calendar, Heart, MessageCircle, Moon, Sparkles } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Building2, Calendar, Heart, MessageCircle, Moon, Sparkles, UserX } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 import { REFERRAL_BONUS_KRW } from '@offhours/shared'
 
 import { useMe } from '../store/auth'
+import { useWithdrawAccount } from '../features/auth/api'
 import { useThemeStore } from '../store/theme'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { Avatar } from '../components/ui/Avatar'
 import { Card, CardBody } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { useConfirm } from '../components/ui/ConfirmDialog'
 import { RecentlyViewedRow } from '../components/space/RecentlyViewedRow'
 import { cn } from '../utils/cn'
+import { getErrorMessage } from '../services/api'
 
 export default function MePage() {
   useDocumentTitle('마이페이지')
   const me = useMe()
   const { theme, toggle } = useThemeStore()
+  const confirm = useConfirm()
+  const navigate = useNavigate()
+  const withdraw = useWithdrawAccount()
   if (!me) return null
+
+  const handleWithdraw = async () => {
+    const ok = await confirm({
+      title: '계정을 탈퇴할까요?',
+      description: '프로필 정보가 익명화되고 현재 로그인된 세션이 종료돼요.',
+      confirmLabel: '탈퇴',
+      danger: true,
+    })
+    if (!ok) return
+    try {
+      await withdraw.mutateAsync()
+      toast.success('계정이 탈퇴 처리됐어요')
+      navigate('/', { replace: true })
+    } catch (err) {
+      toast.error(getErrorMessage(err, '탈퇴 처리에 실패했어요'))
+    }
+  }
 
   const items = [
     { to: '/me/reservations', icon: Calendar, label: '예약 내역', desc: '이전·진행 중인 예약' },
@@ -134,6 +159,31 @@ export default function MePage() {
           <span className="font-semibold text-[var(--color-fg)]">
             {me.pointsKRW.toLocaleString()}P
           </span>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-[var(--radius-xl)] hairline bg-[var(--color-bg-elevated)] p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-error)_14%,transparent)] text-[var(--color-error)]">
+              <UserX size={18} />
+            </span>
+            <div>
+              <h3 className="font-semibold">계정 관리</h3>
+              <p className="mt-1 text-sm text-[var(--color-fg-muted)]">
+                탈퇴하면 개인정보가 익명화되고 모든 로그인 세션이 종료돼요.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="destructive"
+            loading={withdraw.isPending}
+            onClick={handleWithdraw}
+            className="sm:shrink-0"
+          >
+            계정 탈퇴
+          </Button>
         </div>
       </div>
     </div>

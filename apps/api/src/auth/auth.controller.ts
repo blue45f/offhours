@@ -99,9 +99,14 @@ export class AuthController {
       return { accessToken: null, user: null }
     }
     const meta = { ip: req.ip, userAgent: req.headers['user-agent'] }
-    const result = await this.auth.refresh(token, meta)
-    setRefreshCookie(res, result.refreshToken, result.refreshExpiresAt)
-    return { accessToken: result.accessToken, user: result.user }
+    try {
+      const result = await this.auth.refresh(token, meta)
+      setRefreshCookie(res, result.refreshToken, result.refreshExpiresAt)
+      return { accessToken: result.accessToken, user: result.user }
+    } catch (err) {
+      clearRefreshCookie(res)
+      throw err
+    }
   }
 
   @HttpCode(204)
@@ -117,7 +122,6 @@ export class AuthController {
   @Get('me')
   async me(@CurrentUser() user: RequestUser) {
     const me = await this.auth.me(user.id)
-    if (!me) return null
     return this.auth.serialize(me)
   }
 }
