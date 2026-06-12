@@ -78,6 +78,7 @@ export default function SpaceDetailPage() {
 
   if (isLoading || !data) return <DetailSkeleton />
 
+  const { useCases: venueUseCases } = data
   const superHost = isSuperHost(data.venue.host.trustScore, data.venue.host.hostedCount)
 
   return (
@@ -99,12 +100,12 @@ export default function SpaceDetailPage() {
             <span className="text-[var(--color-fg-muted)]">최대 {data.capacityMax}명</span>
             {data.instantBook && <Badge tone="accent">즉시 예약</Badge>}
           </div>
-          {data.useCases && data.useCases.length > 0 && (
+          {venueUseCases && venueUseCases.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
               <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--color-fg-muted)] mr-1">
                 이런 모임에 좋아요
               </span>
-              {data.useCases.slice(0, 5).map((c) => {
+              {venueUseCases.slice(0, 5).map((c) => {
                 const meta = USE_CASE_META[c as UseCase]
                 if (!meta) return null
                 return (

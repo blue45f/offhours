@@ -86,7 +86,7 @@ export function ReservationPanel({ space }: Props) {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm<CreateReservationInput>({
-    resolver: zodResolver(CreateReservationSchema),
+    resolver: zodResolver(CreateReservationSchema as never),
   })
 
   async function onSubmit() {

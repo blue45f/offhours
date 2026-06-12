@@ -24,7 +24,7 @@ export default function SignupPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
-    resolver: zodResolver(SignUpSchema),
+    resolver: zodResolver(SignUpSchema as never),
     defaultValues: { marketingOptIn: false },
   })
 

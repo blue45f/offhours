@@ -39,8 +39,7 @@ export function ChatThreadView({ threadId }: { threadId: string }) {
     if (messages.isSuccess) {
       qc.invalidateQueries({ queryKey: chatKeys.list, exact: true })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadId, messages.isSuccess])
+  }, [threadId, messages.isSuccess, qc])
 
   // 새 메시지 도착 시에만 하단으로 — 즉시 점프(behavior: auto)라 reduced-motion 에도 안전
   useEffect(() => {

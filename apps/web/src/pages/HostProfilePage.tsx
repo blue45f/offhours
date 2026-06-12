@@ -53,7 +53,9 @@ export default function HostProfilePage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CreateHostProfileInput>({
-    resolver: zodResolver(CreateHostProfileSchema) as unknown as Resolver<CreateHostProfileInput>,
+    resolver: zodResolver(
+      CreateHostProfileSchema as never
+    ) as unknown as Resolver<CreateHostProfileInput>,
     defaultValues: {
       businessName: '',
       businessNumber: '',

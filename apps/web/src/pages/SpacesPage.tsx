@@ -29,6 +29,7 @@ export default function SpacesPage() {
   const [params, setParams] = useSearchParams()
   const [filterOpen, setFilterOpen] = useState(false)
   const geo = useGeolocation()
+  const geoCoords = geo.coords
   usePageMeta({
     title: '공간 둘러보기',
     description:
@@ -39,7 +40,7 @@ export default function SpacesPage() {
   const liveWithinHours = params.get('liveWithinHours')
     ? Number(params.get('liveWithinHours'))
     : undefined
-  const useGeo = !!radiusKm && geo.coords != null
+  const useGeo = !!radiusKm && geoCoords != null
 
   const query: SpaceSearchParams = useMemo(
     () => ({
@@ -54,18 +55,18 @@ export default function SpacesPage() {
       useCases: params.get('useCases') ?? undefined,
       instantBook: params.get('instantBook') === 'true' ? true : undefined,
       verifiedOnly: params.get('verifiedOnly') === 'true' ? true : undefined,
-      lat: useGeo ? geo.coords!.lat : undefined,
-      lng: useGeo ? geo.coords!.lng : undefined,
+      lat: useGeo && geoCoords ? geoCoords.lat : undefined,
+      lng: useGeo && geoCoords ? geoCoords.lng : undefined,
       radiusKm: useGeo ? radiusKm : undefined,
       liveWithinHours,
       sort: (params.get('sort') as SpaceSearchParams['sort']) ?? 'popular',
       page: params.get('page') ? Math.max(1, Number(params.get('page'))) : 1,
       pageSize: 24,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [params, geo.coords?.lat, geo.coords?.lng, useGeo, radiusKm, liveWithinHours]
+    [params, useGeo, geoCoords, radiusKm, liveWithinHours]
   )
 
+  const { useCases: queryUseCases } = query
   const { data, isLoading } = useSpacesSearch(query)
 
   function set(key: string, value: string | undefined) {
@@ -103,8 +104,8 @@ export default function SpacesPage() {
       `${formatKRWShort(query.priceMin ?? 0)}~${query.priceMax ? formatKRWShort(query.priceMax) : '∞'}`
     )
   if (query.amenities) activeFilters.push(`편의 ${query.amenities.split(',').length}개`)
-  if (query.useCases) {
-    const codes = query.useCases.split(',').filter(Boolean) as UseCase[]
+  if (queryUseCases) {
+    const codes = queryUseCases.split(',').filter(Boolean) as UseCase[]
     const labels = codes.map((c) => USE_CASE_META[c]?.label ?? c).join(', ')
     activeFilters.push(`모임: ${labels}`)
   }
@@ -261,7 +262,7 @@ export default function SpacesPage() {
           onChange={(v) => set('region', v)}
           allLabel="전체 지역"
         />
-        <UseCaseChipBar value={query.useCases} onChange={(v) => set('useCases', v)} />
+        <UseCaseChipBar value={queryUseCases} onChange={(v) => set('useCases', v)} />
       </div>
 
       {activeFilters.length > 0 && (
@@ -422,14 +423,15 @@ function FilterContent({
   query: SpaceSearchParams
   onApply: (patches: Record<string, string | number | undefined>) => void
 }) {
+  const { useCases: queryUseCases } = query
   const [capacity, setCapacity] = useState<number | undefined>(query.capacity)
   const [priceMin, setPriceMin] = useState<number | undefined>(query.priceMin)
   const [priceMax, setPriceMax] = useState<number | undefined>(query.priceMax)
   const [amenities, setAmenities] = useState<string[]>(
     query.amenities ? query.amenities.split(',') : []
   )
-  const [useCases, setUseCases] = useState<UseCase[]>(
-    query.useCases ? (query.useCases.split(',').filter(Boolean) as UseCase[]) : []
+  const [selectedUseCases, setSelectedUseCases] = useState<UseCase[]>(
+    queryUseCases ? (queryUseCases.split(',').filter(Boolean) as UseCase[]) : []
   )
   const [instantBook, setInstantBook] = useState(query.instantBook ?? false)
   const [verifiedOnly, setVerifiedOnly] = useState(query.verifiedOnly ?? false)
@@ -440,7 +442,7 @@ function FilterContent({
     setAmenities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]))
   }
   function toggleUseCase(c: UseCase) {
-    setUseCases((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
+    setSelectedUseCases((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
   }
 
   return (
@@ -450,7 +452,11 @@ function FilterContent({
           {(Object.keys(USE_CASE_META) as UseCase[]).map((c) => {
             const meta = USE_CASE_META[c]
             return (
-              <Chip key={c} selected={useCases.includes(c)} onClick={() => toggleUseCase(c)}>
+              <Chip
+                key={c}
+                selected={selectedUseCases.includes(c)}
+                onClick={() => toggleUseCase(c)}
+              >
                 <span className="mr-1.5">{meta.emoji}</span>
                 {meta.label}
               </Chip>
@@ -561,7 +567,7 @@ function FilterContent({
               priceMin,
               priceMax,
               amenities: amenities.length ? amenities.join(',') : undefined,
-              useCases: useCases.length ? useCases.join(',') : undefined,
+              useCases: selectedUseCases.length ? selectedUseCases.join(',') : undefined,
               instantBook: instantBook ? 'true' : undefined,
               verifiedOnly: verifiedOnly ? 'true' : undefined,
               category,

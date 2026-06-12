@@ -79,12 +79,25 @@ if (!exists('vercel.json')) {
     '"installCommand": "corepack enable && pnpm install --frozen-lockfile"',
     '"buildCommand": "pnpm --filter @offhours/shared build && pnpm --filter @offhours/web build"',
     '"outputDirectory": "apps/web/dist"',
-    '"destination": "https://offhours-api.onrender.com/api/:path*"',
   ]
   for (const snippet of requiredVercelSnippets) {
     if (!vercel.includes(snippet)) {
       issues.push(`vercel.json must include ${snippet}`)
     }
+  }
+  // The web app calls same-origin /api/* and relies on a Vercel rewrite to the
+  // deployed API origin. The host moves with the infra (Render -> shared EC2),
+  // so validate the rewrite shape instead of pinning a hostname.
+  try {
+    const rewrites = JSON.parse(vercel).rewrites ?? []
+    const apiRewrite = rewrites.find((rule) => rule.source === '/api/:path*')
+    if (!apiRewrite || !/^https:\/\/\S+\/api\/:path\*$/.test(apiRewrite.destination ?? '')) {
+      issues.push(
+        'vercel.json must rewrite "/api/:path*" to an https API origin ("/api/:path*" preserved)'
+      )
+    }
+  } catch {
+    issues.push('vercel.json is not valid JSON')
   }
 }
 if (!exists('.github/workflows/deploy-vercel-web.yml')) {
