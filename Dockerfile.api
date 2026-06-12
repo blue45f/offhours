@@ -28,13 +28,7 @@ ENV NODE_ENV=production
 ENV PORT=3000
 RUN apk add --no-cache libc6-compat openssl
 COPY --from=build /app ./
-# 부팅 시 db push 용 prisma CLI — 번들 package.json 의 workspace:* 때문에 격리 설치.
-RUN mkdir -p /opt/prisma && cd /opt/prisma \
- && npm init -y >/dev/null \
- && npm install --no-audit --no-fund prisma@7 @prisma/engines >/dev/null 2>&1
-# prisma.config.ts 가 `prisma/config` 를 import 하므로 격리 설치본을 require 경로에 노출한다.
-ENV NODE_PATH=/opt/prisma/node_modules
-ENV PATH=/opt/prisma/node_modules/.bin:$PATH
 EXPOSE 3000
-# 스키마 동기화(db push, 멱등 — migrations 디렉터리 없는 db push 컨벤션) 후 기동.
-CMD ["sh", "-c", "prisma db push --skip-generate --schema prisma/schema.prisma && node dist/src/main.js"]
+# 스키마 동기화(db push)는 배포 스크립트가 빌드 컨텍스트에서 수행한다 — 격리 설치한
+# 단독 prisma CLI 는 prisma.config.ts(ts·dotenv import) 를 로드하지 못해 부팅이 깨진다.
+CMD ["node", "dist/src/main.js"]
