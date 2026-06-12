@@ -13,11 +13,19 @@ import { GoogleSignInButton } from '../features/auth/GoogleSignInButton'
 import { useIsAuthed } from '../store/auth'
 import { getErrorMessage } from '../services/api'
 
+// seed.ts 가 만드는 공개 데모 계정 — 역할별 둘러보기용
+const DEMO_ACCOUNTS = [
+  { role: '게스트', hint: '공간 탐색·예약', email: 'guest@offhours.kr', password: 'guest1234' },
+  { role: '호스트', hint: '공간 등록·운영', email: 'host1@offhours.kr', password: 'host1234' },
+  { role: '관리자', hint: '운영 콘솔', email: 'admin@offhours.kr', password: 'admin1234' },
+] as const
+
 export default function LoginPage() {
   const isAuthed = useIsAuthed()
   const navigate = useNavigate()
   const location = useLocation()
   const [showPwd, setShowPwd] = useState(false)
+  const [demoRole, setDemoRole] = useState<string | null>(null)
   const signIn = useSignIn()
   const authConfig = useAuthConfig()
   const googleSignIn = useGoogleSignIn()
@@ -36,8 +44,9 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm<SignInInput>({ resolver: zodResolver(SignInSchema) })
+  } = useForm<SignInInput>({ resolver: zodResolver(SignInSchema as never) })
 
   if (isAuthed) return <Navigate to={from} replace />
 
@@ -49,6 +58,14 @@ export default function LoginPage() {
     } catch (e) {
       toast.error(getErrorMessage(e, '로그인에 실패했어요'))
     }
+  }
+
+  // 데모 버튼 = 자동 입력 + 제출. 폼을 거쳐가므로 검증·로딩 상태를 그대로 공유한다.
+  function signInAsDemo(account: (typeof DEMO_ACCOUNTS)[number]) {
+    setValue('email', account.email, { shouldValidate: true })
+    setValue('password', account.password, { shouldValidate: true })
+    setDemoRole(account.role)
+    void handleSubmit(onSubmit)().finally(() => setDemoRole(null))
   }
 
   return (
@@ -113,12 +130,40 @@ export default function LoginPage() {
             가입하기
           </Link>
         </div>
-        <div className="mt-8 rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-4 text-xs text-[var(--color-fg-muted)] leading-relaxed">
-          <strong className="text-[var(--color-fg)]">시드 계정</strong> · 게스트{' '}
-          <code>guest@offhours.kr / guest1234</code> · 호스트{' '}
-          <code>host1@offhours.kr / host1234</code> · 관리자{' '}
-          <code>admin@offhours.kr / admin1234</code>
-        </div>
+        <section
+          aria-label="데모 계정으로 바로 로그인"
+          className="mt-8 rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-4"
+        >
+          <p className="text-xs leading-relaxed text-[var(--color-fg-muted)]">
+            <strong className="text-[var(--color-fg)]">데모 계정으로 바로 둘러보기</strong> · 클릭
+            한 번이면 자동 입력 후 로그인됩니다.
+          </p>
+          <div className="mt-3 grid gap-2">
+            {DEMO_ACCOUNTS.map((account) => (
+              <Button
+                key={account.role}
+                type="button"
+                variant="secondary"
+                size="sm"
+                full
+                loading={demoRole === account.role}
+                disabled={isSubmitting && demoRole !== account.role}
+                onClick={() => signInAsDemo(account)}
+                className="justify-between"
+              >
+                <span className="font-semibold">
+                  {account.role}
+                  <span className="ml-1.5 font-normal text-[var(--color-fg-muted)]">
+                    {account.hint}
+                  </span>
+                </span>
+                <span className="font-normal text-xs text-[var(--color-fg-muted)]">
+                  {account.email}
+                </span>
+              </Button>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   )
