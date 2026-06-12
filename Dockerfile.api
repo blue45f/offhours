@@ -10,7 +10,9 @@ FROM node:22-alpine AS build
 WORKDIR /repo
 RUN corepack enable && apk add --no-cache libc6-compat openssl
 COPY . .
-RUN pnpm install --frozen-lockfile
+# api+shared 의 의존성만 설치한다 — web 앱 deps(framer-motion·radix·tanstack·msw 등)를
+# 빼면 t3.micro 빌드 디스크 피크가 크게 줄어 no-space 실패를 피한다.
+RUN pnpm install --frozen-lockfile --filter "@offhours/api..." --filter "@offhours/shared..."
 RUN pnpm --filter @offhours/api run db:generate \
  && pnpm --filter @offhours/api run build
 # prod 전용 자가완결 번들. --legacy: 빌드 산출물 없는 워크스페이스 dep 경로 호환.

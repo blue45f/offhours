@@ -5,6 +5,26 @@ import * as argon2 from 'argon2'
 import { randomBytes } from 'crypto'
 
 const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+
+// 구별 실제 중심 좌표 — 시드 주소(addressRoad)와 정합하는 위치를 부여한다.
+// 기존엔 Math.random() 지터라 거리 정렬이 주소와 무관했다(위치 실값화 #26).
+const DISTRICT_COORDS: Record<string, { lat: number; lng: number }> = {
+  마포구: { lat: 37.5663, lng: 126.9019 },
+  성동구: { lat: 37.5634, lng: 127.0369 },
+  용산구: { lat: 37.5326, lng: 126.9905 },
+  종로구: { lat: 37.5735, lng: 126.979 },
+  서대문구: { lat: 37.5791, lng: 126.9368 },
+  송파구: { lat: 37.5145, lng: 127.1059 },
+  영등포구: { lat: 37.5264, lng: 126.8962 },
+  강남구: { lat: 37.5172, lng: 127.0473 },
+  성남시: { lat: 37.42, lng: 127.1265 },
+}
+// 같은 구 내 베뉴를 결정적으로 분산(약 ±0.6~1.2km) — 인덱스 기반이라 시드마다 안정적.
+function venueCoords(district: string, i: number): { lat: number; lng: number } {
+  const base = DISTRICT_COORDS[district] ?? { lat: 37.5665, lng: 126.978 }
+  return { lat: base.lat + ((i % 5) - 2) * 0.006, lng: base.lng + (((i * 3) % 5) - 2) * 0.006 }
+}
+
 function randomCode(prefix: string, length = 6) {
   let s = ''
   for (let i = 0; i < length; i++) s += ALPHA[Math.floor(Math.random() * ALPHA.length)]
@@ -535,8 +555,8 @@ async function main() {
         addressRoad: spec.addressRoad,
         region: spec.region,
         district: spec.district,
-        lat: 37.55 + Math.random() * 0.1,
-        lng: 126.95 + Math.random() * 0.1,
+        lat: venueCoords(spec.district, i).lat,
+        lng: venueCoords(spec.district, i).lng,
         description: `${spec.region} ${spec.district}에 위치한 공간입니다.`,
         status: 'ACTIVE',
         approvedAt: new Date(),
