@@ -5,7 +5,19 @@
  */
 import type { GalleryPhoto, SpaceCard, SpaceDetail, SpacePhoto } from '@offhours/shared'
 
-const PHOTO = (seed: string) => `https://images.offhours.mock/${seed}.jpg`
+const PHOTO = (seed: string) => {
+  if (seed.startsWith('hannam-rooftop-lounge')) return '/images/hannam-rooftop.jpg'
+  if (seed.startsWith('seongsu-photo-studio-grain')) return '/images/seongsu-studio.jpg'
+  if (seed.startsWith('yeonnam-garden-house')) return '/images/yeonnam-house.jpg'
+  if (seed.startsWith('euljiro-hidden-bar')) return '/images/euljiro-bar.jpg'
+  if (seed.startsWith('hapjeong-white-gallery')) return '/images/hapjeong-gallery.jpg'
+  if (seed.startsWith('gangnam-seminar-room')) return '/images/gangnam-seminar.jpg'
+  if (seed.startsWith('host-')) {
+    const name = seed.replace('host-', '')
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=5a6f4f&color=ffffff&bold=true`
+  }
+  return '/images/hannam-rooftop.jpg' // Safe fallback
+}
 
 const photoSet = (slug: string, n: number): SpacePhoto[] =>
   Array.from({ length: n }, (_, i) => ({

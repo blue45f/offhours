@@ -186,37 +186,83 @@ function Hero() {
       {/* 하단 헤어라인 — 인테리어 기본 envelope와 동일한 구조 신호 */}
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-[var(--color-border)]" />
 
-      <div className="container-page pt-16 pb-14 md:pt-24 md:pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.2, 0, 0, 1] }}
-          className="max-w-3xl"
-        >
-          <span className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] hairline bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)] shadow-[var(--shadow-sm)]">
-            <LightStillOn />
-            영업이 끝난 뒤에도, 불은 켜져 있습니다
-          </span>
-          <h1 className="mt-7 text-display serif leading-[1.08]">
-            마감한 가게의 불을
-            <br />
-            당신의 <RotatingNoun />
-            으로 켭니다.
-          </h1>
-          <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-fg-muted)]">
-            카페·바·레스토랑·갤러리의 휴무일과 영업 종료 후. 평소엔 만날 수 없던 감성 공간을
-            파티·스몰웨딩·모임·팝업으로 시간 단위 통대관 하세요.
-          </p>
-        </motion.div>
+      <div className="container-page pt-12 pb-14 md:pt-20 md:pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="lg:col-span-7 space-y-8">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.2, 0, 0, 1] }}
+            >
+              <span className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] hairline bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)] shadow-[var(--shadow-sm)]">
+                <LightStillOn />
+                영업이 끝난 뒤에도, 불은 켜져 있습니다
+              </span>
+              <h1 className="mt-6 text-display serif leading-[1.1]">
+                마감한 가게의 불을
+                <br />
+                당신의 <RotatingNoun />
+                으로 켭니다.
+              </h1>
+              <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-fg-muted)]">
+                카페·바·레스토랑·갤러리의 휴무일과 영업 종료 후. 평소엔 만날 수 없던 감성 공간을
+                파티·스몰웨딩·모임·팝업으로 시간 단위 통대관 하세요.
+              </p>
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15, ease: [0.2, 0, 0, 1] }}
-          className="mt-10"
-        >
-          <HeroSearch />
-        </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.2, 0, 0, 1] }}
+            >
+              <HeroSearch />
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.2, 0, 0, 1] }}
+            className="hidden lg:block lg:col-span-5"
+          >
+            <div className="relative group rounded-[var(--radius-2xl)] bg-[var(--color-bg-elevated)] p-3 hairline shadow-[var(--shadow-md)] transition-all duration-[var(--duration-slow)] hover:scale-[1.01] hover:shadow-[var(--shadow-lg)]">
+              <div className="overflow-hidden rounded-[var(--radius-xl)] aspect-[4/3] relative">
+                <img
+                  src="/images/hannam-rooftop.jpg"
+                  alt="한남동 루프탑 라운지"
+                  className="object-cover size-full transition-transform duration-[4000ms] group-hover:scale-105"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,20,0.6)] via-transparent to-transparent"
+                />
+                <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent)] shadow-[var(--shadow-sm)]">
+                  <span className="relative inline-flex size-2 items-center justify-center">
+                    <span className="absolute inset-0 rounded-full bg-[var(--color-accent)] animate-pulse" />
+                    <span className="size-1 rounded-full bg-[var(--color-accent-soft)]" />
+                  </span>
+                  오늘 22:00 예약 가능
+                </span>
+              </div>
+              <div className="mt-4 px-2 pb-2">
+                <span className="text-xs font-semibold text-[var(--color-fg-subtle)]">
+                  용산구 · 루프탑
+                </span>
+                <div className="flex items-center justify-between mt-1">
+                  <h3 className="font-bold serif text-lg text-[var(--color-fg)]">
+                    한남동 루프탑 라운지
+                  </h3>
+                  <span className="text-sm font-semibold text-[var(--color-primary)]">
+                    시간당 80,000원
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-[var(--color-fg-muted)] line-clamp-1">
+                  남산타워가 한눈에 보이는 조용하고 따뜻한 옥상 정원
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   )
