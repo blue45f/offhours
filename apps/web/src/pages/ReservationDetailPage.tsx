@@ -1,6 +1,3 @@
-import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import toast from 'react-hot-toast'
 import {
   CANCELLATION_POLICIES,
   CleaningJobStatusLabel,
@@ -9,10 +6,24 @@ import {
   ReservationStatusLabel,
   calcRefundRate,
   payableKRW,
+  CorporateTaxTypeLabel,
 } from '@offhours/shared'
 import { Building2, Clock, MessageCircle, ShieldCheck, Share2, Sparkles, X } from 'lucide-react'
-import { CorporateTaxTypeLabel } from '@offhours/shared'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import { ArrivalKitCard } from '../components/reservation/ArrivalKitCard'
+import { ReservationReviewCard } from '../components/reservation/ReservationReviewCard'
+import { SplitPaymentPanel } from '../components/reservation/SplitPaymentPanel'
+import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
+import { Dialog } from '../components/ui/Dialog'
+import { Field, Input, Textarea } from '../components/ui/Input'
+import { Select } from '../components/ui/Select'
+import { useOpenChat } from '../features/chat/api'
+import { useTossPayment } from '../features/payments/useTossPayment'
 import {
   useCancelReservation,
   useExtendReservation,
@@ -20,21 +31,10 @@ import {
   useFileClaim,
   useReservationDetail,
 } from '../features/reservations/api'
-import { useMe } from '../store/auth'
-import { useOpenChat } from '../features/chat/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { Button } from '../components/ui/Button'
-import { Badge } from '../components/ui/Badge'
-import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
-import { Dialog } from '../components/ui/Dialog'
-import { Field, Input, Textarea } from '../components/ui/Input'
-import { Select } from '../components/ui/Select'
-import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 import { getErrorMessage } from '../services/api'
-import { useTossPayment } from '../features/payments/useTossPayment'
-import { SplitPaymentPanel } from '../components/reservation/SplitPaymentPanel'
-import { ArrivalKitCard } from '../components/reservation/ArrivalKitCard'
-import { ReservationReviewCard } from '../components/reservation/ReservationReviewCard'
+import { useMe } from '../store/auth'
+import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 
 export default function ReservationDetailPage() {
   const { id } = useParams<{ id: string }>()

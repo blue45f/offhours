@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 
 import { PrismaService } from '../prisma/prisma.service'
+
 import { SlotsService } from './slots.service'
 
 @Injectable()

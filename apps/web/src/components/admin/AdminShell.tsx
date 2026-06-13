@@ -1,4 +1,3 @@
-import { NavLink } from 'react-router-dom'
 import {
   AlertTriangle,
   Building2,
@@ -8,9 +7,11 @@ import {
   ShieldAlert,
   Users,
 } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { NavLink } from 'react-router-dom'
 
 import { cn } from '../../utils/cn'
+
+import type { ReactNode } from 'react'
 
 const items = [
   { to: '/admin', icon: Settings, label: '대시보드', end: true },

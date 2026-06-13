@@ -1,5 +1,5 @@
-import { Navigate, useSearchParams } from 'react-router-dom'
 import { MessageCircle } from 'lucide-react'
+import { Navigate, useSearchParams } from 'react-router-dom'
 
 import { ChatShell } from '../components/chat/ChatShell'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'

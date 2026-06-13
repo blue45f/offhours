@@ -5,6 +5,9 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { Prisma, Role } from '@prisma/client'
+
+import { PrismaService } from '../prisma/prisma.service'
+
 import type {
   ArrivalGuide,
   CreateHostProfileInput,
@@ -12,8 +15,6 @@ import type {
   HostVenueArrival,
   UpdateHostProfileInput,
 } from '@offhours/shared'
-
-import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class HostService {

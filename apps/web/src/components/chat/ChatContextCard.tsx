@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom'
-import { CalendarDays, ChevronRight, MessageCircleQuestion } from 'lucide-react'
 import { ReservationStatusLabel, type ChatSummary } from '@offhours/shared'
+import { CalendarDays, ChevronRight, MessageCircleQuestion } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
-import { Badge } from '../ui/Badge'
 import { formatDateTimeKR } from '../../utils/format'
+import { Badge } from '../ui/Badge'
 
 /**
  * 스레드 상단의 예약 컨텍스트 카드 — 무슨 건으로 나누는 대화인지(예약/예약 전 문의)와

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import { protectionCoverage, protectionFee } from './protection'
 
 describe('protectionFee', () => {

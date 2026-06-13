@@ -1,7 +1,7 @@
-import { useNavigate, useParams } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import { CheckCircle2, Clock, MapPin, Users, Wallet } from 'lucide-react'
 import { SplitMemberStatusLabel } from '@offhours/shared'
+import { CheckCircle2, Clock, MapPin, Users, Wallet } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { PageLoader } from '../components/layout/PageLoader'
 import { Button } from '../components/ui/Button'

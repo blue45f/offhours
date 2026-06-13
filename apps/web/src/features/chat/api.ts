@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { ChatMessage, ChatSummary, SendMessageInput } from '@offhours/shared'
 
 import { api } from '../../services/api'
+
+import type { ChatMessage, ChatSummary, SendMessageInput } from '@offhours/shared'
 
 export const chatKeys = {
   list: ['chats'] as const,

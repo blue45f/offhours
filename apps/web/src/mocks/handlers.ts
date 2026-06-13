@@ -1,8 +1,9 @@
-import { http, HttpResponse } from 'msw'
 import { paginated } from '@offhours/shared'
-import type { Paginated, SpaceCard, Slot } from '@offhours/shared'
+import { http, HttpResponse } from 'msw'
 
 import { galleryFor, mockSpaces, toCard, toDetail } from './data'
+
+import type { Paginated, SpaceCard, Slot } from '@offhours/shared'
 
 /**
  * MSW READ-only 핸들러: 브라우징·검색·상세 디자인 이터레이션/데모용.

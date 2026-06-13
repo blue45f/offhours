@@ -4,9 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import type { CreateSplitInput, PublicSplitInfo, SplitDetail } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
+
+import type { CreateSplitInput, PublicSplitInfo, SplitDetail } from '@offhours/shared'
 
 @Injectable()
 export class SplitsService {

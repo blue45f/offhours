@@ -11,10 +11,11 @@ import {
   type UpdateSpaceInput,
 } from '@offhours/shared'
 
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
-import { Public } from '../common/decorators/public.decorator'
 import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
+import { Public } from '../common/decorators/public.decorator'
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
+
 import { SpacesService } from './spaces.service'
 
 @ApiTags('spaces')

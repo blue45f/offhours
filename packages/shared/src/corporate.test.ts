@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import { creditBonus } from './corporate'
 
 describe('creditBonus', () => {

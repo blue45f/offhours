@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { SpaceSearch } from '@offhours/shared'
 
 import { SpacesService } from './spaces.service'
+
+import type { SpaceSearch } from '@offhours/shared'
 
 /**
  * 공간 검색(search) 회귀 방지 — 가장 복잡한 미검증 서비스. 모든 게스트가 거치는 표면이라

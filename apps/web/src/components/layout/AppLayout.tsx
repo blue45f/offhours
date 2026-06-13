@@ -1,11 +1,12 @@
 import { Outlet } from 'react-router-dom'
 
-import { Header } from './Header'
-import { Footer } from './Footer'
-import { BottomNav } from './BottomNav'
-import { RouteAnnouncer } from './RouteAnnouncer'
-import { CompareBar } from '../space/CompareBar'
 import { CommandPalette } from '../CommandPalette'
+import { CompareBar } from '../space/CompareBar'
+
+import { BottomNav } from './BottomNav'
+import { Footer } from './Footer'
+import { Header } from './Header'
+import { RouteAnnouncer } from './RouteAnnouncer'
 
 export function AppLayout() {
   return (

@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { PricingRule } from '@prisma/client'
 
 import { SlotsService } from './slots.service'
+
+import type { PricingRule } from '@prisma/client'
 
 /**
  * 연장 추가 요금 회귀 방지 — calcExtension = 동적 시간당가 × 시간 × 용도 배수.

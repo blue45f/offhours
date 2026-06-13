@@ -1,4 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { api } from '../../services/api'
+import { useIsAuthed } from '../../store/auth'
+
 import type {
   CastVoteInput,
   CollectionDetail,
@@ -6,9 +10,6 @@ import type {
   CreateCollectionInput,
   UpdateCollectionInput,
 } from '@offhours/shared'
-
-import { api } from '../../services/api'
-import { useIsAuthed } from '../../store/auth'
 
 export const collectionKeys = {
   mine: ['collections', 'mine'] as const,

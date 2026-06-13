@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import toast from 'react-hot-toast'
 import {
   AlertTriangle,
   Copy,
@@ -12,6 +10,9 @@ import {
   Sparkles,
   Wifi,
 } from 'lucide-react'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+
 import type { ArrivalGuide } from '@offhours/shared'
 
 interface Props {

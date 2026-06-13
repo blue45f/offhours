@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { api } from '../../services/api'
+
 import type {
   ConnectExternalCalendarInput,
   CreateManualBlockInput,
   HostCalendarOverview,
 } from '@offhours/shared'
-
-import { api } from '../../services/api'
 
 export function useHostCalendars() {
   return useQuery({

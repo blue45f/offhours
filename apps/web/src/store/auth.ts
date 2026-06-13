@@ -1,7 +1,8 @@
 import { create } from 'zustand'
-import type { Me } from '@offhours/shared'
 
 import { api } from '../services/api'
+
+import type { Me } from '@offhours/shared'
 
 interface AuthState {
   accessToken: string | null

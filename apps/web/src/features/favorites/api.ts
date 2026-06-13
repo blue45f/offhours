@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { SpaceCard } from '@offhours/shared'
 
 import { api } from '../../services/api'
 import { useIsAuthed } from '../../store/auth'
+
+import type { SpaceCard } from '@offhours/shared'
 
 export function useFavorites() {
   return useQuery({

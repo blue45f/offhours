@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { PayoutCycleSchema, TaxTypeSchema } from './enums'
 
 export const BusinessNumberSchema = z

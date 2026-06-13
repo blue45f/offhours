@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { ReportReasonSchema, ReportStatusSchema, ReportTargetSchema } from './enums'
 
 export const CreateReportSchema = z.object({

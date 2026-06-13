@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
 import { ArrowRight, GitCompare, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { COMPARE_MAX, useCompareStore } from '../../store/compare'
 

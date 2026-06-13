@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { BlockSourceLabel, type ExternalCalendar, type VenueBlock } from '@offhours/shared'
 import {
   AlertTriangle,
   Calendar,
@@ -9,7 +8,8 @@ import {
   RefreshCcw,
   Trash2,
 } from 'lucide-react'
-import { BlockSourceLabel, type ExternalCalendar, type VenueBlock } from '@offhours/shared'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'

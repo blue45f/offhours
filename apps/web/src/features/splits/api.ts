@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateSplitInput, PublicSplitInfo, SplitDetail } from '@offhours/shared'
 
 import { api } from '../../services/api'
+
+import type { CreateSplitInput, PublicSplitInfo, SplitDetail } from '@offhours/shared'
 
 export function useReservationSplit(reservationId?: string) {
   return useQuery({

@@ -1,6 +1,6 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
-
 import { cn } from '../../utils/cn'
+
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 interface ChipProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean

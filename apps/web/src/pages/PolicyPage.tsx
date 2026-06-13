@@ -2,6 +2,8 @@ import { format, parseISO } from 'date-fns'
 import { ko } from 'date-fns/locale/ko'
 import { ExternalLink, RefreshCw } from 'lucide-react'
 
+import { Button } from '../components/ui/Button'
+import { Skeleton } from '../components/ui/Skeleton'
 import {
   usePolicy,
   policyExternalUrl,
@@ -9,8 +11,6 @@ import {
   type PublicPolicy,
 } from '../features/policies/api'
 import { parsePolicyBody } from '../features/policies/policyBody'
-import { Button } from '../components/ui/Button'
-import { Skeleton } from '../components/ui/Skeleton'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 const POLICY_META: Record<PolicySlug, { title: string; description: string }> = {

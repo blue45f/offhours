@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma, type Role } from '@prisma/client'
+
+import { NotificationsService } from '../notifications/notifications.service'
+import { PrismaService } from '../prisma/prisma.service'
+import { ReviewsService } from '../reviews/reviews.service'
+
 import type {
   BroadcastNotificationInput,
   ModerateContentInput,
@@ -8,10 +13,6 @@ import type {
   ResolveReportInput,
   SetSuspendedInput,
 } from '@offhours/shared'
-
-import { PrismaService } from '../prisma/prisma.service'
-import { NotificationsService } from '../notifications/notifications.service'
-import { ReviewsService } from '../reviews/reviews.service'
 
 @Injectable()
 export class AdminService {

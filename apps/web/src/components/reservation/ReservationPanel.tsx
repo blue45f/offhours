@@ -1,6 +1,3 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   CANCELLATION_POLICIES,
@@ -12,25 +9,27 @@ import {
   type Purpose,
   type SpaceDetail,
 } from '@offhours/shared'
+import { Clock, Coins, RefreshCw, ShieldCheck, Users, Building2, Wallet } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
-import { Clock, Coins, RefreshCw, ShieldCheck, Users } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
 
-import { Button } from '../ui/Button'
-import { Field, Input, Textarea } from '../ui/Input'
-import { Select } from '../ui/Select'
-import { Card } from '../ui/Card'
+import { useCorporateProfile } from '../../features/corporate/api'
 import { useCreateReservation, useCreateRecurring } from '../../features/reservations/api'
 import { defaultHeadcount } from '../../features/reservations/headcount'
 import { useQuote } from '../../features/spaces/api'
-import { AvailabilityCalendar } from './AvailabilityCalendar'
-import { AddonPicker } from './AddonPicker'
-import { useCorporateProfile } from '../../features/corporate/api'
-import { useIsAuthed, useMe } from '../../store/auth'
-import { Link } from 'react-router-dom'
-import { Building2, Wallet } from 'lucide-react'
-import { WaitlistButton } from '../space/WaitlistButton'
-import { formatKRW } from '../../utils/format'
 import { getErrorMessage } from '../../services/api'
+import { useIsAuthed, useMe } from '../../store/auth'
+import { formatKRW } from '../../utils/format'
+import { WaitlistButton } from '../space/WaitlistButton'
+import { Button } from '../ui/Button'
+import { Card } from '../ui/Card'
+import { Field, Input, Textarea } from '../ui/Input'
+import { Select } from '../ui/Select'
+
+import { AddonPicker } from './AddonPicker'
+import { AvailabilityCalendar } from './AvailabilityCalendar'
 
 interface Props {
   space: SpaceDetail
@@ -260,6 +259,7 @@ export function ReservationPanel({ space }: Props) {
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
+                    aria-label="법인 결제 (세금계산서)"
                     checked={useCorporate}
                     onChange={(e) => setUseCorporate(e.target.checked)}
                     className="mt-0.5 size-4 accent-[var(--color-primary)]"
@@ -279,6 +279,7 @@ export function ReservationPanel({ space }: Props) {
                   <label className="flex items-center gap-2 cursor-pointer border-t border-[var(--color-border-subtle)] pt-2">
                     <input
                       type="checkbox"
+                      aria-label="영업 외 크레딧 사용"
                       checked={useCredit}
                       onChange={(e) => setUseCredit(e.target.checked)}
                       className="size-4 accent-[var(--color-primary)]"
@@ -315,6 +316,7 @@ export function ReservationPanel({ space }: Props) {
           <label className="flex items-center gap-2 cursor-pointer rounded-[var(--radius-lg)] hairline p-3">
             <input
               type="checkbox"
+              aria-label="적립 포인트 사용"
               checked={usePoints}
               onChange={(e) => setUsePoints(e.target.checked)}
               className="size-4 accent-[var(--color-primary)]"

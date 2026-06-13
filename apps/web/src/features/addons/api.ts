@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import type { SpaceAddon } from '@offhours/shared'
 
 import { api } from '../../services/api'
+
+import type { SpaceAddon } from '@offhours/shared'
 
 export function useSpaceAddons(spaceId?: string) {
   return useQuery({

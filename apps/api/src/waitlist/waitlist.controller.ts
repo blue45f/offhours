@@ -1,13 +1,15 @@
 import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common'
-import type { Request } from 'express'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { JoinWaitlistSchema, type JoinWaitlistInput } from '@offhours/shared'
 
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
 import { Public } from '../common/decorators/public.decorator'
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
+
 import { WaitlistService } from './waitlist.service'
+
+import type { Request } from 'express'
 
 @ApiBearerAuth()
 @ApiTags('waitlist')

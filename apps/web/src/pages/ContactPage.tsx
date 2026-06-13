@@ -1,7 +1,3 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import { ArrowUpRight, CheckCircle2, LifeBuoy, Send } from 'lucide-react'
 import {
   INQUIRY_CATEGORIES,
   InquiryCategoryHint,
@@ -10,13 +6,17 @@ import {
   type InquiryCategory,
   type InquiryReceipt,
 } from '@offhours/shared'
+import { ArrowUpRight, CheckCircle2, LifeBuoy, Send } from 'lucide-react'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
 
-import { SUPPORT_FALLBACK_URL, useSubmitInquiry } from '../features/inquiry/api'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { useMe } from '../store/auth'
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
 import { Field, Input, Textarea } from '../components/ui/Input'
+import { SUPPORT_FALLBACK_URL, useSubmitInquiry } from '../features/inquiry/api'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useMe } from '../store/auth'
 import { cn } from '../utils/cn'
 
 type FieldErrors = Partial<Record<'category' | 'title' | 'body' | 'contactEmail', string>>

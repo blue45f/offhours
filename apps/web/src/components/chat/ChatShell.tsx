@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react'
+import { cn } from '../../utils/cn'
 
 import { ChatListPane } from './ChatListPane'
-import { cn } from '../../utils/cn'
+
+import type { ReactNode } from 'react'
 
 interface ChatShellProps {
   /** 현재 열린 스레드 — 목록 하이라이트 + 모바일에서 목록/스레드 중 무엇을 보일지 결정 */

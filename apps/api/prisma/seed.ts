@@ -1,8 +1,9 @@
 import 'dotenv/config'
+import { randomBytes } from 'crypto'
+
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient, Role, RsvpStatus } from '@prisma/client'
 import * as argon2 from 'argon2'
-import { randomBytes } from 'crypto'
 
 const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 

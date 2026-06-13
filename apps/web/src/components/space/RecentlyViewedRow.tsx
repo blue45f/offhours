@@ -2,6 +2,7 @@ import { History } from 'lucide-react'
 
 import { useSpacesBySlugs } from '../../features/spaces/api'
 import { useRecentlyViewedStore } from '../../store/recentlyViewed'
+
 import { SpaceCard } from './SpaceCard'
 
 interface Props {

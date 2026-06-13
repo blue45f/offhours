@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import type { SpaceAddon } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
+
+import type { SpaceAddon } from '@offhours/shared'
 
 @Injectable()
 export class AddonsService {

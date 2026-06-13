@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
+import { describe, expect, it } from 'vitest'
 
 import { CommandPalette } from './CommandPalette'
 

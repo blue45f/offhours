@@ -1,10 +1,10 @@
+import { VenueCategoryLabel, type VenueCategory } from '@offhours/shared'
+import { Coins, TrendingUp } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Coins, TrendingUp } from 'lucide-react'
-import { VenueCategoryLabel, type VenueCategory } from '@offhours/shared'
 
-import { Button } from '../ui/Button'
 import { formatKRW, formatKRWShort } from '../../utils/format'
+import { Button } from '../ui/Button'
 
 // 카테고리별 영업 외 시간당 기준 단가 (KRW/h) — seed 시장가와 동일 선상.
 const HOURLY_BY_CATEGORY: Record<VenueCategory, number> = {
@@ -84,8 +84,17 @@ export function RevenueSimulator() {
 
       {/* 카테고리 */}
       <div className="mt-5">
-        <label className="text-xs font-semibold text-[var(--color-fg-muted)]">우리 가게 업종</label>
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <span
+          id="revsim-category-label"
+          className="text-xs font-semibold text-[var(--color-fg-muted)]"
+        >
+          우리 가게 업종
+        </span>
+        <div
+          role="group"
+          aria-labelledby="revsim-category-label"
+          className="mt-2 flex flex-wrap gap-1.5"
+        >
           {PICKABLE.map((c) => (
             <button
               key={c}

@@ -5,7 +5,6 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common'
-import { Prisma, type Space, type SpacePhoto, type Venue } from '@prisma/client'
 import {
   haversineKm,
   isSuperHost,
@@ -19,9 +18,10 @@ import {
   type UpdateSpaceInput,
   type UseCase,
 } from '@offhours/shared'
+import { Prisma, type Space, type SpacePhoto, type Venue } from '@prisma/client'
 
-import { PrismaService } from '../prisma/prisma.service'
 import { slugify } from '../common/util/code'
+import { PrismaService } from '../prisma/prisma.service'
 import { SlotsService } from '../slots/slots.service'
 
 @Injectable()

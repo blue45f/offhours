@@ -1,22 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowLeft, EyeOff, Send } from 'lucide-react'
-import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
-import type { ChatMessage } from '@offhours/shared'
+import { format, parseISO } from 'date-fns'
+import { ArrowLeft, EyeOff, Send } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
 
 import { chatKeys, useChatMessages, useChatThread, useSendMessage } from '../../features/chat/api'
-import { useMe } from '../../store/auth'
 import { getErrorMessage } from '../../services/api'
+import { useMe } from '../../store/auth'
+import { cn } from '../../utils/cn'
+import { formatDateKR } from '../../utils/format'
+import { AttachmentInput, AttachmentThumbs } from '../ui/AttachmentInput'
 import { Avatar } from '../ui/Avatar'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
-import { AttachmentInput, AttachmentThumbs } from '../ui/AttachmentInput'
 import { Skeleton } from '../ui/Skeleton'
+
 import { ChatContextCard } from './ChatContextCard'
-import { cn } from '../../utils/cn'
-import { formatDateKR } from '../../utils/format'
-import { format, parseISO } from 'date-fns'
+
+import type { ChatMessage } from '@offhours/shared'
 
 /** 같은 날 메시지를 묶기 위한 day key */
 function dayKey(iso: string): string {

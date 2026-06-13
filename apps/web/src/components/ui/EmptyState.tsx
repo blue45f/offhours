@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
 import { Sparkles } from 'lucide-react'
+
+import type { ReactNode } from 'react'
 
 interface EmptyStateProps {
   icon?: ReactNode

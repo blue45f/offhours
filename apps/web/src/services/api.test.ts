@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { AxiosError } from 'axios'
+import { describe, expect, it } from 'vitest'
 
 import { getErrorMessage } from './api'
 

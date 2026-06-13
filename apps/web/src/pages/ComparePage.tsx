@@ -1,6 +1,3 @@
-import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { useQueries } from '@tanstack/react-query'
 import {
   AlcoholPolicyLabel,
   CateringPolicyLabel,
@@ -10,16 +7,19 @@ import {
   formatTrustTier,
   type SpaceDetail,
 } from '@offhours/shared'
+import { useQueries } from '@tanstack/react-query'
 import { ArrowRight, Check, GitCompare, Share2, X } from 'lucide-react'
+import { useMemo } from 'react'
 import toast from 'react-hot-toast'
+import { Link, useSearchParams } from 'react-router-dom'
 
-import { api } from '../services/api'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Skeleton } from '../components/ui/Skeleton'
-import { formatKRW } from '../utils/format'
+import { api } from '../services/api'
 import { COMPARE_MAX, useCompareStore } from '../store/compare'
 import { cn } from '../utils/cn'
+import { formatKRW } from '../utils/format'
 
 const ROWS: Array<{
   key: string

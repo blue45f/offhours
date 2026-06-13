@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import type { CreateReportInput } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
+
+import type { CreateReportInput } from '@offhours/shared'
 
 @Injectable()
 export class ReportsService {

@@ -1,13 +1,14 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+
+import { slugify } from '../common/util/code'
+import { PrismaService } from '../prisma/prisma.service'
+
 import type {
   CollectionDetail,
   CollectionSummary,
   CreateCollectionInput,
   UpdateCollectionInput,
 } from '@offhours/shared'
-
-import { PrismaService } from '../prisma/prisma.service'
-import { slugify } from '../common/util/code'
 
 @Injectable()
 export class CollectionsService {

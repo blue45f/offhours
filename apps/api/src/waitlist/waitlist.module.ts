@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { AuthModule } from '../auth/auth.module'
 import { NotificationsModule } from '../notifications/notifications.module'
+
 import { WaitlistController } from './waitlist.controller'
 import { WaitlistService } from './waitlist.service'
 

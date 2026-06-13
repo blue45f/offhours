@@ -2,8 +2,9 @@ import { Sparkles } from 'lucide-react'
 
 import { useForYou } from '../../features/spaces/api'
 import { useRecentlyViewedStore } from '../../store/recentlyViewed'
-import { SpaceCard } from './SpaceCard'
 import { Skeleton } from '../ui/Skeleton'
+
+import { SpaceCard } from './SpaceCard'
 
 /**
  * 둘러본 공간이 3개 이상일 때만 노출되는 "당신을 위한 추천" 캐러셀.

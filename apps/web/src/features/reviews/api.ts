@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateReviewInput, ReviewReply } from '@offhours/shared'
 
 import { api } from '../../services/api'
+
+import type { CreateReviewInput, ReviewReply } from '@offhours/shared'
 
 export type HostReviewFilter = 'all' | 'unanswered' | 'answered'
 

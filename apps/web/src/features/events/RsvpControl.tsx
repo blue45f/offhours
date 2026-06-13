@@ -1,10 +1,11 @@
-import { useId, useState } from 'react'
-import { Check, CircleHelp, X } from 'lucide-react'
-import type { RsvpStatus } from '@offhours/shared'
 import { RsvpStatusLabel } from '@offhours/shared'
+import { Check, CircleHelp, X } from 'lucide-react'
+import { useId, useState } from 'react'
 
-import { cn } from '../../utils/cn'
 import { Input } from '../../components/ui/Input'
+import { cn } from '../../utils/cn'
+
+import type { RsvpStatus } from '@offhours/shared'
 
 const ORDER: RsvpStatus[] = ['GOING', 'MAYBE', 'NO']
 

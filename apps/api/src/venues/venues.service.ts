@@ -1,8 +1,9 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
-import type { CreateVenueInput, UpdateVenueInput } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
+
+import type { CreateVenueInput, UpdateVenueInput } from '@offhours/shared'
 
 @Injectable()
 export class VenuesService {

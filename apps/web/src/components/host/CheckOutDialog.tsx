@@ -1,15 +1,14 @@
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
 import { CHECKOUT_ITEMS, type CheckoutItemKey } from '@offhours/shared'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Check, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
-import { Dialog } from '../ui/Dialog'
-import { Button } from '../ui/Button'
-import { Field, Textarea } from '../ui/Input'
-import { api } from '../../services/api'
-import { getErrorMessage } from '../../services/api'
+import { api, getErrorMessage } from '../../services/api'
 import { cn } from '../../utils/cn'
+import { Button } from '../ui/Button'
+import { Dialog } from '../ui/Dialog'
+import { Field, Textarea } from '../ui/Input'
 
 interface Props {
   open: boolean

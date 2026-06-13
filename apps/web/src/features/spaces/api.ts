@@ -1,4 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { api } from '../../services/api'
+
 import type {
   AddonLine,
   AddonSelection,
@@ -13,8 +16,6 @@ import type {
   Slot,
   VenueCategory,
 } from '@offhours/shared'
-
-import { api } from '../../services/api'
 
 export interface SpaceSearchParams {
   q?: string

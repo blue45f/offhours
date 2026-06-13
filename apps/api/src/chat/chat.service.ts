@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import type { ChatSummary, SendMessageInput } from '@offhours/shared'
 
-import { PrismaService } from '../prisma/prisma.service'
 import { NotificationsService } from '../notifications/notifications.service'
+import { PrismaService } from '../prisma/prisma.service'
+
+import type { ChatSummary, SendMessageInput } from '@offhours/shared'
 
 /** 목록·단건 스레드가 같은 맥락(공간·예약·멤버)을 보도록 공유하는 include */
 const chatInclude = {

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { BusinessHour, PricingRule } from '@prisma/client'
 
 import { generateOffhoursPlans, pricePerHour } from './slots.engine'
+
+import type { BusinessHour, PricingRule } from '@prisma/client'
 
 function bh(weekday: number, openMinute: number, closeMinute: number): BusinessHour {
   return { id: `bh${weekday}`, venueId: 'v', weekday, openMinute, closeMinute }

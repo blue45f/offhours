@@ -1,13 +1,13 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { renderHook } from '@testing-library/react'
 import { createElement, type ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { renderHook } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+import { useSignOut } from './api'
 
 vi.mock('../../services/api', () => ({
   api: { post: vi.fn().mockResolvedValue({}) },
 }))
-
-import { useSignOut } from './api'
 
 function wrapper(qc: QueryClient) {
   return ({ children }: { children: ReactNode }) =>

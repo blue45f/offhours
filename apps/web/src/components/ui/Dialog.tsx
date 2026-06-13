@@ -1,8 +1,9 @@
 import * as RDialog from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
-import type { ReactNode } from 'react'
 
 import { cn } from '../../utils/cn'
+
+import type { ReactNode } from 'react'
 
 interface DialogProps {
   open: boolean

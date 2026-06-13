@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateRsvpInput, EventSummary } from '@offhours/shared'
 
 import { api } from '../../services/api'
+
 import { getClientToken } from './clientToken'
+
+import type { CreateRsvpInput, EventSummary } from '@offhours/shared'
 
 export function useEvent(code?: string) {
   return useQuery({

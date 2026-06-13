@@ -1,6 +1,3 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
 import {
   AlcoholPolicyLabel,
   AMENITY_OPTIONS,
@@ -14,15 +11,18 @@ import {
   type ProtectionTier,
   type UseCase,
 } from '@offhours/shared'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
+import { PriceSuggestionCard } from '../components/host/PriceSuggestionCard'
 import { Button } from '../components/ui/Button'
+import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
+import { Chip } from '../components/ui/Chip'
 import { Field, Input, Textarea } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
-import { Chip } from '../components/ui/Chip'
-import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { useCreateSpace } from '../features/spaces/api'
 import { getErrorMessage } from '../services/api'
-import { PriceSuggestionCard } from '../components/host/PriceSuggestionCard'
 
 export default function HostNewSpacePage() {
   const navigate = useNavigate()

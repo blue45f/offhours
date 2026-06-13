@@ -1,4 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { api } from '../../services/api'
+
 import type {
   ArrivalGuide,
   CreateRecurringInput,
@@ -13,8 +16,6 @@ export type ReservationDetail = Reservation & {
   venueAddressRoad: string | null
   arrivalGuide: ArrivalGuide | null
 }
-
-import { api } from '../../services/api'
 
 export const reservationKeys = {
   mine: (role: 'guest' | 'host', status?: ReservationStatus) =>

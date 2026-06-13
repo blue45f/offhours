@@ -1,8 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import { AddonsService } from './addons.service'
 import { Public } from '../common/decorators/public.decorator'
+
+import { AddonsService } from './addons.service'
 
 @ApiTags('addons')
 @Controller('spaces/:spaceId/addons')

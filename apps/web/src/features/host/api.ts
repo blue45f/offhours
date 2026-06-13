@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateHostProfileInput, HostEarnings, HostProfile } from '@offhours/shared'
 
 import { api } from '../../services/api'
 import { useIsAuthed } from '../../store/auth'
+
+import type { CreateHostProfileInput, HostEarnings, HostProfile } from '@offhours/shared'
 
 export const hostKeys = {
   profile: ['host', 'profile'] as const,

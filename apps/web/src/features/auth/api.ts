@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Me, SignInInput, SignUpInput } from '@offhours/shared'
 
 import { api } from '../../services/api'
 import { useAuthStore } from '../../store/auth'
+
+import type { Me, SignInInput, SignUpInput } from '@offhours/shared'
 
 interface AuthResult {
   accessToken: string

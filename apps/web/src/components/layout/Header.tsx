@@ -1,14 +1,14 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom'
 import * as RDropdown from '@radix-ui/react-dropdown-menu'
 import { Bell, Heart, LogIn, Menu, Moon, Search, Sun } from 'lucide-react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 
+import { useUnreadNotifications } from '../../features/notifications/useUnreadNotifications'
 import { useIsAdmin, useIsAuthed, useIsHost, useMe } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
-import { Button } from '../ui/Button'
-import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
-import { useUnreadNotifications } from '../../features/notifications/useUnreadNotifications'
 import { openCommandPalette } from '../commandPaletteEvents'
+import { Avatar } from '../ui/Avatar'
+import { Button } from '../ui/Button'
 
 export function Header() {
   const me = useMe()

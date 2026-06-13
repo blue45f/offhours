@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import { VenueCategoryLabel, formatDistanceKm, formatResponseTimeBadge } from '@offhours/shared'
 import { format, parseISO } from 'date-fns'
-import { Link } from 'react-router-dom'
+import { useReducedMotion } from 'framer-motion'
 import {
   Check,
   Clock,
@@ -13,18 +12,19 @@ import {
   Navigation,
   Users,
 } from 'lucide-react'
-import type { SpaceCard as SpaceCardType } from '@offhours/shared'
-import { VenueCategoryLabel, formatDistanceKm, formatResponseTimeBadge } from '@offhours/shared'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { Badge } from '../ui/Badge'
-import { StarRating } from '../ui/StarRating'
-import { formatKRW } from '../../utils/format'
-import { cn } from '../../utils/cn'
 import { useToggleFavorite, useFavoriteIds } from '../../features/favorites/api'
 import { useIsAuthed } from '../../store/auth'
-import { useNavigate } from 'react-router-dom'
 import { COMPARE_MAX, useCompareStore } from '../../store/compare'
+import { cn } from '../../utils/cn'
+import { formatKRW } from '../../utils/format'
+import { Badge } from '../ui/Badge'
+import { StarRating } from '../ui/StarRating'
+
+import type { SpaceCard as SpaceCardType } from '@offhours/shared'
 
 interface Props {
   space: SpaceCardType

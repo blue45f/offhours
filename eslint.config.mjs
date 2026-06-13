@@ -1,136 +1,87 @@
-import reactCompiler from 'eslint-plugin-react-compiler'
-import js from '@eslint/js'
+import { base, react, plugin, defineConfig } from '@heejun/eslint-config'
+import { globalIgnores } from 'eslint/config'
 import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig(
-  [
-    globalIgnores([
-      '**/dist/**',
-      '**/build/**',
-      '**/coverage/**',
-      '**/node_modules/**',
-      '**/.vercel/**',
-      '**/*.d.ts',
-      '**/*.tsbuildinfo',
-      'apps/api/prisma/migrations/**',
-      '**/*.config.{js,mjs,cjs,ts}',
-    ]),
+  globalIgnores([
+    '**/dist/**',
+    '**/build/**',
+    '**/coverage/**',
+    '**/node_modules/**',
+    '**/.vercel/**',
+    '**/*.d.ts',
+    '**/*.tsbuildinfo',
+    'apps/api/prisma/migrations/**',
+    '**/*.config.{js,mjs,cjs,ts}',
+  ]),
 
-    // Shared TS rules for the whole monorepo.
-    {
-      files: ['**/*.{ts,tsx}'],
-      extends: [js.configs.recommended, tseslint.configs.recommended],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-        ],
-        '@typescript-eslint/no-unsafe-function-type': 'error',
-        '@typescript-eslint/no-require-imports': 'error',
-        '@typescript-eslint/no-unused-expressions': 'error',
-        'no-empty': ['error', { allowEmptyCatch: true }],
-        'no-useless-escape': 'error',
-      },
-    },
+  // 공유 베이스(TS + import 위생 + 커스텀 규칙 + prettier 충돌 비활성).
+  base({ files: ['**/*.{ts,tsx}'] }),
 
-    // apps/web — React 19 + Vite (browser).
-    {
-      files: ['apps/web/**/*.{ts,tsx}'],
-      extends: [reactHooks.configs.flat.recommended, reactRefresh.configs.vite],
-      languageOptions: {
-        ecmaVersion: 2022,
-        globals: globals.browser,
-      },
-      rules: {
-        // 네이티브 window.confirm/alert/prompt 금지 — 브랜드 ConfirmDialog/PromptDialog/Toast를 쓴다.
-        // (useConfirm()/usePrompt() 같은 로컬 변수는 섀도잉이라 영향 없음)
-        'no-restricted-globals': [
-          'error',
-          {
-            name: 'confirm',
-            message: 'useConfirm()/ConfirmDialog를 사용하세요 (window.confirm 금지).',
-          },
-          { name: 'alert', message: 'Toast/Dialog를 사용하세요 (window.alert 금지).' },
-          {
-            name: 'prompt',
-            message: 'usePrompt()/PromptDialog를 사용하세요 (window.prompt 금지).',
-          },
-        ],
-        'react-hooks/exhaustive-deps': 'error',
-        'react-refresh/only-export-components': [
-          'error',
-          {
-            allowConstantExport: true,
-            allowExportNames: ['router', 'useConfirm', 'usePrompt'],
-          },
-        ],
-        // react-hooks v7 ships React Compiler diagnostics; enforce them as errors.
-        'react-hooks/set-state-in-effect': 'error',
-        'react-hooks/purity': 'error',
-        'react-hooks/incompatible-library': 'error',
-        'react-hooks/immutability': 'error',
-        'react-hooks/refs': 'error',
-        'react-hooks/preserve-manual-memoization': 'error',
-        'react-hooks/static-components': 'error',
-      },
-    },
+  // apps/web — React 19 + Vite + RC + jsx-a11y.
+  react({ files: ['apps/web/**/*.{ts,tsx}'] }),
 
-    // Route tables intentionally mix lazy component references with router exports.
-    {
-      files: ['apps/web/src/router/index.tsx'],
-      rules: {
-        'react-refresh/only-export-components': 'off',
-      },
+  // heejun 개인 테스트/목 컨벤션 규칙은 비활성 — 횡단 일관성 대상이 아니라
+  // offhours 자체 테스트 스타일과 충돌한다(shared base 의 일반 규칙만 채택).
+  {
+    plugins: { '@heejun': plugin },
+    rules: {
+      '@heejun/vitest-mock-import': 'off',
+      '@heejun/vitest-mock-import-original': 'off',
+      '@heejun/mock-response-naming': 'off',
+      '@heejun/no-js-interface-direct-access': 'off',
     },
+  },
 
-    // apps/api — NestJS (Node). Decorator-heavy; empty constructors/interfaces are idiomatic.
-    {
-      files: ['apps/api/**/*.ts'],
-      languageOptions: {
-        ecmaVersion: 2022,
-        globals: globals.node,
-      },
-      rules: {
-        '@typescript-eslint/no-empty-object-type': 'off',
-        '@typescript-eslint/no-extraneous-class': 'off',
-      },
-    },
-
-    // packages/shared — isomorphic (Node).
-    {
-      files: ['packages/shared/**/*.ts'],
-      languageOptions: {
-        ecmaVersion: 2022,
-        globals: globals.node,
-      },
-    },
-
-    // Test files — Vitest globals; relax fast-refresh constraint.
-    {
-      files: ['**/*.{test,spec}.{ts,tsx}', '**/test/**/*.{ts,tsx}'],
-      languageOptions: {
-        globals: { ...globals.node, ...globals.browser },
-      },
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'off',
-        'react-refresh/only-export-components': 'off',
-      },
-    },
-  ],
-  // React Compiler correctness gate — apps/web compiles with the compiler, so
-  // patterns it cannot safely compile are hard errors.
+  // apps/web 레포 정책: 네이티브 confirm/alert/prompt 금지 + 추가 export 허용.
   {
     files: ['apps/web/**/*.{ts,tsx}'],
-    plugins: {
-      'react-compiler': reactCompiler,
-    },
     rules: {
-      'react-compiler/react-compiler': 'error',
+      'no-restricted-globals': [
+        'error',
+        { name: 'confirm', message: 'useConfirm()/ConfirmDialog를 사용하세요 (window.confirm 금지).' },
+        { name: 'alert', message: 'Toast/Dialog를 사용하세요 (window.alert 금지).' },
+        { name: 'prompt', message: 'usePrompt()/PromptDialog를 사용하세요 (window.prompt 금지).' },
+      ],
+      'react-refresh/only-export-components': [
+        'error',
+        { allowConstantExport: true, allowExportNames: ['router', 'useConfirm', 'usePrompt'] },
+      ],
+      // 오버레이(Dialog/CommandPalette)는 열릴 때 주 컨트롤로 포커스를 옮기는 것이
+      // 올바른 모달 접근성 동작이라 autoFocus 를 의도적으로 사용한다.
+      'jsx-a11y/no-autofocus': 'off',
+    },
+  },
+
+  // 라우트 테이블은 lazy 컴포넌트 + router export 혼재.
+  {
+    files: ['apps/web/src/router/index.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
+
+  // apps/api — NestJS (Node). 데코레이터 + 빈 생성자/클래스 관용.
+  {
+    files: ['apps/api/**/*.ts'],
+    languageOptions: { globals: globals.node },
+    rules: {
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-extraneous-class': 'off',
+    },
+  },
+
+  // packages/shared — isomorphic (Node).
+  {
+    files: ['packages/shared/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
+
+  // 테스트 — Vitest globals; fast-refresh 제약 완화.
+  {
+    files: ['**/*.{test,spec}.{ts,tsx}', '**/test/**/*.{ts,tsx}'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'react-refresh/only-export-components': 'off',
     },
   }
 )

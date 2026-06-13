@@ -1,8 +1,9 @@
 import * as RSelect from '@radix-ui/react-select'
 import { Check, ChevronDown } from 'lucide-react'
-import type { ReactNode } from 'react'
 
 import { cn } from '../../utils/cn'
+
+import type { ReactNode } from 'react'
 
 interface SelectOption {
   value: string

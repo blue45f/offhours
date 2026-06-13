@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { ARRIVAL_GUIDE_FIELDS, type ArrivalGuide, type HostVenueArrival } from '@offhours/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronRight, Sparkles } from 'lucide-react'
-import { ARRIVAL_GUIDE_FIELDS, type ArrivalGuide, type HostVenueArrival } from '@offhours/shared'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 import { api, getErrorMessage } from '../../services/api'
 import { Button } from '../ui/Button'

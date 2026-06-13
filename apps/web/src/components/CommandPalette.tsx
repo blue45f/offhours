@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as RDialog from '@radix-ui/react-dialog'
-import { useNavigate } from 'react-router-dom'
 import { CornerDownLeft, Search } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useIsAdmin, useIsAuthed, useIsHost } from '../store/auth'
 import { cn } from '../utils/cn'
+
 import { COMMAND_PALETTE_OPEN_EVENT } from './commandPaletteEvents'
 
 type Command = {
