@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { USE_CASE_META, type UseCase } from '@offhours/shared'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 const ORDER: UseCase[] = [
   'BIRTHDAY',
