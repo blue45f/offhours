@@ -2,7 +2,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SignInSchema, type SignInInput } from '@offhours/shared'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { Eye, EyeOff, Mail } from 'lucide-react'
 

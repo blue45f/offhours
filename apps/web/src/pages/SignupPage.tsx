@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SignUpSchema, type SignUpInput } from '@offhours/shared'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { Mail, User } from 'lucide-react'
 
 import { Button } from '../components/ui/Button'

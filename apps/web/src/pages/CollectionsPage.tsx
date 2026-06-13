@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { FolderHeart, Globe2, Lock, Plus } from 'lucide-react'
 
 import { Button } from '../components/ui/Button'

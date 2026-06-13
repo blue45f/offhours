@@ -11,7 +11,7 @@ import {
   type SpaceDetail,
 } from '@offhours/shared'
 import { ArrowRight, Check, GitCompare, Share2, X } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { api } from '../services/api'
 import { Button } from '../components/ui/Button'

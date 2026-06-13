@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { CheckCircle2, Clock, MapPin, Users, Wallet } from 'lucide-react'
 import { SplitMemberStatusLabel } from '@offhours/shared'
 

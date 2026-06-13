@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronRight, Sparkles } from 'lucide-react'
 import { ARRIVAL_GUIDE_FIELDS, type ArrivalGuide, type HostVenueArrival } from '@offhours/shared'

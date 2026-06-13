@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { Lock, MessageCircleReply, Star } from 'lucide-react'
 import type { MyReservationReview } from '@offhours/shared'
 

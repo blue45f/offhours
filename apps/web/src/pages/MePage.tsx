@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Building2, Calendar, Heart, MessageCircle, Moon, Sparkles, UserX } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { REFERRAL_BONUS_KRW } from '@offhours/shared'
 

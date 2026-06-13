@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { CornerDownRight, Send } from 'lucide-react'
 import type { Review } from '@offhours/shared'
 

@@ -12,7 +12,7 @@ import {
   type Purpose,
   type SpaceDetail,
 } from '@offhours/shared'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { Clock, Coins, RefreshCw, ShieldCheck, Users } from 'lucide-react'
 
 import { Button } from '../ui/Button'

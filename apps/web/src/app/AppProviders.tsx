@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { QueryClientProvider, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
+import { Toaster } from 'sonner'
 import { MotionConfig } from 'framer-motion'
 
 import { appQueryClient } from './queryClient'
@@ -46,7 +46,7 @@ export function AppProviders() {
       </MotionConfig>
       <Toaster
         position="top-center"
-        gutter={10}
+        gap={10}
         toastOptions={{
           duration: 3000,
           style: {
