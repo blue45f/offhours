@@ -140,7 +140,9 @@ if (exists('pnpm-workspace.yaml')) {
   const ws = read('pnpm-workspace.yaml')
   const globs = [...ws.matchAll(/^\s*-\s*['"]?([^'"\n]+?)['"]?\s*$/gm)]
     .map((m) => m[1].trim())
-    .filter((g) => g.includes('/'))
+    // path globs (apps/*, packages/*) only — exclude package specs from other
+    // list sections like minimumReleaseAgeExclude (e.g. @heejun/prettier-config@3.0.0)
+    .filter((g) => g.includes('/') && !g.includes('@'))
   for (const glob of globs) {
     const base = glob.replace(/\/\*+$/, '')
     if (!exists(base)) issues.push(`workspace dir missing: ${base} (from "${glob}")`)
@@ -160,15 +162,21 @@ for (const dir of workspaceDirs) {
   if (!wp.scripts || !wp.scripts.build) issues.push(`workspace ${dir} has no "build" script`)
 }
 
-// Prettier no-semi convention is the project style; guard the config exists
-if (!exists('.prettierrc')) {
-  issues.push('missing file: .prettierrc')
-} else {
-  try {
-    const pr = JSON.parse(read('.prettierrc'))
-    if (pr.semi !== false) issues.push('.prettierrc must keep semi:false (no-semi convention)')
-  } catch {
-    issues.push('.prettierrc is not valid JSON')
+// Prettier no-semi convention is the project style. The standard is the shared
+// @heejun/prettier-config (no-semi); a local semi:false .prettierrc is also accepted.
+{
+  const rootPkg = JSON.parse(read('package.json'))
+  if (rootPkg.prettier === '@heejun/prettier-config') {
+    // shared no-semi preset — OK
+  } else if (exists('.prettierrc')) {
+    try {
+      const pr = JSON.parse(read('.prettierrc'))
+      if (pr.semi !== false) issues.push('.prettierrc must keep semi:false (no-semi convention)')
+    } catch {
+      issues.push('.prettierrc is not valid JSON')
+    }
+  } else {
+    issues.push('missing prettier config: .prettierrc or "prettier": "@heejun/prettier-config"')
   }
 }
 
