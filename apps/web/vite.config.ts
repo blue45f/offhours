@@ -60,7 +60,7 @@ export default defineConfig({
           }
           if (id.includes('node_modules/react-router')) return 'router'
           if (id.includes('node_modules/@tanstack/react-query')) return 'query'
-          if (id.includes('node_modules/framer-motion')) return 'motion'
+          if (id.includes('node_modules/motion')) return 'motion'
           if (id.includes('node_modules/@radix-ui')) return 'radix'
           if (
             id.includes('node_modules/react-hook-form') ||

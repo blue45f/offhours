@@ -3,7 +3,7 @@ import { QueryClientProvider, QueryErrorResetBoundary } from '@tanstack/react-qu
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
-import { MotionConfig } from 'framer-motion'
+import { MotionConfig } from 'motion/react'
 
 import { appQueryClient } from './queryClient'
 import { router } from '../router'
