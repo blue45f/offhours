@@ -7,7 +7,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
-import { api, getErrorMessage } from '../../services/api'
+import { api, getErrorMessage } from '../../infrastructure/api'
 import { useMe } from '../../store/auth'
 import { formatDateKR } from '../../utils/format'
 

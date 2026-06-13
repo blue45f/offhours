@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, Calendar, Flame, Users, Wallet } from 'lucide-react
 import { AdminShell } from '../../components/admin/AdminShell'
 import { Card, CardBody } from '../../components/ui/Card'
 import { Skeleton } from '../../components/ui/Skeleton'
-import { api } from '../../services/api'
+import { api } from '../../infrastructure/api'
 import { cn } from '../../utils/cn'
 import { formatKRW, formatKRWShort } from '../../utils/format'
 

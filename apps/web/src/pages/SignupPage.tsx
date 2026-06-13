@@ -8,8 +8,8 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { Button } from '../components/ui/Button'
 import { Field, Input } from '../components/ui/Input'
-import { useSignUp } from '../features/auth/api'
-import { getErrorMessage } from '../services/api'
+import { useSignUp } from '../domains/auth/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { useIsAuthed } from '../store/auth'
 
 export default function SignupPage() {

@@ -10,7 +10,7 @@ import { Card, CardBody } from '../../components/ui/Card'
 import { Dialog } from '../../components/ui/Dialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { Field, Textarea } from '../../components/ui/Input'
-import { api, getErrorMessage } from '../../services/api'
+import { api, getErrorMessage } from '../../infrastructure/api'
 import { formatDateTimeKR } from '../../utils/format'
 
 import type { ModerateContentInput, ReportTargetSummary } from '@offhours/shared'

@@ -4,7 +4,7 @@ import { Check, ChevronRight, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
-import { api, getErrorMessage } from '../../services/api'
+import { api, getErrorMessage } from '../../infrastructure/api'
 import { Button } from '../ui/Button'
 import { Dialog } from '../ui/Dialog'
 import { Field, Input, Textarea } from '../ui/Input'

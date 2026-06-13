@@ -31,7 +31,7 @@ import { LiveNearbyRail } from '../components/space/LiveNearbyRail'
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { UseCaseDiscovery } from '../components/space/UseCaseDiscovery'
 import { Button } from '../components/ui/Button'
-import { useSpacesSearch } from '../features/spaces/api'
+import { useSpacesSearch } from '../domains/spaces/api'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 import { usePageMeta } from '../hooks/usePageMeta'
 

@@ -14,8 +14,8 @@ import {
   useCreateCollection,
   useDeleteCollection,
   useMyCollections,
-} from '../features/collections/api'
-import { getErrorMessage } from '../services/api'
+} from '../domains/collections/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { formatDateKR } from '../utils/format'
 
 export default function CollectionsPage() {

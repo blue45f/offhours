@@ -1,6 +1,6 @@
 import { History } from 'lucide-react'
 
-import { useSpacesBySlugs } from '../../features/spaces/api'
+import { useSpacesBySlugs } from '../../domains/spaces/api'
 import { useRecentlyViewedStore } from '../../store/recentlyViewed'
 
 import { SpaceCard } from './SpaceCard'

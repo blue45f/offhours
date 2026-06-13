@@ -2,7 +2,7 @@ import { ReservationStatusLabel, type ChatSummary } from '@offhours/shared'
 import { MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { useChats } from '../../features/chat/api'
+import { useChats } from '../../domains/chat/api'
 import { cn } from '../../utils/cn'
 import { timeFromNow } from '../../utils/format'
 import { Avatar } from '../ui/Avatar'

@@ -22,17 +22,17 @@ import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { Dialog } from '../components/ui/Dialog'
 import { Field, Input, Textarea } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
-import { useOpenChat } from '../features/chat/api'
-import { useTossPayment } from '../features/payments/useTossPayment'
+import { useOpenChat } from '../domains/chat/api'
+import { useTossPayment } from '../domains/payments/useTossPayment'
 import {
   useCancelReservation,
   useExtendReservation,
   useExtensionQuote,
   useFileClaim,
   useReservationDetail,
-} from '../features/reservations/api'
+} from '../domains/reservations/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { getErrorMessage } from '../services/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { useMe } from '../store/auth'
 import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 

@@ -21,8 +21,8 @@ import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { Chip } from '../components/ui/Chip'
 import { Field, Input, Textarea } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
-import { useCreateSpace } from '../features/spaces/api'
-import { getErrorMessage } from '../services/api'
+import { useCreateSpace } from '../domains/spaces/api'
+import { getErrorMessage } from '../infrastructure/api'
 
 export default function HostNewSpacePage() {
   const navigate = useNavigate()

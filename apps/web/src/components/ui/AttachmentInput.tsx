@@ -3,7 +3,7 @@ import { ImagePlus, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import { fileToAttachment } from '../../features/chat/attachments'
+import { fileToAttachment } from '../../domains/chat/attachments'
 import { cn } from '../../utils/cn'
 
 import { Dialog } from './Dialog'

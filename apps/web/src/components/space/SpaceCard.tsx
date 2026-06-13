@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { useToggleFavorite, useFavoriteIds } from '../../features/favorites/api'
+import { useToggleFavorite, useFavoriteIds } from '../../domains/favorites/api'
 import { useIsAuthed } from '../../store/auth'
 import { COMPARE_MAX, useCompareStore } from '../../store/compare'
 import { cn } from '../../utils/cn'

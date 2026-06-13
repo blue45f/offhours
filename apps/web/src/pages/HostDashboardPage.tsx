@@ -7,8 +7,8 @@ import { ArrivalGuideEditor } from '../components/host/ArrivalGuideEditor'
 import { DemandHeatmap } from '../components/host/DemandHeatmap'
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
-import { useHostEarnings } from '../features/host/api'
-import { api } from '../services/api'
+import { useHostEarnings } from '../domains/host/api'
+import { api } from '../infrastructure/api'
 import { formatKRW, formatKRWShort } from '../utils/format'
 
 interface HostStats {

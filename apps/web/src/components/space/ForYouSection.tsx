@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react'
 
-import { useForYou } from '../../features/spaces/api'
+import { useForYou } from '../../domains/spaces/api'
 import { useRecentlyViewedStore } from '../../store/recentlyViewed'
 import { Skeleton } from '../ui/Skeleton'
 

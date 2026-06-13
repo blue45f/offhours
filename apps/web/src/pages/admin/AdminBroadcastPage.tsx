@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { Card, CardBody } from '../../components/ui/Card'
 import { Field, Input, Textarea } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
-import { api } from '../../services/api'
+import { api } from '../../infrastructure/api'
 
 export default function AdminBroadcastPage() {
   const [audience, setAudience] = useState<'ALL' | 'GUESTS' | 'HOSTS' | 'SUSPENDED'>('ALL')

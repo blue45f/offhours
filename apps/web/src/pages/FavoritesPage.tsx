@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
-import { useFavorites } from '../features/favorites/api'
+import { useFavorites } from '../domains/favorites/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 export default function FavoritesPage() {

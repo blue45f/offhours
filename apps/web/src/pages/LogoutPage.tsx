@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 
-import { useSignOut } from '../features/auth/api'
+import { useSignOut } from '../domains/auth/api'
 import { useIsAuthed } from '../store/auth'
 
 export default function LogoutPage() {

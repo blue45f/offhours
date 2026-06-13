@@ -2,8 +2,8 @@ import { BellRing, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
-import { useJoinWaitlist, useLeaveWaitlist, useWaitlistStatus } from '../../features/waitlist/api'
-import { getErrorMessage } from '../../services/api'
+import { useJoinWaitlist, useLeaveWaitlist, useWaitlistStatus } from '../../domains/waitlist/api'
+import { getErrorMessage } from '../../infrastructure/api'
 import { useIsAuthed } from '../../store/auth'
 
 /**

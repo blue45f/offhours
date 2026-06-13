@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Sparkles, TrendingDown, TrendingUp, Wand2 } from 'lucide-react'
 import { useState } from 'react'
 
-import { api } from '../../services/api'
+import { api } from '../../infrastructure/api'
 import { formatKRW } from '../../utils/format'
 import { Button } from '../ui/Button'
 import { Field, Input } from '../ui/Input'

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import PolicyPage from './PolicyPage'
 
-import type { PolicySlug, PublicPolicy } from '../features/policies/api'
+import type { PolicySlug, PublicPolicy } from '../domains/policies/api'
 
 const policy: PublicPolicy = {
   orgName: 'Offhours',

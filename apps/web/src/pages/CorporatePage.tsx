@@ -19,9 +19,9 @@ import {
   useDeleteCorporateProfile,
   useTopupCredit,
   useUpsertCorporateProfile,
-} from '../features/corporate/api'
+} from '../domains/corporate/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { getErrorMessage } from '../services/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { cn } from '../utils/cn'
 import { formatKRW } from '../utils/format'
 

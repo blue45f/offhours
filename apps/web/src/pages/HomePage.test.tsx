@@ -27,7 +27,7 @@ vi.mock('../components/space/FeaturedSpacesBand', () => ({ FeaturedSpacesBand: (
 vi.mock('../components/space/LiveNearbyRail', () => ({ LiveNearbyRail: () => null }))
 vi.mock('../components/space/UseCaseDiscovery', () => ({ UseCaseDiscovery: () => null }))
 vi.mock('../components/space/ForYouSection', () => ({ ForYouSection: () => null }))
-vi.mock('../features/spaces/api', () => ({
+vi.mock('../domains/spaces/api', () => ({
   useSpacesSearch: () => ({ data: undefined, isLoading: false }),
 }))
 vi.mock('../hooks/useGeolocation', () => ({

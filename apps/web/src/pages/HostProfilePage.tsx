@@ -16,8 +16,8 @@ import { Button } from '../components/ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { Field, Input } from '../components/ui/Input'
 import { Skeleton } from '../components/ui/Skeleton'
-import { useHostProfile, useUpsertHostProfile } from '../features/host/api'
-import { getErrorMessage } from '../services/api'
+import { useHostProfile, useUpsertHostProfile } from '../domains/host/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { cn } from '../utils/cn'
 
 function formatBizNumber(value: string): string {

@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button'
 import { Card, CardBody } from '../../components/ui/Card'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { usePrompt } from '../../components/ui/PromptDialog'
-import { api } from '../../services/api'
+import { api } from '../../infrastructure/api'
 import { formatKRW } from '../../utils/format'
 
 interface PendingSpace {

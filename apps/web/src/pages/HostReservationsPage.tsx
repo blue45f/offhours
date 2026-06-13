@@ -15,8 +15,8 @@ import {
   useApproveReservation,
   useMyReservations,
   useRejectReservation,
-} from '../features/reservations/api'
-import { api, getErrorMessage } from '../services/api'
+} from '../domains/reservations/api'
+import { api, getErrorMessage } from '../infrastructure/api'
 import { formatDateTimeKR, formatKRW } from '../utils/format'
 
 const TABS = [

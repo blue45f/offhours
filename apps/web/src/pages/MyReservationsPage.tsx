@@ -8,7 +8,7 @@ import { Card, CardBody } from '../components/ui/Card'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Skeleton } from '../components/ui/Skeleton'
 import { Tabs } from '../components/ui/Tabs'
-import { useMyReservations } from '../features/reservations/api'
+import { useMyReservations } from '../domains/reservations/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatDateTimeKR, formatKRW } from '../utils/format'
 

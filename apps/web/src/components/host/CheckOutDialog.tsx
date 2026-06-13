@@ -4,7 +4,7 @@ import { Check, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
-import { api, getErrorMessage } from '../../services/api'
+import { api, getErrorMessage } from '../../infrastructure/api'
 import { cn } from '../../utils/cn'
 import { Button } from '../ui/Button'
 import { Dialog } from '../ui/Dialog'

@@ -25,9 +25,9 @@ import {
   useDeleteCalendar,
   useHostCalendars,
   useResyncCalendar,
-} from '../features/calendars/api'
-import { useMySpaces } from '../features/spaces/api'
-import { getErrorMessage } from '../services/api'
+} from '../domains/calendars/api'
+import { useMySpaces } from '../domains/spaces/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { formatDateTimeKR } from '../utils/format'
 
 export default function HostCalendarPage() {

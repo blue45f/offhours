@@ -8,9 +8,9 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import { Button } from '../components/ui/Button'
 import { Field, Input } from '../components/ui/Input'
-import { useAuthConfig, useGoogleSignIn, useSignIn } from '../features/auth/api'
-import { GoogleSignInButton } from '../features/auth/GoogleSignInButton'
-import { getErrorMessage } from '../services/api'
+import { useAuthConfig, useGoogleSignIn, useSignIn } from '../domains/auth/api'
+import { GoogleSignInButton } from '../domains/auth/GoogleSignInButton'
+import { getErrorMessage } from '../infrastructure/api'
 import { useIsAuthed } from '../store/auth'
 
 // seed.ts 가 만드는 공개 데모 계정 — 역할별 둘러보기용

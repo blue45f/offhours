@@ -9,8 +9,8 @@ import {
   policyExternalUrl,
   type PolicySlug,
   type PublicPolicy,
-} from '../features/policies/api'
-import { parsePolicyBody } from '../features/policies/policyBody'
+} from '../domains/policies/api'
+import { parsePolicyBody } from '../domains/policies/policyBody'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 const POLICY_META: Record<PolicySlug, { title: string; description: string }> = {

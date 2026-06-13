@@ -2,7 +2,7 @@ import * as RDropdown from '@radix-ui/react-dropdown-menu'
 import { Bell, Heart, LogIn, Menu, Moon, Search, Sun } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 
-import { useUnreadNotifications } from '../../features/notifications/useUnreadNotifications'
+import { useUnreadNotifications } from '../../domains/notifications/useUnreadNotifications'
 import { useIsAdmin, useIsAuthed, useIsHost, useMe } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
 import { cn } from '../../utils/cn'

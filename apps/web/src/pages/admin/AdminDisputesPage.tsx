@@ -10,7 +10,7 @@ import { Card, CardBody } from '../../components/ui/Card'
 import { Dialog } from '../../components/ui/Dialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { Field, Textarea } from '../../components/ui/Input'
-import { api } from '../../services/api'
+import { api } from '../../infrastructure/api'
 import { formatDateTimeKR, formatKRW } from '../../utils/format'
 
 type ResolveStatus = ResolveDisputeInput['status']

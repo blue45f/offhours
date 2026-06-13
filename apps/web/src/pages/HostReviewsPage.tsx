@@ -18,8 +18,8 @@ import {
   useRespondReview,
   type HostReviewFilter,
   type HostReviewItem,
-} from '../features/reviews/api'
-import { getErrorMessage } from '../services/api'
+} from '../domains/reviews/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { formatDateKR } from '../utils/format'
 
 const TABS: { value: HostReviewFilter; label: string }[] = [

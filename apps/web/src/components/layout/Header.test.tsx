@@ -19,7 +19,7 @@ vi.stubGlobal(
   }
 )
 
-vi.mock('../../features/notifications/useUnreadNotifications', () => ({
+vi.mock('../../domains/notifications/useUnreadNotifications', () => ({
   useUnreadNotifications: () => ({ data: 0 }),
 }))
 

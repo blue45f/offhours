@@ -37,17 +37,17 @@ import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Skeleton } from '../components/ui/Skeleton'
 import { StarRating } from '../components/ui/StarRating'
-import { useOpenSpaceInquiry } from '../features/chat/api'
-import { useToggleFavorite, useFavoriteIds } from '../features/favorites/api'
+import { useOpenSpaceInquiry } from '../domains/chat/api'
+import { useToggleFavorite, useFavoriteIds } from '../domains/favorites/api'
 import {
   useNearbyBundle,
   useSpaceDetail,
   useSpaceGallery,
   useSpaceReviews,
-} from '../features/spaces/api'
+} from '../domains/spaces/api'
 import { useJsonLd } from '../hooks/useJsonLd'
 import { usePageMeta } from '../hooks/usePageMeta'
-import { getErrorMessage } from '../services/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { useMe } from '../store/auth'
 import { useRecentlyViewedStore } from '../store/recentlyViewed'
 import { formatKRW } from '../utils/format'

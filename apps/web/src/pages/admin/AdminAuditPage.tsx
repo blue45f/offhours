@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { AdminShell } from '../../components/admin/AdminShell'
 import { Badge } from '../../components/ui/Badge'
-import { api } from '../../services/api'
+import { api } from '../../infrastructure/api'
 import { formatDateTimeKR } from '../../utils/format'
 
 import type { AuditLogRow } from '@offhours/shared'

@@ -2,7 +2,7 @@ import { WEEKDAY_KO, type DemandHeatmap as DemandHeatmapData } from '@offhours/s
 import { useQuery } from '@tanstack/react-query'
 import { TrendingUp } from 'lucide-react'
 
-import { api } from '../../services/api'
+import { api } from '../../infrastructure/api'
 import { cn } from '../../utils/cn'
 
 export function DemandHeatmap() {
