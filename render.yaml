@@ -26,13 +26,8 @@
 # HEALTH CHECK NOTE: main.ts sets the global prefix to `api`; health endpoints are
 #   effectively exposed under `/api/health` (ex: `/api/health`, `/api/health/ready`).
 
-databases:
-  - name: offhours-postgres
-    databaseName: offhours
-    user: offhours
-    plan: basic-256mb # free DBs are time-limited; basic is the smallest durable tier
-    region: oregon
-    postgresMajorVersion: '16' # match docker-compose.yml (postgres:16-alpine)
+# 운영 DB는 Neon(서비스 전용 free 프로젝트, 서비스당 단일 DB) — DATABASE_URL을 외부에서
+# 주입(sync:false)한다. (이전의 Render-managed Postgres 블록은 미생성·유료라 제거.)
 
 services:
   - type: web
@@ -62,10 +57,7 @@ services:
       - key: PORT
         value: 10000 # Render routes external traffic to this port; main.ts reads PORT
       - key: DATABASE_URL
-        # Wired automatically from the managed Postgres database above.
-        fromDatabase:
-          name: offhours-postgres
-          property: connectionString
+        sync: false # Neon connection string — Render 대시보드/API에서 설정(운영 DB = Neon)
       - key: JWT_SECRET
         sync: false # set a long random secret in the Render dashboard
       - key: JWT_REFRESH_SECRET
