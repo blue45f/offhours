@@ -1,7 +1,7 @@
 import { Controller, Get, Header } from '@nestjs/common'
 
-import { PrismaService } from '../prisma/prisma.service'
 import { Public } from '../common/decorators/public.decorator'
+import { PrismaService } from '../prisma/prisma.service'
 
 @Controller('seo')
 export class SeoController {

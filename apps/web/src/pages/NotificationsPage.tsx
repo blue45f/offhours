@@ -1,6 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import type { Notification, NotificationType } from '@offhours/shared'
 import {
   Bell,
   CalendarCheck,
@@ -10,16 +8,19 @@ import {
   MessageCircle,
   Star,
 } from 'lucide-react'
-import type { ComponentType } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { api } from '../services/api'
-import { notificationLink } from '../features/notifications/deeplink'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { EmptyState } from '../components/ui/EmptyState'
 import { Button } from '../components/ui/Button'
+import { EmptyState } from '../components/ui/EmptyState'
 import { Skeleton } from '../components/ui/Skeleton'
-import { formatDateTimeKR } from '../utils/format'
+import { notificationLink } from '../domains/notifications/deeplink'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { api } from '../infrastructure/api'
 import { cn } from '../utils/cn'
+import { formatDateTimeKR } from '../utils/format'
+
+import type { Notification, NotificationType } from '@offhours/shared'
+import type { ComponentType } from 'react'
 
 const TYPE_ICON: Record<NotificationType, ComponentType<{ size?: number | string }>> = {
   RESERVATION_REQUESTED: CalendarCheck,

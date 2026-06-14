@@ -7,9 +7,10 @@ import {
   type CreatePaymentIntentInput,
 } from '@offhours/shared'
 
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
+
 import { PaymentsService } from './payments.service'
 
 @ApiBearerAuth()

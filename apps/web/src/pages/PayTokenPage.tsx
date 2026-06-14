@@ -1,13 +1,13 @@
+import { SplitMemberStatusLabel } from '@offhours/shared'
+import { CheckCircle2, Clock, MapPin, Users, Wallet } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CheckCircle2, Clock, MapPin, Users, Wallet } from 'lucide-react'
-import { SplitMemberStatusLabel } from '@offhours/shared'
 
 import { PageLoader } from '../components/layout/PageLoader'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
-import { useConfirmSplitPayment, usePublicSplit } from '../features/splits/api'
-import { getErrorMessage } from '../services/api'
+import { useConfirmSplitPayment, usePublicSplit } from '../domains/splits/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { formatDateTimeKR, formatKRW } from '../utils/format'
 
 export default function PayTokenPage() {

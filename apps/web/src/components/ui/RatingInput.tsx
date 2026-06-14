@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { Star } from 'lucide-react'
+import { useState } from 'react'
 
 import { cn } from '../../utils/cn'
 
@@ -19,6 +19,9 @@ export function RatingInput({ value, onChange, size = 26, className }: RatingInp
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
+      {/* Roving focus is handled by the focusable <button role="radio"> children;
+          onMouseLeave is hover-only, so the group container needs no tabindex. */}
+      {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
       <div
         role="radiogroup"
         aria-label="별점"

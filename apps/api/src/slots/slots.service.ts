@@ -1,5 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { Logger } from '@nestjs/common'
+import { Injectable, NotFoundException, Logger } from '@nestjs/common'
 import {
   addonAmount,
   lastMinuteDiscountRate,
@@ -12,6 +11,7 @@ import {
 } from '@offhours/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
+
 import { generateOffhoursPlans, pricePerHour } from './slots.engine'
 
 @Injectable()

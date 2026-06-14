@@ -1,6 +1,3 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Calendar, Search, Sparkles, Users } from 'lucide-react'
 import {
   KOREA_REGIONS,
   PurposeLabel,
@@ -9,6 +6,9 @@ import {
   toSearchParams,
   type Purpose,
 } from '@offhours/shared'
+import { Calendar, Search, Sparkles, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { Button } from '../ui/Button'
 

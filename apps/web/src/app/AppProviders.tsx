@@ -1,17 +1,18 @@
-import { useEffect } from 'react'
 import { QueryClientProvider, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { MotionConfig } from 'motion/react'
+import { useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { MotionConfig } from 'motion/react'
 
-import { appQueryClient } from './queryClient'
+import { ErrorBoundary } from '../components/layout/ErrorBoundary'
+import { ConfirmProvider } from '../components/ui/ConfirmDialog'
+import { PromptProvider } from '../components/ui/PromptDialog'
 import { router } from '../router'
 import { bootstrapAuth } from '../store/auth'
 import { useThemeStore } from '../store/theme'
-import { ConfirmProvider } from '../components/ui/ConfirmDialog'
-import { PromptProvider } from '../components/ui/PromptDialog'
-import { ErrorBoundary } from '../components/layout/ErrorBoundary'
+
+import { appQueryClient } from './queryClient'
 
 export function AppProviders() {
   const theme = useThemeStore((s) => s.theme)

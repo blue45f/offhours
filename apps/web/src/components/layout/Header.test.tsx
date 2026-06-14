@@ -1,11 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
-import type { Me } from '@offhours/shared'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { Header } from './Header'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
+
+import { Header } from './Header'
+
+import type { Me } from '@offhours/shared'
 
 // Radix popper(DropdownMenu.Content)가 요구하는 ResizeObserver 는 jsdom 에 없다
 vi.stubGlobal(
@@ -17,7 +19,7 @@ vi.stubGlobal(
   }
 )
 
-vi.mock('../../features/notifications/useUnreadNotifications', () => ({
+vi.mock('../../domains/notifications/useUnreadNotifications', () => ({
   useUnreadNotifications: () => ({ data: 0 }),
 }))
 

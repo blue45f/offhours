@@ -1,7 +1,8 @@
 import * as RTabs from '@radix-ui/react-tabs'
-import type { ReactNode } from 'react'
 
 import { cn } from '../../utils/cn'
+
+import type { ReactNode } from 'react'
 
 interface TabsProps {
   value: string

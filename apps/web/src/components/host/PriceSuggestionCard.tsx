@@ -1,19 +1,19 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import {
   KOREA_REGIONS,
   VenueCategoryLabel,
   type PriceSuggestion,
   type VenueCategory,
 } from '@offhours/shared'
+import { useQuery } from '@tanstack/react-query'
 import { Sparkles, TrendingDown, TrendingUp, Wand2 } from 'lucide-react'
+import { useState } from 'react'
 
-import { api } from '../../services/api'
-import { Button } from '../ui/Button'
-import { Select } from '../ui/Select'
-import { Field, Input } from '../ui/Input'
-import { Skeleton } from '../ui/Skeleton'
+import { api } from '../../infrastructure/api'
 import { formatKRW } from '../../utils/format'
+import { Button } from '../ui/Button'
+import { Field, Input } from '../ui/Input'
+import { Select } from '../ui/Select'
+import { Skeleton } from '../ui/Skeleton'
 
 interface Props {
   basePriceKRW: number

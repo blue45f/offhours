@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { RepeatRuleSchema, VenueCategorySchema, VenueStatusSchema } from './enums'
 
 export const BusinessHourSchema = z.object({

@@ -1,11 +1,12 @@
-import { useRef, useState } from 'react'
-import { ImagePlus, X } from 'lucide-react'
-import { toast } from 'sonner'
 import { ATTACHMENT_MAX_COUNT } from '@offhours/shared'
+import { ImagePlus, X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { toast } from 'sonner'
 
-import { fileToAttachment } from '../../features/chat/attachments'
-import { Dialog } from './Dialog'
+import { fileToAttachment } from '../../domains/chat/attachments'
 import { cn } from '../../utils/cn'
+
+import { Dialog } from './Dialog'
 
 interface AttachmentInputProps {
   value: string[]

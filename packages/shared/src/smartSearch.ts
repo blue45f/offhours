@@ -1,6 +1,6 @@
-import { AMENITY_OPTIONS } from './space'
 import { KOREA_REGIONS } from './constants'
 import { USE_CASE_META, VenueCategoryLabel, type UseCase, type VenueCategory } from './enums'
+import { AMENITY_OPTIONS } from './space'
 
 export interface SmartSearchParse {
   region?: string

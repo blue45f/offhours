@@ -9,15 +9,16 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common'
-import { Throttle } from '@nestjs/throttler'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { Request, Response } from 'express'
+import { Throttle } from '@nestjs/throttler'
 import { SignInSchema, SignUpSchema } from '@offhours/shared'
+import { Request, Response } from 'express'
+
+import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
 
 import { AuthService } from './auth.service'
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
-import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
 
 const REFRESH_COOKIE = 'offh_rt'
 

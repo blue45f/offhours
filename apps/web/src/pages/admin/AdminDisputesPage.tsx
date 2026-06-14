@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { DisputeStatusLabel, type DisputeRow, type ResolveDisputeInput } from '@offhours/shared'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
-import { api } from '../../services/api'
 import { AdminShell } from '../../components/admin/AdminShell'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card, CardBody } from '../../components/ui/Card'
 import { Dialog } from '../../components/ui/Dialog'
-import { Field, Textarea } from '../../components/ui/Input'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { Field, Textarea } from '../../components/ui/Input'
+import { api } from '../../infrastructure/api'
 import { formatDateTimeKR, formatKRW } from '../../utils/format'
 
 type ResolveStatus = ResolveDisputeInput['status']

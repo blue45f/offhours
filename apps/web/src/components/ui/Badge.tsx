@@ -1,6 +1,6 @@
-import type { HTMLAttributes } from 'react'
-
 import { cn } from '../../utils/cn'
+
+import type { HTMLAttributes } from 'react'
 
 type Tone = 'neutral' | 'primary' | 'accent' | 'success' | 'warning' | 'error' | 'info'
 

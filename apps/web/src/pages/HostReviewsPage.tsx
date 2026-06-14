@@ -1,25 +1,25 @@
+import { MessageCircleReply, Send, ShieldCheck, Star } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { MessageCircleReply, Send, ShieldCheck, Star } from 'lucide-react'
 
+import { AttachmentThumbs } from '../components/ui/AttachmentInput'
 import { Avatar } from '../components/ui/Avatar'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
 import { EmptyState } from '../components/ui/EmptyState'
+import { Textarea } from '../components/ui/Input'
 import { StarRating } from '../components/ui/StarRating'
 import { Tabs } from '../components/ui/Tabs'
-import { Textarea } from '../components/ui/Input'
-import { AttachmentThumbs } from '../components/ui/AttachmentInput'
 import {
   useAddReviewReply,
   useHostReviews,
   useRespondReview,
   type HostReviewFilter,
   type HostReviewItem,
-} from '../features/reviews/api'
-import { getErrorMessage } from '../services/api'
+} from '../domains/reviews/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { formatDateKR } from '../utils/format'
 
 const TABS: { value: HostReviewFilter; label: string }[] = [

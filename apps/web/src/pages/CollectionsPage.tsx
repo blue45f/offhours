@@ -1,7 +1,7 @@
+import { FolderHeart, Globe2, Lock, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { FolderHeart, Globe2, Lock, Plus } from 'lucide-react'
 
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
@@ -14,8 +14,8 @@ import {
   useCreateCollection,
   useDeleteCollection,
   useMyCollections,
-} from '../features/collections/api'
-import { getErrorMessage } from '../services/api'
+} from '../domains/collections/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { formatDateKR } from '../utils/format'
 
 export default function CollectionsPage() {

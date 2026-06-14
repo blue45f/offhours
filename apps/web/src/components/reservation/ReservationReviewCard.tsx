@@ -1,18 +1,19 @@
+import { Lock, MessageCircleReply, Star } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Lock, MessageCircleReply, Star } from 'lucide-react'
-import type { MyReservationReview } from '@offhours/shared'
 
-import { useCreateReview } from '../../features/reviews/api'
-import { getErrorMessage } from '../../services/api'
+import { useCreateReview } from '../../domains/reviews/api'
+import { getErrorMessage } from '../../infrastructure/api'
+import { formatDateKR } from '../../utils/format'
+import { AttachmentInput, AttachmentThumbs } from '../ui/AttachmentInput'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '../ui/Card'
 import { Field, Textarea } from '../ui/Input'
 import { RatingInput } from '../ui/RatingInput'
 import { StarRating } from '../ui/StarRating'
-import { AttachmentInput, AttachmentThumbs } from '../ui/AttachmentInput'
-import { formatDateKR } from '../../utils/format'
+
+import type { MyReservationReview } from '@offhours/shared'
 
 interface ReservationReviewCardProps {
   reservationId: string

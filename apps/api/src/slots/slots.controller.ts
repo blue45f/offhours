@@ -1,10 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import type { Purpose } from '@offhours/shared'
+import { Public } from '../common/decorators/public.decorator'
 
 import { SlotsService } from './slots.service'
-import { Public } from '../common/decorators/public.decorator'
+
+import type { Purpose } from '@offhours/shared'
 
 @ApiTags('slots')
 @Controller('spaces/:spaceId/slots')

@@ -1,11 +1,11 @@
+import { randomUUID } from 'crypto'
+
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { randomUUID } from 'crypto'
-import { Prisma, type Dispute, type Reservation, type ReservationStatus } from '@prisma/client'
 import {
   ReservationSchema,
   TRUST_SCORE,
@@ -22,13 +22,14 @@ import {
   type FileClaimInput,
   type RecurringResult,
 } from '@offhours/shared'
+import { Prisma, type Dispute, type Reservation, type ReservationStatus } from '@prisma/client'
 
-import { PrismaService } from '../prisma/prisma.service'
-import { SlotsService } from '../slots/slots.service'
 import { randomCode, randomUpperCode } from '../common/util/code'
 import { NotificationsService } from '../notifications/notifications.service'
-import { WaitlistService } from '../waitlist/waitlist.service'
 import { PaymentsService } from '../payments/payments.service'
+import { PrismaService } from '../prisma/prisma.service'
+import { SlotsService } from '../slots/slots.service'
+import { WaitlistService } from '../waitlist/waitlist.service'
 
 @Injectable()
 export class ReservationsService {

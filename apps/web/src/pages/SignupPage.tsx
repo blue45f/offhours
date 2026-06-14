@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SignUpSchema, type SignUpInput } from '@offhours/shared'
-import { toast } from 'sonner'
 import { Mail, User } from 'lucide-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { Button } from '../components/ui/Button'
 import { Field, Input } from '../components/ui/Input'
-import { useSignUp } from '../features/auth/api'
+import { useSignUp } from '../domains/auth/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { useIsAuthed } from '../store/auth'
-import { getErrorMessage } from '../services/api'
 
 export default function SignupPage() {
   const isAuthed = useIsAuthed()

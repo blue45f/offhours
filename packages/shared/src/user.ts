@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { RoleSchema } from './enums'
 
 export const EmailSchema = z

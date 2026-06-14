@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { PurposeSchema } from './enums'
 
 export const GalleryPhotoSchema = z.object({

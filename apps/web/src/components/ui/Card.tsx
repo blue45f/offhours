@@ -43,6 +43,8 @@ export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
 
 export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
   function CardTitle({ className, ...props }, ref) {
+    // Generic heading wrapper — content is supplied by the consumer via children/props.
+    // eslint-disable-next-line jsx-a11y/heading-has-content
     return <h3 ref={ref} className={cn('text-title font-semibold', className)} {...props} />
   }
 )

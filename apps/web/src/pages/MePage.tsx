@@ -1,21 +1,20 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { REFERRAL_BONUS_KRW } from '@offhours/shared'
 import { Building2, Calendar, Heart, MessageCircle, Moon, Sparkles, UserX } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import { REFERRAL_BONUS_KRW } from '@offhours/shared'
-
-import { useMe } from '../store/auth'
-import { useWithdrawAccount } from '../features/auth/api'
-import { useThemeStore } from '../store/theme'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { RecentlyViewedRow } from '../components/space/RecentlyViewedRow'
 import { Avatar } from '../components/ui/Avatar'
-import { Card, CardBody } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
+import { Card, CardBody } from '../components/ui/Card'
 import { useConfirm } from '../components/ui/ConfirmDialog'
-import { RecentlyViewedRow } from '../components/space/RecentlyViewedRow'
+import { useWithdrawAccount } from '../domains/auth/api'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { getErrorMessage } from '../infrastructure/api'
+import { useMe } from '../store/auth'
+import { useThemeStore } from '../store/theme'
 import { cn } from '../utils/cn'
-import { getErrorMessage } from '../services/api'
 
 export default function MePage() {
   useDocumentTitle('마이페이지')

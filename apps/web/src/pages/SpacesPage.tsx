@@ -1,6 +1,3 @@
-import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Clock, Filter, MapPin, Navigation, X } from 'lucide-react'
 import {
   AMENITY_OPTIONS,
   KOREA_REGIONS,
@@ -11,19 +8,22 @@ import {
   type UseCase,
   type VenueCategory,
 } from '@offhours/shared'
+import { Clock, Filter, MapPin, Navigation, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
-import { useSpacesSearch, type SpaceSearchParams } from '../features/spaces/api'
 import { Button } from '../components/ui/Button'
 import { Chip } from '../components/ui/Chip'
-import { Select } from '../components/ui/Select'
-import { Field, Input } from '../components/ui/Input'
-import { EmptyState } from '../components/ui/EmptyState'
 import { Dialog } from '../components/ui/Dialog'
-import { formatKRWShort } from '../utils/format'
+import { EmptyState } from '../components/ui/EmptyState'
+import { Field, Input } from '../components/ui/Input'
+import { Select } from '../components/ui/Select'
+import { useSpacesSearch, type SpaceSearchParams } from '../domains/spaces/api'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { cn } from '../utils/cn'
+import { formatKRWShort } from '../utils/format'
 
 export default function SpacesPage() {
   const [params, setParams] = useSearchParams()

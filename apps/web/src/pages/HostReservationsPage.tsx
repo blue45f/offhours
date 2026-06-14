@@ -1,23 +1,23 @@
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { ReservationStatusLabel, formatTrustTier, type ReservationStatus } from '@offhours/shared'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ClipboardCheck, QrCode, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
-import { Tabs } from '../components/ui/Tabs'
-import { Card, CardBody } from '../components/ui/Card'
+import { CheckOutDialog } from '../components/host/CheckOutDialog'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
+import { Card, CardBody } from '../components/ui/Card'
 import { EmptyState } from '../components/ui/EmptyState'
 import { usePrompt } from '../components/ui/PromptDialog'
+import { Tabs } from '../components/ui/Tabs'
 import {
   useApproveReservation,
   useMyReservations,
   useRejectReservation,
-} from '../features/reservations/api'
-import { api, getErrorMessage } from '../services/api'
+} from '../domains/reservations/api'
+import { api, getErrorMessage } from '../infrastructure/api'
 import { formatDateTimeKR, formatKRW } from '../utils/format'
-import { CheckOutDialog } from '../components/host/CheckOutDialog'
 
 const TABS = [
   { value: 'REQUESTED', label: '요청' },

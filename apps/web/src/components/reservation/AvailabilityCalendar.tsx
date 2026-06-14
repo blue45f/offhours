@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
 import { addDays, format, parseISO, startOfWeek } from 'date-fns'
 import { Clock } from 'lucide-react'
+import { useMemo } from 'react'
 
-import { useSpaceSlots } from '../../features/spaces/api'
+import { useSpaceSlots } from '../../domains/spaces/api'
 import { cn } from '../../utils/cn'
 
 const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']

@@ -1,16 +1,17 @@
-import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import type { AdminUserRow, Paginated, Role } from '@offhours/shared'
 
-import { api, getErrorMessage } from '../../services/api'
 import { AdminShell } from '../../components/admin/AdminShell'
-import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
-import { formatDateKR } from '../../utils/format'
+import { api, getErrorMessage } from '../../infrastructure/api'
 import { useMe } from '../../store/auth'
+import { formatDateKR } from '../../utils/format'
+
+import type { AdminUserRow, Paginated, Role } from '@offhours/shared'
 
 export default function AdminUsersPage() {
   const [q, setQ] = useState('')

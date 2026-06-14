@@ -1,9 +1,9 @@
-import { Minus, Plus, Sparkles } from 'lucide-react'
 import { AddonUnitLabel, addonAmount } from '@offhours/shared'
+import { Minus, Plus, Sparkles } from 'lucide-react'
 
-import { useSpaceAddons } from '../../features/addons/api'
-import { formatKRW } from '../../utils/format'
+import { useSpaceAddons } from '../../domains/addons/api'
 import { cn } from '../../utils/cn'
+import { formatKRW } from '../../utils/format'
 
 interface Props {
   spaceId: string

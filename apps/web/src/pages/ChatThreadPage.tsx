@@ -2,7 +2,7 @@ import { Navigate, useParams } from 'react-router-dom'
 
 import { ChatShell } from '../components/chat/ChatShell'
 import { ChatThreadView } from '../components/chat/ChatThreadView'
-import { useChatThread } from '../features/chat/api'
+import { useChatThread } from '../domains/chat/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 /** 채팅 스레드 — 알림 딥링크(/chat/:id)의 착지점. md+ 에서는 목록과 나란히 보인다 */

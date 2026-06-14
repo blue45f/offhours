@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import { TRUST_SCORE, clampTrust } from '@offhours/shared'
+import { describe, expect, it, vi } from 'vitest'
 
 import { ReviewsService } from './reviews.service'
 

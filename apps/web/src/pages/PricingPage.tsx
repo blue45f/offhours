@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom'
 import { ArrowRight, Check, Wallet } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
-import { Button } from '../components/ui/Button'
 import { Accordion, AccordionItem } from '../components/ui/Accordion'
+import { Button } from '../components/ui/Button'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 /**

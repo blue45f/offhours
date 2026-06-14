@@ -1,13 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import type { Me } from '@offhours/shared'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import MePage from './MePage'
+import { ConfirmProvider } from '../components/ui/ConfirmDialog'
 import { useAuthStore } from '../store/auth'
 import { useThemeStore } from '../store/theme'
-import { ConfirmProvider } from '../components/ui/ConfirmDialog'
+
+import MePage from './MePage'
+
+import type { Me } from '@offhours/shared'
 
 // RecentlyViewedRow 는 react-query 훅을 쓰므로 페이지 단위 테스트에서는 잘라낸다
 vi.mock('../components/space/RecentlyViewedRow', () => ({

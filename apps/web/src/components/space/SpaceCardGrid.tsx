@@ -1,7 +1,8 @@
-import type { SpaceCard as SpaceCardType } from '@offhours/shared'
+import { Skeleton } from '../ui/Skeleton'
 
 import { SpaceCard } from './SpaceCard'
-import { Skeleton } from '../ui/Skeleton'
+
+import type { SpaceCard as SpaceCardType } from '@offhours/shared'
 
 interface Props {
   spaces?: SpaceCardType[]

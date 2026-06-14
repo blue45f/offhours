@@ -1,10 +1,10 @@
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { Suspense, type ReactNode } from 'react'
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 
 import { AppLayout } from '../components/layout/AppLayout'
-import { useAuthHydrated, useIsAdmin, useIsAuthed, useIsHost } from '../store/auth'
 import { PageLoader } from '../components/layout/PageLoader'
 import { RouteError } from '../components/layout/RouteError'
+import { useAuthHydrated, useIsAdmin, useIsAuthed, useIsHost } from '../store/auth'
 import { lazyRetry } from '../utils/lazyRetry'
 
 const HomePage = lazyRetry(() => import('../pages/HomePage'))

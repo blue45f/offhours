@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { BlockSourceLabel, type ExternalCalendar, type VenueBlock } from '@offhours/shared'
 import {
   AlertTriangle,
   Calendar,
@@ -9,7 +8,8 @@ import {
   RefreshCcw,
   Trash2,
 } from 'lucide-react'
-import { BlockSourceLabel, type ExternalCalendar, type VenueBlock } from '@offhours/shared'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
@@ -25,9 +25,9 @@ import {
   useDeleteCalendar,
   useHostCalendars,
   useResyncCalendar,
-} from '../features/calendars/api'
-import { useMySpaces } from '../features/spaces/api'
-import { getErrorMessage } from '../services/api'
+} from '../domains/calendars/api'
+import { useMySpaces } from '../domains/spaces/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { formatDateTimeKR } from '../utils/format'
 
 export default function HostCalendarPage() {

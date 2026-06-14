@@ -1,6 +1,3 @@
-import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
 import {
   AlcoholPolicyLabel,
   CANCELLATION_POLICIES,
@@ -28,30 +25,32 @@ import {
   Sparkles,
   TrendingUp,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 
+import { ReservationPanel } from '../components/reservation/ReservationPanel'
+import { ReviewThread } from '../components/space/ReviewThread'
+import { SpaceCard } from '../components/space/SpaceCard'
+import { Avatar } from '../components/ui/Avatar'
+import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { Skeleton } from '../components/ui/Skeleton'
+import { StarRating } from '../components/ui/StarRating'
+import { useOpenSpaceInquiry } from '../domains/chat/api'
+import { useToggleFavorite, useFavoriteIds } from '../domains/favorites/api'
 import {
   useNearbyBundle,
   useSpaceDetail,
   useSpaceGallery,
   useSpaceReviews,
-} from '../features/spaces/api'
-import { useRecentlyViewedStore } from '../store/recentlyViewed'
-import { useMe } from '../store/auth'
-import { useOpenSpaceInquiry } from '../features/chat/api'
-import { SpaceCard } from '../components/space/SpaceCard'
-import { ReviewThread } from '../components/space/ReviewThread'
-import { useToggleFavorite, useFavoriteIds } from '../features/favorites/api'
-import { StarRating } from '../components/ui/StarRating'
-import { Badge } from '../components/ui/Badge'
-import { Avatar } from '../components/ui/Avatar'
-import { Button } from '../components/ui/Button'
-import { ReservationPanel } from '../components/reservation/ReservationPanel'
-import { Skeleton } from '../components/ui/Skeleton'
-import { formatKRW } from '../utils/format'
-import { getErrorMessage } from '../services/api'
-import { usePageMeta } from '../hooks/usePageMeta'
+} from '../domains/spaces/api'
 import { useJsonLd } from '../hooks/useJsonLd'
+import { usePageMeta } from '../hooks/usePageMeta'
+import { getErrorMessage } from '../infrastructure/api'
+import { useMe } from '../store/auth'
+import { useRecentlyViewedStore } from '../store/recentlyViewed'
+import { formatKRW } from '../utils/format'
 
 export default function SpaceDetailPage() {
   const { slug } = useParams<{ slug: string }>()

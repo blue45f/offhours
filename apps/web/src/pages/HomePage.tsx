@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { motion, useReducedMotion } from 'motion/react'
+import {
+  VenueCategoryLabel,
+  type SpaceCard as SpaceCardType,
+  type VenueCategory,
+} from '@offhours/shared'
 import {
   ArrowRight,
   Camera,
@@ -18,20 +20,18 @@ import {
   UtensilsCrossed,
   Wine,
 } from 'lucide-react'
-import {
-  VenueCategoryLabel,
-  type SpaceCard as SpaceCardType,
-  type VenueCategory,
-} from '@offhours/shared'
+import { motion, useReducedMotion } from 'motion/react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
-import { HeroSearch } from '../components/space/HeroSearch'
-import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { FeaturedSpacesBand } from '../components/space/FeaturedSpacesBand'
-import { LiveNearbyRail } from '../components/space/LiveNearbyRail'
-import { UseCaseDiscovery } from '../components/space/UseCaseDiscovery'
 import { ForYouSection } from '../components/space/ForYouSection'
-import { useSpacesSearch } from '../features/spaces/api'
+import { HeroSearch } from '../components/space/HeroSearch'
+import { LiveNearbyRail } from '../components/space/LiveNearbyRail'
+import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
+import { UseCaseDiscovery } from '../components/space/UseCaseDiscovery'
 import { Button } from '../components/ui/Button'
+import { useSpacesSearch } from '../domains/spaces/api'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 import { usePageMeta } from '../hooks/usePageMeta'
 

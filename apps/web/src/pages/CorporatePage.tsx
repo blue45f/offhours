@@ -1,6 +1,3 @@
-import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { Building2, ReceiptText, Trash2, Wallet } from 'lucide-react'
 import {
   CorporateTaxTypeLabel,
   creditBonus,
@@ -8,6 +5,9 @@ import {
   type CorporateTaxType,
   type UpsertCorporateProfileInput,
 } from '@offhours/shared'
+import { Building2, ReceiptText, Trash2, Wallet } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '../components/ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
@@ -19,11 +19,11 @@ import {
   useDeleteCorporateProfile,
   useTopupCredit,
   useUpsertCorporateProfile,
-} from '../features/corporate/api'
+} from '../domains/corporate/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { getErrorMessage } from '../services/api'
-import { formatKRW } from '../utils/format'
+import { getErrorMessage } from '../infrastructure/api'
 import { cn } from '../utils/cn'
+import { formatKRW } from '../utils/format'
 
 const EMPTY_CORPORATE_FORM: UpsertCorporateProfileInput = {
   companyName: '',

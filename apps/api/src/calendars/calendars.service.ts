@@ -1,4 +1,10 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+
+import { PrismaService } from '../prisma/prisma.service'
+
+import { parseIcs } from './ics-parser'
+import { assertSafeIcsUrl, fetchIcsSafely } from './ics-url'
+
 import type {
   ConnectExternalCalendarInput,
   CreateManualBlockInput,
@@ -6,10 +12,6 @@ import type {
   HostCalendarOverview,
   VenueBlock as SharedVenueBlock,
 } from '@offhours/shared'
-
-import { PrismaService } from '../prisma/prisma.service'
-import { parseIcs } from './ics-parser'
-import { assertSafeIcsUrl, fetchIcsSafely } from './ics-url'
 
 @Injectable()
 export class CalendarsService {

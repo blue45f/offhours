@@ -1,6 +1,6 @@
-import { type ComponentPropsWithoutRef, type ReactNode } from 'react'
 import * as RAccordion from '@radix-ui/react-accordion'
 import { ChevronDown } from 'lucide-react'
+import { type ComponentPropsWithoutRef, type ReactNode } from 'react'
 
 import { cn } from '../../utils/cn'
 

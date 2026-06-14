@@ -13,8 +13,8 @@ import {
   type ReviewReply,
 } from '@offhours/shared'
 
-import { PrismaService } from '../prisma/prisma.service'
 import { NotificationsService } from '../notifications/notifications.service'
+import { PrismaService } from '../prisma/prisma.service'
 
 /** 후기에 항상 따라붙는 1단 답글 스레드 — 숨김 답글 제외, 시간순 */
 const REPLIES_INCLUDE = {

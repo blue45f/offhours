@@ -1,10 +1,10 @@
+import { BellRing, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { BellRing, Check } from 'lucide-react'
 
+import { useJoinWaitlist, useLeaveWaitlist, useWaitlistStatus } from '../../domains/waitlist/api'
+import { getErrorMessage } from '../../infrastructure/api'
 import { useIsAuthed } from '../../store/auth'
-import { useJoinWaitlist, useLeaveWaitlist, useWaitlistStatus } from '../../features/waitlist/api'
-import { getErrorMessage } from '../../services/api'
 
 /**
  * 빈자리 알림 — 원하는 시간이 꽉 찼을 때 신청. 취소 발생 시 알림이 온다.

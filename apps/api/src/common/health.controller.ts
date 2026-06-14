@@ -1,9 +1,10 @@
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { SkipThrottle } from '@nestjs/throttler'
-import type { Response } from 'express'
 
 import { PrismaService } from '../prisma/prisma.service'
+
+import type { Response } from 'express'
 
 /**
  * Health probes for hosted deploys (Cloud Run / Railway / Docker).

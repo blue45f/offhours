@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { Check, Sparkles } from 'lucide-react'
+import { motion } from 'motion/react'
+import { Link } from 'react-router-dom'
 
-import { Button } from '../components/ui/Button'
 import { RevenueSimulator } from '../components/host/RevenueSimulator'
-import { useIsHost } from '../store/auth'
+import { Button } from '../components/ui/Button'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useIsHost } from '../store/auth'
 
 export default function HostLandingPage() {
   const isHost = useIsHost()

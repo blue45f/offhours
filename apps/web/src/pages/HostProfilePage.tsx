@@ -1,8 +1,4 @@
-import { useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
 import {
   CreateHostProfileSchema,
   type CreateHostProfileInput,
@@ -10,15 +6,19 @@ import {
   type TaxType,
 } from '@offhours/shared'
 import { Building2, Check, CreditCard, Receipt, ShieldCheck } from 'lucide-react'
+import { useEffect } from 'react'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
+import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '../components/ui/Card'
 import { Field, Input } from '../components/ui/Input'
-import { Button } from '../components/ui/Button'
-import { Badge } from '../components/ui/Badge'
 import { Skeleton } from '../components/ui/Skeleton'
+import { useHostProfile, useUpsertHostProfile } from '../domains/host/api'
+import { getErrorMessage } from '../infrastructure/api'
 import { cn } from '../utils/cn'
-import { getErrorMessage } from '../services/api'
-import { useHostProfile, useUpsertHostProfile } from '../features/host/api'
 
 function formatBizNumber(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 10)

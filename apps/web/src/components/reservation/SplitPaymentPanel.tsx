@@ -1,15 +1,15 @@
+import { SplitMemberStatusLabel, type SplitDetail } from '@offhours/shared'
+import { Check, Copy, Send, Share2, Users } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Check, Copy, Send, Share2, Users } from 'lucide-react'
-import { SplitMemberStatusLabel, type SplitDetail } from '@offhours/shared'
 
+import { useCreateSplit, useReservationSplit } from '../../domains/splits/api'
+import { getErrorMessage } from '../../infrastructure/api'
+import { formatKRW } from '../../utils/format'
 import { Button } from '../ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '../ui/Card'
 import { Dialog } from '../ui/Dialog'
 import { Field, Input, Textarea } from '../ui/Input'
-import { useCreateSplit, useReservationSplit } from '../../features/splits/api'
-import { getErrorMessage } from '../../services/api'
-import { formatKRW } from '../../utils/format'
 
 interface Props {
   reservationId: string

@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { Role } from '@prisma/client'
 import {
   BroadcastNotificationSchema,
   ModerateContentSchema,
@@ -15,12 +14,14 @@ import {
   type SetRoleInput,
   type SetSuspendedInput,
 } from '@offhours/shared'
+import { Role } from '@prisma/client'
 
+import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
+import { Roles } from '../common/decorators/roles.decorator'
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { RolesGuard } from '../common/guards/roles.guard'
-import { Roles } from '../common/decorators/roles.decorator'
-import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
+
 import { AdminService } from './admin.service'
 
 @ApiBearerAuth()

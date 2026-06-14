@@ -1,18 +1,19 @@
+import { CornerDownRight, Send } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { CornerDownRight, Send } from 'lucide-react'
-import type { Review } from '@offhours/shared'
 
-import { useAddReviewReply } from '../../features/reviews/api'
-import { getErrorMessage } from '../../services/api'
+import { useAddReviewReply } from '../../domains/reviews/api'
+import { getErrorMessage } from '../../infrastructure/api'
 import { useMe } from '../../store/auth'
+import { formatDateKR } from '../../utils/format'
+import { AttachmentThumbs } from '../ui/AttachmentInput'
 import { Avatar } from '../ui/Avatar'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { Textarea } from '../ui/Input'
 import { StarRating } from '../ui/StarRating'
-import { AttachmentThumbs } from '../ui/AttachmentInput'
-import { formatDateKR } from '../../utils/format'
+
+import type { Review } from '@offhours/shared'
 
 interface ReviewThreadProps {
   review: Review

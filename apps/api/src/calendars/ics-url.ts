@@ -1,6 +1,7 @@
-import { BadRequestException } from '@nestjs/common'
 import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
+
+import { BadRequestException } from '@nestjs/common'
 
 /**
  * 외부 캘린더 ICS URL 검증 — 호스트가 제공한 URL을 서버가 fetch 하므로 SSRF 방어가 필요하다.

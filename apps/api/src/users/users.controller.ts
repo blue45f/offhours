@@ -11,12 +11,14 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { UpdateProfileSchema, type UpdateProfileInput } from '@offhours/shared'
-import type { Response } from 'express'
 
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { CurrentUser, RequestUser } from '../common/decorators/current-user.decorator'
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
+
 import { UsersService } from './users.service'
+
+import type { Response } from 'express'
 
 const REFRESH_COOKIE = 'offh_rt'
 

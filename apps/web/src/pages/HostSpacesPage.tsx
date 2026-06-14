@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom'
 import { PlusCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
-import { useMySpaces } from '../features/spaces/api'
+import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card, CardBody } from '../components/ui/Card'
-import { Badge } from '../components/ui/Badge'
 import { EmptyState } from '../components/ui/EmptyState'
+import { useMySpaces } from '../domains/spaces/api'
 import { formatKRW } from '../utils/format'
 
 export default function HostSpacesPage() {

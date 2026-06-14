@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
 import { ArrowRight, Clock, Compass, Moon, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { Button } from '../components/ui/Button'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'

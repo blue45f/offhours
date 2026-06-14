@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { type NotificationType } from '@prisma/client'
 
 import { PrismaService } from '../prisma/prisma.service'
+
 import { NotificationChannels } from './channels.provider'
 
 interface CreateNotificationInput {

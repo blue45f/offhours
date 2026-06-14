@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { AuthModule } from '../auth/auth.module'
+
 import { CorporateController } from './corporate.controller'
 import { CorporateService } from './corporate.service'
 
