@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'motion/react'
 import { format, parseISO } from 'date-fns'
 import { Link } from 'react-router-dom'
 import {
