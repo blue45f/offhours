@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, EyeOff, Send } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import type { ChatMessage } from '@offhours/shared'
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 
 import { api } from '../../services/api'

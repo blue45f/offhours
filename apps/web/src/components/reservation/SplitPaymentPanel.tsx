@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { Check, Copy, Send, Share2, Users } from 'lucide-react'
 import { SplitMemberStatusLabel, type SplitDetail } from '@offhours/shared'
 

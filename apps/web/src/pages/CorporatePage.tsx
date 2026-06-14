@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { Building2, ReceiptText, Trash2, Wallet } from 'lucide-react'
 import {
   CorporateTaxTypeLabel,

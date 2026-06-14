@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { MessageCircleReply, Send, ShieldCheck, Star } from 'lucide-react'
 
 import { Avatar } from '../components/ui/Avatar'

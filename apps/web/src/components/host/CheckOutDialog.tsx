@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { CHECKOUT_ITEMS, type CheckoutItemKey } from '@offhours/shared'
 import { Check, Sparkles } from 'lucide-react'
 

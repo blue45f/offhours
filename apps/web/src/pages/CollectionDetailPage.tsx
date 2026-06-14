@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { Globe2, Lock, MapPin, Share2, ThumbsDown, ThumbsUp } from 'lucide-react'
 import type { CollectionDetail, VoteValue } from '@offhours/shared'
 

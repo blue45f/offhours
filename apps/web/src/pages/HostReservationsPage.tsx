@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { ReservationStatusLabel, formatTrustTier, type ReservationStatus } from '@offhours/shared'
 import { ClipboardCheck, QrCode, ShieldCheck } from 'lucide-react'
 

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import type { SpaceCard as SpaceCardType } from '@offhours/shared'
 import { VenueCategoryLabel, formatDistanceKm, formatResponseTimeBadge } from '@offhours/shared'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { Badge } from '../ui/Badge'
 import { StarRating } from '../ui/StarRating'
