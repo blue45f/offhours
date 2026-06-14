@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import type { InquiryFormInput, InquiryReceipt } from '@offhours/shared'
 
 /**
- * TermsDesk 공개 문의 API — 외부 서비스라 내부 axios(api) 클라이언트를 쓰지 않고
+ * TermsDesk 공개 문의 API — 외부 서비스라 내부 ky(api) 클라이언트를 쓰지 않고
  * fetch 로 직접 호출한다(쿠키·토큰 미전송, API 계약 감사 대상 제외).
  */
 export const TERMSDESK_INQUIRY_URL = 'https://termsdesk.vercel.app/api/public/offhours/inquiries'

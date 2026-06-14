@@ -25,7 +25,7 @@ export function policyExternalUrl(slug: PolicySlug): string {
 }
 
 export async function fetchPolicy(slug: PolicySlug): Promise<PublicPolicy> {
-  // TermsDesk 공개 API(무인증·CORS 허용) — offhours API 클라이언트(axios)는 자격증명·
+  // TermsDesk 공개 API(무인증·CORS 허용) — offhours API 클라이언트(ky)는 자격증명·
   // Authorization 헤더를 붙이므로 크로스 오리진 공개 문서에는 평범한 fetch 를 쓴다.
   const res = await fetch(`${TERMSDESK_BASE}/api/public/${ORG_SLUG}/policies/${slug}`, {
     headers: { Accept: 'application/json' },
