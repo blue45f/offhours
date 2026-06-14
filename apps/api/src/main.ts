@@ -9,8 +9,13 @@ import { Logger } from 'nestjs-pino'
 import { AppModule } from './app.module'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ZodValidationFilter } from './common/filters/zod-exception.filter'
+import { validateEnv } from './config/env'
 
 async function bootstrap() {
+  // Non-fatal env sanity check: logs warnings on misconfiguration but never
+  // throws/exits, so a live deploy is never blocked by this.
+  validateEnv()
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   })
