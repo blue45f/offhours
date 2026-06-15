@@ -95,9 +95,18 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 border-t border-[var(--color-border)] pt-6 text-xs text-[var(--color-fg-subtle)]">
-          © {new Date().getFullYear()} Offhours. All rights reserved. · 데모 서비스 — 사업자 정보는
-          정식 오픈 시 게시됩니다
+        <div className="mt-12 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[var(--color-border)] pt-6 text-xs text-[var(--color-fg-subtle)]">
+          <span>
+            © {new Date().getFullYear()} Offhours. All rights reserved. · 데모 서비스 — 사업자
+            정보는 정식 오픈 시 게시됩니다
+          </span>
+          <span aria-hidden>·</span>
+          <Link
+            to="/design"
+            className="underline-offset-4 hover:text-[var(--color-fg-muted)] hover:underline"
+          >
+            디자인 시스템
+          </Link>
         </div>
       </div>
     </footer>

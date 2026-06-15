@@ -23,15 +23,28 @@ export function BottomNav() {
             <NavLink
               to={to}
               end={to === '/'}
+              // 활성 항목을 색 차이뿐 아니라 상단 인디케이터 바 + aria-current 로 명확히 알린다.
               className={({ isActive }) =>
                 cn(
-                  'h-full flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium',
-                  isActive ? 'text-[var(--color-fg)]' : 'text-[var(--color-fg-muted)]'
+                  'relative h-full flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors',
+                  isActive
+                    ? 'text-[var(--color-primary)]'
+                    : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]'
                 )
               }
             >
-              <Icon size={20} aria-hidden />
-              {label}
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span
+                      aria-hidden
+                      className="absolute inset-x-5 top-0 h-0.5 rounded-full bg-[var(--color-primary)]"
+                    />
+                  )}
+                  <Icon size={20} aria-hidden />
+                  {label}
+                </>
+              )}
             </NavLink>
           </li>
         ))}

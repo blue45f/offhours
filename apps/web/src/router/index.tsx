@@ -47,6 +47,7 @@ const AdminBroadcastPage = lazyRetry(() => import('../pages/admin/AdminBroadcast
 const NotFoundPage = lazyRetry(() => import('../pages/NotFoundPage'))
 const ComingSoonPage = lazyRetry(() => import('../pages/ComingSoonPage'))
 const PolicyPage = lazyRetry(() => import('../pages/PolicyPage'))
+const DesignSystemPage = lazyRetry(() => import('../pages/DesignSystemPage'))
 
 function Protected({ children }: { children: ReactNode }) {
   const hydrated = useAuthHydrated()
@@ -105,6 +106,8 @@ export const router = createBrowserRouter([
           { path: 'privacy', element: lazyEl(<PolicyPage slug="privacy-policy" />) },
           { path: 'cancel-policy', element: lazyEl(<PolicyPage slug="refund-policy" />) },
           { path: 'safety', element: lazyEl(<ComingSoonPage />) },
+          // 디자인 시스템 가이드 — 토큰·컴포넌트 전시(주 내비 미노출, 푸터에서만 진입)
+          { path: 'design', element: lazyEl(<DesignSystemPage />) },
 
           {
             path: 'me',

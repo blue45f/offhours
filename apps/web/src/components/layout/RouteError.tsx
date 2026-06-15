@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react'
 import { useRouteError } from 'react-router-dom'
 
 import { Button } from '../ui/Button'
@@ -12,9 +13,12 @@ export function RouteError() {
   console.error('Route render error:', error)
 
   return (
-    <div className="container-page py-20 text-center">
-      <h1 className="text-headline serif">문제가 발생했어요</h1>
-      <p className="mt-3 text-sm text-[var(--color-fg-muted)]">
+    <div className="container-page flex flex-col items-center py-20 text-center">
+      <div className="mb-5 flex size-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)] text-[var(--color-warning)] ring-1 ring-[var(--color-border)]">
+        <AlertTriangle size={26} strokeWidth={1.5} aria-hidden />
+      </div>
+      <h1 className="text-headline serif text-balance">문제가 발생했어요</h1>
+      <p className="mt-3 max-w-[46ch] text-pretty text-sm leading-relaxed text-[var(--color-fg-muted)]">
         페이지를 표시하는 중 오류가 났어요. 잠시 후 다시 시도하거나 홈으로 돌아가 주세요.
       </p>
       <div className="mt-6 flex items-center justify-center gap-2">
