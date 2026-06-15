@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 
 import { CommandPalette } from '../CommandPalette'
+import { FeedbackWidget } from '../feedback/FeedbackWidget'
 import { CompareBar } from '../space/CompareBar'
 
 import { BottomNav } from './BottomNav'
@@ -26,6 +27,10 @@ export function AppLayout() {
       <BottomNav />
       <CompareBar />
       <CommandPalette />
+      {/* SurveyDesk 피드백 위젯: 엔드포인트 env 가 설정된 경우에만 렌더(미설정=기본, 무영향). */}
+      {import.meta.env.VITE_SURVEYDESK_URL && (
+        <FeedbackWidget appId="offhours" endpoint={import.meta.env.VITE_SURVEYDESK_URL} />
+      )}
     </div>
   )
 }

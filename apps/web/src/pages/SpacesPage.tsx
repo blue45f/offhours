@@ -130,7 +130,7 @@ export default function SpacesPage() {
 
   function goToPage(p: number) {
     set('page', p <= 1 ? undefined : String(p))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    globalThis.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (

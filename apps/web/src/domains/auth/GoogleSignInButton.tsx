@@ -18,19 +18,22 @@ declare global {
   interface Window {
     google?: GoogleIdentityServices
   }
+  // `globalThis.google` 접근을 타입화한다(코드베이스가 window→globalThis 로 통일됨).
+  // var 선언이라야 globalThis 인덱스에 노출되어 TS7017 을 회피한다.
+  var google: GoogleIdentityServices | undefined
 }
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client'
 
 function loadGis(): Promise<GoogleIdentityServices> {
   return new Promise((resolve, reject) => {
-    if (window.google?.accounts?.id) {
-      resolve(window.google)
+    if (globalThis.google?.accounts?.id) {
+      resolve(globalThis.google)
       return
     }
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SRC}"]`)
     if (existing) {
-      existing.addEventListener('load', () => window.google && resolve(window.google))
+      existing.addEventListener('load', () => globalThis.google && resolve(globalThis.google))
       existing.addEventListener('error', () => reject(new Error('GIS 로드 실패')))
       return
     }
@@ -38,7 +41,7 @@ function loadGis(): Promise<GoogleIdentityServices> {
     script.src = GIS_SRC
     script.async = true
     script.defer = true
-    script.onload = () => window.google && resolve(window.google)
+    script.onload = () => globalThis.google && resolve(globalThis.google)
     script.onerror = () => reject(new Error('GIS 로드 실패'))
     document.head.appendChild(script)
   })

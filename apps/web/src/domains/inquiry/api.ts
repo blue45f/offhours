@@ -25,7 +25,7 @@ export async function submitInquiry(payload: SubmitInquiryPayload): Promise<Inqu
       title: payload.title,
       body: payload.body,
       ...(payload.contactEmail ? { contactEmail: payload.contactEmail } : {}),
-      originUrl: window.location.href,
+      originUrl: globalThis.location.href,
       website: payload.website,
     }),
   })

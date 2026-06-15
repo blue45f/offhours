@@ -15,8 +15,8 @@ export function resolveInitialTheme(): Theme {
     if (root.classList.contains('theme-dark')) return 'dark'
     if (root.classList.contains('theme-light')) return 'light'
   }
-  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  if (typeof window !== 'undefined' && typeof globalThis.matchMedia === 'function') {
+    return globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   }
   return 'light'
 }

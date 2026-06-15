@@ -67,11 +67,11 @@ export function CommandPalette() {
       }
     }
     const onOpen = () => openPalette()
-    window.addEventListener('keydown', onKey)
-    window.addEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpen)
+    globalThis.addEventListener('keydown', onKey)
+    globalThis.addEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpen)
     return () => {
-      window.removeEventListener('keydown', onKey)
-      window.removeEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpen)
+      globalThis.removeEventListener('keydown', onKey)
+      globalThis.removeEventListener(COMMAND_PALETTE_OPEN_EVENT, onOpen)
     }
   }, [open, openPalette])
 

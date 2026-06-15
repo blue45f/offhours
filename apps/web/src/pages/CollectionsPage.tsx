@@ -126,7 +126,7 @@ export default function CollectionsPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        const url = `${window.location.origin}/c/${c.slug}`
+                        const url = `${globalThis.location.origin}/c/${c.slug}`
                         navigator.clipboard?.writeText(url)
                         toast.success('공유 링크를 복사했어요')
                       }}

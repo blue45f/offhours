@@ -39,9 +39,9 @@ export default defineConfig(
     rules: {
       'no-restricted-globals': [
         'error',
-        { name: 'confirm', message: 'useConfirm()/ConfirmDialog를 사용하세요 (window.confirm 금지).' },
-        { name: 'alert', message: 'Toast/Dialog를 사용하세요 (window.alert 금지).' },
-        { name: 'prompt', message: 'usePrompt()/PromptDialog를 사용하세요 (window.prompt 금지).' },
+        { name: 'confirm', message: 'useConfirm()/ConfirmDialog를 사용하세요 (globalThis.confirm 금지).' },
+        { name: 'alert', message: 'Toast/Dialog를 사용하세요 (globalThis.alert 금지).' },
+        { name: 'prompt', message: 'usePrompt()/PromptDialog를 사용하세요 (globalThis.prompt 금지).' },
       ],
       'react-refresh/only-export-components': [
         'error',

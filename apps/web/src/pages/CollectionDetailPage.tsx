@@ -66,7 +66,7 @@ export default function CollectionDetailPage() {
   }
 
   async function share() {
-    const url = window.location.href
+    const url = globalThis.location.href
     if (navigator.share) {
       try {
         await navigator.share({ url, title: data?.name ?? '오프아워스 컬렉션' })

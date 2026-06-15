@@ -61,8 +61,8 @@ export function useGeolocation(opts?: { eager?: boolean }) {
 
   useEffect(() => {
     if (!opts?.eager || status !== 'idle' || coords) return
-    const id = window.setTimeout(request, 0)
-    return () => window.clearTimeout(id)
+    const id = globalThis.setTimeout(request, 0)
+    return () => globalThis.clearTimeout(id)
   }, [opts?.eager, status, coords, request])
 
   return { coords, status, error, request, clear }

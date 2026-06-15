@@ -22,11 +22,11 @@ export function RouteError() {
         페이지를 표시하는 중 오류가 났어요. 잠시 후 다시 시도하거나 홈으로 돌아가 주세요.
       </p>
       <div className="mt-6 flex items-center justify-center gap-2">
-        <Button onClick={() => window.location.reload()}>다시 시도</Button>
+        <Button onClick={() => globalThis.location.reload()}>다시 시도</Button>
         <Button
           variant="secondary"
           onClick={() => {
-            window.location.href = '/'
+            globalThis.location.href = '/'
           }}
         >
           홈으로

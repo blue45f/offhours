@@ -21,7 +21,7 @@ const PromptContext = createContext<PromptFn | null>(null)
 /**
  * Provides an imperative `prompt()` that resolves to the entered string (or
  * null if cancelled), backed by the branded {@link Dialog} — a themed,
- * accessible replacement for `window.prompt`. One instance lives at the app
+ * accessible replacement for `globalThis.prompt`. One instance lives at the app
  * root (like the Toaster / ConfirmProvider); call sites do
  * `const v = await prompt({ title }); if (v === null) return`.
  */

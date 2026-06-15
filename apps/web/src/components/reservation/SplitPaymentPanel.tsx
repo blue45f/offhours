@@ -174,7 +174,8 @@ function SplitProgress({ split, spaceTitle }: { split: SplitDetail; spaceTitle: 
             const urls = split.members
               .filter((m) => m.status !== 'PAID')
               .map(
-                (m, i) => `${i + 1}/${split.memberCount}: ${window.location.origin}/pay/${m.token}`
+                (m, i) =>
+                  `${i + 1}/${split.memberCount}: ${globalThis.location.origin}/pay/${m.token}`
               )
               .join('\n')
             navigator.clipboard?.writeText(urls)
@@ -197,7 +198,7 @@ function MemberRow({
   member: SplitDetail['members'][number]
   spaceTitle: string
 }) {
-  const url = `${window.location.origin}/pay/${member.token}`
+  const url = `${globalThis.location.origin}/pay/${member.token}`
   function copy() {
     navigator.clipboard?.writeText(url)
     toast.success(`${idx}번 멤버 링크를 복사했어요`)

@@ -106,7 +106,7 @@ export default function ReservationDetailPage() {
   }
 
   async function onShareEvent() {
-    const url = `${window.location.origin}/event/${reservation.code}`
+    const url = `${globalThis.location.origin}/event/${reservation.code}`
     try {
       await navigator.clipboard.writeText(url)
       toast.success('초대 링크를 복사했어요')

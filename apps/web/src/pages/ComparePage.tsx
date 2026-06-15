@@ -149,7 +149,7 @@ export default function ComparePage() {
   const isLoading = queries.some((q) => q.isLoading)
 
   function copyShareLink() {
-    const url = `${window.location.origin}/compare?spaces=${slugs.join(',')}`
+    const url = `${globalThis.location.origin}/compare?spaces=${slugs.join(',')}`
     navigator.clipboard?.writeText(url).then(
       () => toast.success('공유 링크를 복사했어요'),
       () => toast.error('복사에 실패했어요')

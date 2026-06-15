@@ -127,7 +127,9 @@ export default function SpaceDetailPage() {
             size="sm"
             leading={<Share2 size={14} />}
             onClick={() => {
-              navigator.share?.({ url: window.location.href, title: data.title }).catch(() => null)
+              navigator
+                .share?.({ url: globalThis.location.href, title: data.title })
+                .catch(() => null)
             }}
           >
             공유
@@ -344,7 +346,7 @@ function spaceJsonLd(data: SpaceDetail): Record<string, unknown> {
     '@type': 'EventVenue',
     name: data.title,
     description: data.summary,
-    url: `${window.location.origin}/spaces/${data.slug}`,
+    url: `${globalThis.location.origin}/spaces/${data.slug}`,
     ...(data.photos.length > 0 && { image: data.photos.map((p) => p.url) }),
     address: {
       '@type': 'PostalAddress',

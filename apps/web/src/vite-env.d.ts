@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string
   /** `'true'`이면 MSW mock 모드로 부팅 (dev:mock 스크립트). 기본 미설정 = 실제 백엔드. */
   readonly VITE_USE_MSW?: string
+  /** SurveyDesk 엔드포인트. 설정 시 피드백 위젯 노출, 미설정(기본)이면 위젯 미렌더. */
+  readonly VITE_SURVEYDESK_URL?: string
 }
 
 interface ImportMeta {

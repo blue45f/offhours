@@ -30,8 +30,8 @@ export function useCountdown(startAt?: string): Countdown | null {
 
   useEffect(() => {
     if (Number.isNaN(target)) return
-    const id = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(id)
+    const id = globalThis.setInterval(() => setNow(Date.now()), 1000)
+    return () => globalThis.clearInterval(id)
   }, [target])
 
   return Number.isNaN(target) ? null : diff(target, now)
