@@ -1,9 +1,12 @@
 import 'dotenv/config'
 import { randomBytes } from 'crypto'
 
+import { weekdayMaskFromArray } from '@offhours/shared'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient, Role, RsvpStatus } from '@prisma/client'
 import * as argon2 from 'argon2'
+
+import { pricePerHour } from '../src/slots/slots.engine'
 
 const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -30,6 +33,67 @@ function randomCode(prefix: string, length = 6) {
   let s = ''
   for (let i = 0; i < length; i++) s += ALPHA[Math.floor(Math.random() * ALPHA.length)]
   return `${prefix}-${s}`
+}
+
+// 동적 가격 규칙 — 영업 외 시간 플랫폼의 핵심 차별점("동적 가격")을 데이터로 활성화한다.
+// 규칙 없이는 모든 슬롯이 기본가로만 노출돼 가격 엔진이 잠들어 있다.
+const WEEKEND_MASK = weekdayMaskFromArray([0, 6]) // 토·일
+const FRI_SAT_MASK = weekdayMaskFromArray([5, 6]) // 금·토
+interface PricingRuleSpec {
+  label: string
+  multiplier: number
+  weekdayMask: number
+  startMinute: number
+  endMinute: number
+  priority: number
+}
+// 카테고리·인덱스로 결정적 분산 — 시드마다 동일. 파티성 공간은 주말·심야 할증을 크게.
+function pricingRuleSpecs(category: string, i: number): PricingRuleSpec[] {
+  const partyish = category === 'BAR' || category === 'ROOFTOP' || category === 'HOUSE'
+  const weekendMult = partyish ? 1.25 : 1.15
+  const lateNightMult = partyish ? 1.35 : 1.2
+  const specs: PricingRuleSpec[] = [
+    {
+      label: '주말 할증',
+      multiplier: weekendMult,
+      weekdayMask: WEEKEND_MASK,
+      startMinute: 0,
+      endMinute: 1440,
+      priority: 10,
+    },
+    {
+      // 심야(22:00~익일 06:00) — 익일 종료라 endMinute > 1440
+      label: '심야 할증',
+      multiplier: lateNightMult,
+      weekdayMask: weekdayMaskFromArray([0, 1, 2, 3, 4, 5, 6]),
+      startMinute: 22 * 60,
+      endMinute: 30 * 60,
+      priority: 20,
+    },
+  ]
+  // 약 절반은 평일 낮 비수기 할인까지 둬 가격 분포를 풍부하게.
+  if (i % 2 === 0) {
+    specs.push({
+      label: '평일 낮 비수기',
+      multiplier: 0.9,
+      weekdayMask: weekdayMaskFromArray([1, 2, 3, 4]),
+      startMinute: 9 * 60,
+      endMinute: 18 * 60,
+      priority: 5,
+    })
+  }
+  // 금·토 황금시간(19:00~24:00) 프리미엄 — 파티성 공간에만.
+  if (partyish) {
+    specs.push({
+      label: '금·토 황금시간',
+      multiplier: 1.4,
+      weekdayMask: FRI_SAT_MASK,
+      startMinute: 19 * 60,
+      endMinute: 24 * 60,
+      priority: 30,
+    })
+  }
+  return specs
 }
 
 const prisma = new PrismaClient({
@@ -583,6 +647,7 @@ async function main() {
       data: {
         venueId: venue.id,
         slug,
+        pricingRules: { create: pricingRuleSpecs(spec.category, i) },
         title: spec.title,
         summary: spec.summary,
         description: spec.description,
@@ -621,7 +686,7 @@ async function main() {
   // 운영에서는 SlotsScheduler 의 매일 03:00 KST 크론이 담당.
   const activeSpaces = await prisma.space.findMany({
     where: { status: 'ACTIVE' },
-    select: { id: true, basePriceKRW: true, cleaningMinutes: true },
+    select: { id: true, basePriceKRW: true, cleaningMinutes: true, pricingRules: true },
   })
   const now = new Date()
   const slotData: {
@@ -642,7 +707,8 @@ async function main() {
         spaceId: s.id,
         startAt: dayStart,
         endAt: nightEnd,
-        priceKRW: s.basePriceKRW,
+        // 동적 가격 — 주말·심야 규칙을 슬롯 단가에 실제 반영(라이브 레일에서도 가격 차등이 보이도록)
+        priceKRW: pricePerHour(s.basePriceKRW, s.pricingRules, dayStart, nightEnd),
         isOpen: true,
       })
       // 휴무 가정 통대관: 매주 월요일 09:00 ~ 21:00
@@ -656,7 +722,7 @@ async function main() {
           spaceId: s.id,
           startAt: dayOpen,
           endAt: dayClose,
-          priceKRW: s.basePriceKRW,
+          priceKRW: pricePerHour(s.basePriceKRW, s.pricingRules, dayOpen, dayClose),
           isOpen: true,
         })
       }
@@ -1170,8 +1236,9 @@ async function main() {
     gallerySeedCount++
   }
 
+  const pricingRuleCount = await prisma.pricingRule.count()
   console.log(
-    `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ` +
+    `✅ Seeded ${SPACE_SEEDS.length} spaces, ${slotData.length} demo slots, ${pricingRuleCount} pricing rules, ` +
       `${hostUsers.length} host response stats, ${collectionsSeed.length} collections, ` +
       `${blockSeedCount} venue blocks, ${guideSeedCount} arrival guides, ${addonSeedCount} addons, ${rsvpSeedCount} rsvps, ${gallerySeedCount} gallery photos.`
   )

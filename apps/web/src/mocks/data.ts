@@ -29,7 +29,8 @@ const photoSet = (slug: string, n: number): SpacePhoto[] =>
   }))
 
 interface SeedSpace extends SpaceCard {
-  detail: Omit<SpaceDetail, keyof SpaceCard>
+  detail: Omit<SpaceDetail, keyof SpaceCard | 'pricingTiers'> &
+    Partial<Pick<SpaceDetail, 'pricingTiers'>>
 }
 
 /**
@@ -448,7 +449,14 @@ export function toCard(s: SeedSpace): SpaceCard {
 
 export function toDetail(s: SeedSpace): SpaceDetail {
   const { detail, ...card } = s
-  return { ...card, ...detail }
+  return {
+    ...card,
+    ...detail,
+    pricingTiers: detail.pricingTiers ?? [
+      { label: '주말 할증', deltaPct: 20 },
+      { label: '심야 할증', deltaPct: 15 },
+    ],
+  }
 }
 
 /** /spaces/slug/:slug/gallery — 호스트가 올린 실제 이용 사진(용도별). */

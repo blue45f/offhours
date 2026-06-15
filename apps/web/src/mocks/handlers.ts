@@ -76,12 +76,15 @@ function buildSlots(spaceId: string, from?: string, to?: string): Slot[] {
       if (to && startAt > new Date(to)) continue
       const endAt = new Date(startAt)
       endAt.setHours(hour + 1)
+      // 동적 가격 데모 — 주말·심야엔 할증, 그 외엔 기본가(시드 PricingRule 와 같은 결을 흉내).
+      const weekend = startAt.getDay() === 0 || startAt.getDay() === 6
+      const mult = weekend ? 1.25 : hour >= 21 ? 1.15 : 1
       slots.push({
         id: `${spaceId}_slot_${d}_${hour}`,
         spaceId,
         startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
-        priceKRW: price,
+        priceKRW: Math.round((price * mult) / 1000) * 1000,
         isOpen: true,
         isReserved: (d + hour) % 4 === 0,
       })

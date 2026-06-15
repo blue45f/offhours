@@ -10,6 +10,7 @@ import {
   UseCaseSchema,
   VenueCategorySchema,
 } from './enums'
+import { PricingTierSchema } from './pricing'
 
 export const AMENITY_OPTIONS = [
   { value: 'wifi', label: 'Wi-Fi' },
@@ -156,6 +157,8 @@ export const SpaceDetailSchema = SpaceCardSchema.extend({
   bookingsLast30d: z.number(),
   /** 누적 페이지 조회수 */
   viewCount: z.number(),
+  /** 동적 가격 티어 요약 — 주말·야간 등 기본가 대비 증감. 규칙 없으면 빈 배열 */
+  pricingTiers: z.array(PricingTierSchema).default([]),
 })
 export type SpaceDetail = z.infer<typeof SpaceDetailSchema>
 
