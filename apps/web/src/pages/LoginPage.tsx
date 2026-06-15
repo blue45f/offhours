@@ -149,15 +149,15 @@ export default function LoginPage() {
                 loading={demoRole === account.role}
                 disabled={isSubmitting && demoRole !== account.role}
                 onClick={() => signInAsDemo(account)}
-                className="justify-between"
+                className="justify-between gap-3"
               >
-                <span className="font-semibold">
+                <span className="shrink-0 font-semibold">
                   {account.role}
                   <span className="ml-1.5 font-normal text-[var(--color-fg-muted)]">
                     {account.hint}
                   </span>
                 </span>
-                <span className="font-normal text-xs text-[var(--color-fg-muted)]">
+                <span className="min-w-0 truncate text-xs font-normal text-[var(--color-fg-muted)]">
                   {account.email}
                 </span>
               </Button>
