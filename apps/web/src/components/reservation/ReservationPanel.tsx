@@ -9,7 +9,16 @@ import {
   type Purpose,
   type SpaceDetail,
 } from '@offhours/shared'
-import { Clock, Coins, RefreshCw, ShieldCheck, Users, Building2, Wallet } from 'lucide-react'
+import {
+  Clock,
+  Coins,
+  RefreshCw,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+  Building2,
+  Wallet,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, Link } from 'react-router-dom'
@@ -158,6 +167,36 @@ export function ReservationPanel({ space }: Props) {
           <div className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)]">
             <ShieldCheck size={12} />
             {PROTECTION_PLANS[space.protectionTier].blurb}
+          </div>
+        )}
+        {space.pricingTiers.length > 0 && (
+          <div className="mt-3 border-t border-[var(--color-border-subtle)] pt-2">
+            <div className="mb-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--color-fg-muted)]">
+              <TrendingUp size={11} className="text-[var(--color-primary)]" />
+              시간대별 가격
+            </div>
+            <ul className="flex flex-wrap gap-1.5">
+              {space.pricingTiers.map((tier) => (
+                <li
+                  key={tier.label}
+                  className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[11px]"
+                >
+                  <span className="text-[var(--color-fg-muted)]">{tier.label}</span>
+                  <span
+                    className={
+                      tier.deltaPct >= 0
+                        ? 'font-semibold text-[var(--color-primary)]'
+                        : 'font-semibold text-[var(--color-accent)]'
+                    }
+                  >
+                    {tier.deltaPct >= 0 ? `+${tier.deltaPct}%` : `${tier.deltaPct}%`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1 text-[10px] text-[var(--color-fg-subtle)]">
+              기본가 대비 · 선택한 시간에 맞춰 자동 적용돼요
+            </p>
           </div>
         )}
       </div>

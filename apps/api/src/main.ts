@@ -23,7 +23,11 @@ async function bootstrap() {
   // HTTP request autoLogging. Replaces the default unstructured console logger.
   app.useLogger(app.get(Logger))
 
-  app.setGlobalPrefix('api', { exclude: ['health'] })
+  // Exclude every health probe route from the `api` prefix. `'health'` alone only
+  // matches the exact path, leaving the documented `/health/live` and
+  // `/health/ready` probes behind the prefix (404 for platform health checks),
+  // so list each route the HealthController exposes.
+  app.setGlobalPrefix('api', { exclude: ['health', 'health/live', 'health/ready'] })
 
   // 채팅·후기 이미지 첨부가 data-URL(개당 ≤2MB, 최대 3장 ≈ base64 8.4MB)로 본문에 실리므로
   // 기본 100kb json 한도를 올린다. 첨부 형식·개수·용량은 Zod(AttachmentListSchema)가 재검증.

@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 
 import { useSpaceSlots } from '../../domains/spaces/api'
 import { cn } from '../../utils/cn'
+import { formatKRWShort } from '../../utils/format'
 
 const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
 const WEEKS = 6
@@ -69,6 +70,8 @@ export function AvailabilityCalendar({ spaceId, value, onPickDate, onPickSlot }:
   }, [gridStart])
 
   const selectedSlots = byDay.get(value) ?? []
+  // 동적 가격 — 선택한 날의 최저 시간당가를 강조해 "가장 저렴한 시간대"를 한눈에 보이게.
+  const minPrice = selectedSlots.length ? Math.min(...selectedSlots.map((s) => s.priceKRW)) : null
   const monthLabel = `${days[7].getFullYear()}년 ${days[7].getMonth() + 1}월`
 
   return (
@@ -130,17 +133,28 @@ export function AvailabilityCalendar({ spaceId, value, onPickDate, onPickSlot }:
             </p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
-              {selectedSlots.map((s) => (
-                <button
-                  key={s.startAt}
-                  type="button"
-                  onClick={() => onPickSlot(hm(s.startAt), hm(s.endAt))}
-                  className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] px-2.5 py-1 text-[11px] font-medium hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors"
-                >
-                  <Clock size={10} />
-                  {hm(s.startAt)}–{hm(s.endAt)} · {durationH(s.startAt, s.endAt)}시간
-                </button>
-              ))}
+              {selectedSlots.map((s) => {
+                const isCheapest = minPrice != null && s.priceKRW === minPrice
+                return (
+                  <button
+                    key={s.startAt}
+                    type="button"
+                    onClick={() => onPickSlot(hm(s.startAt), hm(s.endAt))}
+                    className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] px-2.5 py-1 text-[11px] font-medium hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors"
+                  >
+                    <Clock size={10} />
+                    {hm(s.startAt)}–{hm(s.endAt)} · {durationH(s.startAt, s.endAt)}시간
+                    <span className="text-[var(--color-fg-muted)]">
+                      {formatKRWShort(s.priceKRW)}/시간
+                    </span>
+                    {isCheapest && selectedSlots.length > 1 && (
+                      <span className="rounded-[var(--radius-pill)] bg-[var(--color-accent)] px-1.5 py-0.5 text-[9px] font-semibold text-white">
+                        최저가
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>

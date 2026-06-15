@@ -10,6 +10,7 @@ import {
   isSuperHost,
   lastMinuteDiscountRate,
   paginated,
+  summarizePricingRules,
   type CreateSpaceInput,
   type GalleryPhoto,
   type SpaceCard,
@@ -213,6 +214,7 @@ export class SpacesService {
       where: { slug },
       include: {
         photos: { orderBy: { order: 'asc' } },
+        pricingRules: { orderBy: { priority: 'desc' } },
         venue: { include: { host: { include: { user: true } } } },
       },
     })
@@ -237,6 +239,7 @@ export class SpacesService {
       ...this.toCard(space),
       bookingsLast30d,
       viewCount: space.viewCount,
+      pricingTiers: summarizePricingRules(space.pricingRules),
       description: space.description,
       areaM2: space.areaM2,
       cleaningFeeKRW: space.cleaningFeeKRW,

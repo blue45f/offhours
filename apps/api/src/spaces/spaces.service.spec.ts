@@ -112,6 +112,87 @@ describe('SpacesService.search — 필터 매핑', () => {
   })
 })
 
+describe('SpacesService.getBySlug — 동적 가격 티어', () => {
+  function detailFixture(pricingRules: any[]) {
+    return {
+      ...spaceFixture('s1', 37.5, 127.0),
+      status: 'ACTIVE',
+      viewCount: 10,
+      description: '설명',
+      areaM2: 40,
+      cleaningFeeKRW: 30000,
+      depositKRW: 0,
+      cleaningMinutes: 90,
+      minHours: 3,
+      alcoholPolicy: 'ALLOWED',
+      cateringPolicy: 'ALLOWED',
+      protectionTier: 'NONE',
+      cancellationPolicy: 'STANDARD',
+      amenities: [],
+      rules: '',
+      pricingRules,
+      venue: {
+        id: 'v1',
+        name: '베뉴',
+        addressRoad: '서울시 어딘가',
+        lat: 37.5,
+        lng: 127.0,
+        region: '서울',
+        district: '강남구',
+        category: 'CAFE',
+        host: {
+          approvedAt: null,
+          isInsured: false,
+          user: {
+            id: 'u1',
+            name: '호스트',
+            avatarUrl: null,
+            trustScore: 50,
+            hostedCount: 1,
+            reviewResponseRate: null,
+            reviewSampleCount: 0,
+            responseMedianMin: null,
+            responseRate24h: null,
+            responseSampleCount: null,
+          },
+        },
+      },
+    }
+  }
+
+  function makeDetail(pricingRules: any[]) {
+    const prisma: any = {
+      space: {
+        findUnique: vi.fn().mockResolvedValue(detailFixture(pricingRules)),
+        update: vi.fn().mockResolvedValue({}),
+      },
+      reservation: { count: vi.fn().mockResolvedValue(0) },
+    }
+    return new SpacesService(prisma, {} as any)
+  }
+
+  it('PricingRule 을 게스트용 티어 요약으로 변환해 노출', async () => {
+    const svc = makeDetail([
+      {
+        multiplier: 1.25,
+        weekdayMask: 65,
+        startMinute: 0,
+        endMinute: 1440,
+        priority: 10,
+        label: '주말 할증',
+      },
+    ])
+    const detail: any = await svc.getBySlug('slug-s1')
+    expect(detail.pricingTiers).toEqual([{ label: '주말 할증', deltaPct: 25 }])
+  })
+
+  it('규칙이 없으면 빈 배열', async () => {
+    const svc = makeDetail([])
+    const detail: any = await svc.getBySlug('slug-s1')
+    expect(detail.pricingTiers).toEqual([])
+  })
+})
+
 describe('SpacesService.search — 거리(지오) 경로', () => {
   it('반경 밖 공간 제외 + 가까운 순 정렬 + take:240 후처리', async () => {
     const near = spaceFixture('near', 37.5, 127.0) // 0km
