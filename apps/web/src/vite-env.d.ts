@@ -35,6 +35,14 @@ interface ImportMetaEnv {
   readonly VITE_COMMUNITYDESK_URL?: string
   /** CommunityDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
   readonly VITE_COMMUNITYDESK_PK?: string
+  /** ModerationDesk 엔드포인트. 설정 시 공개 신고 버튼 노출(공간 상세 등, 미설정=비활성). */
+  readonly VITE_MODERATIONDESK_URL?: string
+  /** ModerationDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
+  readonly VITE_MODERATIONDESK_PK?: string
+  /** RealtimeDesk 엔드포인트. 현재 HTTP 위젯 미통합(WS 계약 미확정, 비활성 예약). */
+  readonly VITE_REALTIMEDESK_URL?: string
+  /** RealtimeDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
+  readonly VITE_REALTIMEDESK_PK?: string
 }
 
 interface ImportMeta {

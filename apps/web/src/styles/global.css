@@ -121,12 +121,19 @@
     line-height: 1.1;
     letter-spacing: -0.02em;
     font-weight: 700;
+    text-wrap: balance;
   }
   .text-headline {
     font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
     line-height: 1.15;
     letter-spacing: -0.02em;
     font-weight: 700;
+    text-wrap: balance;
+  }
+  /* 장문 본문 가독 폭 — 한 줄 65–75ch 가이드(legal·소개 등). text-wrap:pretty 로 고아줄 완화. */
+  .measure {
+    max-width: 68ch;
+    text-wrap: pretty;
   }
   .text-title {
     font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.625rem);

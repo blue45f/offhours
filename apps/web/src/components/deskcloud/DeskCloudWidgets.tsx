@@ -14,7 +14,7 @@
  * 멤버 식별: 알림/커뮤니티/채팅은 로그인 사용자(useMe) id 를 recipientId/memberId 로 씁니다.
  * 로그인하지 않은 경우 멤버 식별이 필요한 위젯(알림/채팅)은 렌더하지 않습니다(콘텐츠 위젯은 익명 읽기 허용).
  */
-import { useId, useState, type ReactElement, type ReactNode } from 'react'
+import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react'
 
 import { useMe } from '../../store/auth'
 
@@ -29,6 +29,34 @@ import { SearchPalette } from './search/SearchPalette'
 const env = import.meta.env
 
 const pk = (key: string): string => env[key as keyof ImportMetaEnv] ?? 'pk_demo'
+
+/**
+ * 플로팅 런처 스타일 — offhours 토큰(올리브 primary)에 정렬. hover/focus-visible 상태와
+ * reduced-motion 대안을 갖춘다. 위젯 셸 한 번만 주입(다른 벤더 위젯의 ensureStyles 패턴).
+ */
+const LAUNCHER_STYLE_ID = 'deskcloud-launcher-styles'
+const LAUNCHER_CSS = `
+.dc-launcher{position:fixed;right:20px;z-index:2147482000;width:48px;height:48px;
+  display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:0;
+  background:var(--color-primary,#5a6f4f);color:var(--color-primary-fg,#fff);cursor:pointer;
+  box-shadow:0 1px 2px rgba(26,24,20,.08),0 12px 32px -8px rgba(26,24,20,.24);
+  transition:transform .18s cubic-bezier(.22,1,.36,1),background .18s cubic-bezier(.22,1,.36,1),box-shadow .18s cubic-bezier(.22,1,.36,1);}
+.dc-launcher:hover{background:var(--color-primary-hover,#4a5f3f);transform:translateY(-1px);
+  box-shadow:0 2px 4px rgba(26,24,20,.1),0 16px 40px -8px rgba(26,24,20,.3);}
+.dc-launcher:active{transform:translateY(0);}
+.dc-launcher:focus-visible{outline:2px solid var(--color-primary,#5a6f4f);outline-offset:3px;}
+@media (prefers-reduced-motion:reduce){.dc-launcher{transition:none;}.dc-launcher:hover{transform:none;}}
+`
+
+function useLauncherStyles(): void {
+  useEffect(() => {
+    if (typeof document === 'undefined' || document.getElementById(LAUNCHER_STYLE_ID)) return
+    const el = document.createElement('style')
+    el.id = LAUNCHER_STYLE_ID
+    el.textContent = LAUNCHER_CSS
+    document.head.appendChild(el)
+  }, [])
+}
 
 /** offhours 커뮤니티 위젯이 붙는 기본 게시판 슬러그(데모 시드의 'free' 게시판). */
 const COMMUNITY_BOARD_SLUG = 'free'
@@ -65,23 +93,8 @@ function FloatingLauncher(props: FloatingLauncherProps): ReactElement {
         aria-haspopup="dialog"
         aria-label={label}
         title={label}
-        style={{
-          position: 'fixed',
-          right: 20,
-          bottom,
-          zIndex: 2147482000,
-          width: 48,
-          height: 48,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: 999,
-          border: 0,
-          background: 'var(--color-primary, #1a1d23)',
-          color: 'var(--color-primary-fg, #fff)',
-          boxShadow: '0 1px 2px rgba(16,24,40,.06), 0 12px 32px -8px rgba(16,24,40,.22)',
-          cursor: 'pointer',
-        }}
+        className="dc-launcher"
+        style={{ bottom }}
       >
         {icon}
       </button>
@@ -204,6 +217,7 @@ const MediaIcon = (): ReactElement => (
 export function DeskCloudWidgets(): ReactElement {
   const me = useMe()
   const memberId = me?.id
+  useLauncherStyles()
 
   return (
     <>

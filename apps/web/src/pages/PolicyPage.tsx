@@ -71,7 +71,7 @@ function PolicyArticle({ policy, slug }: { policy: PublicPolicy; slug: PolicySlu
             {block.heading && <h2 className="text-title serif">{block.heading}</h2>}
             {block.text && (
               <p
-                className={`whitespace-pre-line leading-relaxed text-[var(--color-fg-muted)] ${
+                className={`measure whitespace-pre-line leading-relaxed text-[var(--color-fg-muted)] ${
                   block.heading ? 'mt-2' : ''
                 }`}
               >

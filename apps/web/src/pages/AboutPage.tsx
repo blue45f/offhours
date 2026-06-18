@@ -170,7 +170,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div>
       <h2 className="text-title font-semibold">{title}</h2>
-      <p className="mt-3 leading-relaxed text-[var(--color-fg-muted)]">{children}</p>
+      <p className="measure mt-3 leading-relaxed text-[var(--color-fg-muted)]">{children}</p>
     </div>
   )
 }
