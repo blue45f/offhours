@@ -7,34 +7,27 @@ interface ImportMetaEnv {
   readonly VITE_USE_MSW?: string
   /** SurveyDesk 엔드포인트. 설정 시 피드백 위젯 노출, 미설정(기본)이면 위젯 미렌더. */
   readonly VITE_SURVEYDESK_URL?: string
-  /** ChangelogDesk 엔드포인트. 설정 시 변경 이력 위젯 노출(미설정=비활성). */
+
+  /* ── DeskCloud 네이티브 통합(@heejun/deskcloud SDK pk_ 브라우저 클라이언트) ──
+   * 각 Desk 는 URL env 설정 시에만 활성화되고, 데이터는 앱 자체 컴포넌트로 렌더된다
+   * (위젯 임베드 아님). 미설정 시 1st-party 기능/빈 상태로 폴백 — 가역적·무영향. */
+
+  /** ChangelogDesk 엔드포인트. 설정 시 /whats-new 페이지에 업데이트 소식 노출(미설정=안내). */
   readonly VITE_CHANGELOGDESK_URL?: string
   /** ChangelogDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
   readonly VITE_CHANGELOGDESK_PK?: string
-  /** NotifyDesk 엔드포인트. 설정 시 알림 인박스 위젯 노출(로그인 사용자 한정, 미설정=비활성). */
-  readonly VITE_NOTIFYDESK_URL?: string
-  /** NotifyDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
-  readonly VITE_NOTIFYDESK_PK?: string
-  /** SearchDesk 엔드포인트. 설정 시 ⌘/ 검색 팔레트 노출(미설정=비활성). */
-  readonly VITE_SEARCHDESK_URL?: string
-  /** SearchDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
-  readonly VITE_SEARCHDESK_PK?: string
-  /** ReviewDesk 엔드포인트. 설정 시 후기 위젯(플로팅 런처) 노출(미설정=비활성). */
+  /** ReviewDesk 엔드포인트. 설정 시 서비스 전반 후기 벽(About 페이지) 노출(미설정=미렌더). */
   readonly VITE_REVIEWDESK_URL?: string
   /** ReviewDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
   readonly VITE_REVIEWDESK_PK?: string
-  /** ChatDesk 엔드포인트. 설정 시 채팅 위젯 노출(로그인 사용자 한정, 미설정=비활성). */
-  readonly VITE_CHATDESK_URL?: string
-  /** ChatDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
-  readonly VITE_CHATDESK_PK?: string
-  /** MediaDesk 엔드포인트. 설정 시 미디어 업로더·갤러리 위젯(플로팅 런처) 노출(미설정=비활성). */
-  readonly VITE_MEDIADESK_URL?: string
-  /** MediaDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
-  readonly VITE_MEDIADESK_PK?: string
-  /** CommunityDesk 엔드포인트. 설정 시 커뮤니티 게시판 위젯(플로팅 런처) 노출(미설정=비활성). */
+  /** CommunityDesk 엔드포인트. 설정 시 /community 게시판 노출(미설정=준비 중 안내). */
   readonly VITE_COMMUNITYDESK_URL?: string
   /** CommunityDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
   readonly VITE_COMMUNITYDESK_PK?: string
+  /** ModerationDesk 엔드포인트. 설정 시 공간 상세에 네이티브 신고 버튼 노출(미설정=미렌더). */
+  readonly VITE_MODERATIONDESK_URL?: string
+  /** ModerationDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
+  readonly VITE_MODERATIONDESK_PK?: string
 }
 
 interface ImportMeta {

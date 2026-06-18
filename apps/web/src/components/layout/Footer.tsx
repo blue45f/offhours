@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom'
 
+import { deskEnabled } from '../../domains/deskcloud/clients'
+
 export function Footer() {
+  // DeskCloud 네이티브 페이지 링크는 해당 Desk env 가 설정된 경우에만 노출(미설정 시 깨진 링크 방지)
+  const changelogOn = deskEnabled.changelog()
+  const communityOn = deskEnabled.community()
   return (
     <footer className="mt-24 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
       <div className="container-page break-keep py-12 md:py-16">
@@ -41,6 +46,13 @@ export function Footer() {
                   수수료 안내
                 </Link>
               </li>
+              {changelogOn && (
+                <li>
+                  <Link to="/whats-new" className="underline-offset-4 hover:underline">
+                    업데이트 소식
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
           <div>
@@ -67,6 +79,13 @@ export function Footer() {
                   문의하기
                 </Link>
               </li>
+              {communityOn && (
+                <li>
+                  <Link to="/community" className="underline-offset-4 hover:underline">
+                    커뮤니티
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
           <div>

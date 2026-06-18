@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom'
 
 import { CommandPalette } from '../CommandPalette'
-import { DeskCloudWidgets } from '../deskcloud/DeskCloudWidgets'
 import { FeedbackWidget } from '../feedback/FeedbackWidget'
 import { CompareBar } from '../space/CompareBar'
 
@@ -32,8 +31,6 @@ export function AppLayout() {
       {import.meta.env.VITE_SURVEYDESK_URL && (
         <FeedbackWidget appId="offhours" endpoint={import.meta.env.VITE_SURVEYDESK_URL} />
       )}
-      {/* DeskCloud 위젯(changelog·notify·search·review·chat·media·community): 각 env URL 설정 시에만 렌더. */}
-      <DeskCloudWidgets />
     </div>
   )
 }

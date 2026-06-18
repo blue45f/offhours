@@ -41,9 +41,15 @@ export default defineConfig(
     rules: {
       'no-restricted-globals': [
         'error',
-        { name: 'confirm', message: 'useConfirm()/ConfirmDialog를 사용하세요 (globalThis.confirm 금지).' },
+        {
+          name: 'confirm',
+          message: 'useConfirm()/ConfirmDialog를 사용하세요 (globalThis.confirm 금지).',
+        },
         { name: 'alert', message: 'Toast/Dialog를 사용하세요 (globalThis.alert 금지).' },
-        { name: 'prompt', message: 'usePrompt()/PromptDialog를 사용하세요 (globalThis.prompt 금지).' },
+        {
+          name: 'prompt',
+          message: 'usePrompt()/PromptDialog를 사용하세요 (globalThis.prompt 금지).',
+        },
       ],
       'react-refresh/only-export-components': [
         'error',
@@ -92,12 +98,13 @@ export default defineConfig(
   // 기술부채 완화(차기 패스에서 도메인으로 이동 예정): components/ 아래 일부 폴더는
   // 사실상 도메인 결합 피처 컴포넌트라 domains/infrastructure 를 직접 import 한다
   // (chat·host·reservation·space 피처 컴포넌트, layout 헤더의 알림 상태,
-  // ui/AttachmentInput 의 chat 첨부 변환). 이들을 도메인으로 물리 이동하는 것은
-  // SpaceCard 같은 공용 빌딩블록까지 얽힌 대규모 리팩터라 이번 파일럿 범위 밖이다.
+  // deskcloud DeskCloud SDK 데이터 훅 소비, ui/AttachmentInput 의 chat 첨부 변환).
+  // 이들을 도메인으로 물리 이동하는 것은 SpaceCard 같은 공용 빌딩블록까지 얽힌
+  // 대규모 리팩터라 이번 파일럿 범위 밖이다.
   // pure shared(ui 의 나머지·hooks·utils·store·styles)는 계속 strict 하게 강제한다.
   {
     files: [
-      'apps/web/src/components/{chat,host,reservation,space,layout}/**/*.{ts,tsx}',
+      'apps/web/src/components/{chat,host,reservation,space,layout,deskcloud}/**/*.{ts,tsx}',
       'apps/web/src/components/ui/AttachmentInput.tsx',
     ],
     rules: { 'boundaries/element-types': 'off' },
