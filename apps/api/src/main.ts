@@ -48,7 +48,11 @@ async function bootstrap() {
     credentials: true,
   })
 
-  app.useGlobalFilters(new ZodValidationFilter(), new HttpExceptionFilter())
+  // NestJS applies global filters in reverse registration order (last-registered
+  // runs first). Register the catch-all HttpExceptionFilter first so the specific
+  // ZodValidationFilter (@Catch(ZodError)) is evaluated first and turns validation
+  // failures into 400s — otherwise the catch-all swallows ZodError as a 500.
+  app.useGlobalFilters(new HttpExceptionFilter(), new ZodValidationFilter())
 
   const swagger = new DocumentBuilder()
     .setTitle('Offhours API')
