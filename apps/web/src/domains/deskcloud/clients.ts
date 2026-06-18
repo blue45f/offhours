@@ -11,10 +11,12 @@
  * 돌려주고, 호출부는 앱의 1st-party 기능(또는 빈 상태)으로 폴백한다 — 가역적·무영향.
  */
 import {
+  createAdClient,
   createChangelogClient,
   createCommunityClient,
   createModerationClient,
   createReviewClient,
+  type AdClient,
   type ChangelogClient,
   type CommunityClient,
   type ModerationClient,
@@ -53,12 +55,32 @@ export function moderationClient(): ModerationClient | null {
   return createModerationClient({ endpoint, publishableKey: pk(env.VITE_MODERATIONDESK_PK) })
 }
 
+/** Ad Desk 클라이언트(추천·스폰서 공간 배너) — URL env 미설정이면 null. */
+export function adClient(): AdClient | null {
+  const endpoint = env.VITE_ADDESK_URL
+  if (!endpoint) return null
+  return createAdClient({ endpoint, publishableKey: pk(env.VITE_ADDESK_PK) })
+}
+
+/**
+ * 홈 "추천(Sponsored)" 공간 레일이 서빙하는 슬롯 키들(슬롯당 1 크리에이티브).
+ * `VITE_ADDESK_SLOTS`(콤마 구분)로 배포별 오버라이드. 활성 크리에이티브를 반환하는
+ * 슬롯만 렌더되므로, 미설정 슬롯(과 AdDesk OFF 전체)은 보이지 않는다.
+ */
+export const adSlots: string[] = (
+  env.VITE_ADDESK_SLOTS ?? 'home-spotlight-1,home-spotlight-2,home-spotlight-3'
+)
+  .split(',')
+  .map((s: string) => s.trim())
+  .filter(Boolean)
+
 /** 각 Desk 활성 여부 — 라우트 노출/링크 게이트에 사용. */
 export const deskEnabled = {
   changelog: (): boolean => Boolean(env.VITE_CHANGELOGDESK_URL),
   review: (): boolean => Boolean(env.VITE_REVIEWDESK_URL),
   community: (): boolean => Boolean(env.VITE_COMMUNITYDESK_URL),
   moderation: (): boolean => Boolean(env.VITE_MODERATIONDESK_URL),
+  ad: (): boolean => Boolean(env.VITE_ADDESK_URL),
 } as const
 
 /** 서비스 전반 후기 주제 식별자 — 공간별 코어 후기(ReviewThread)와 구분되는 서비스 후기 벽. */
