@@ -15,6 +15,7 @@ export function findClickableNonInteractiveElements(root = ROOT) {
   const files = listFiles(srcDir, (file) => {
     if (!/\.tsx$/.test(file)) return false
     if (/\.(test|spec)\.tsx$/.test(file)) return false
+    if (/[\\/]deskcloud[\\/]/.test(file)) return false // vendored DeskCloud widgets (own intentional a11y patterns)
     return true
   })
   const findings = []
