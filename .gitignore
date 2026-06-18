@@ -57,3 +57,7 @@ test-results
 
 # We use pnpm; ignore any stray npm lockfile
 package-lock.json
+
+# apps-in-toss (granite) build artifacts
+**/.granite/
+*.ait

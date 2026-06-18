@@ -7,3 +7,7 @@ pnpm-lock.yaml
 **/build
 **/coverage
 *.tsbuildinfo
+
+# apps-in-toss (granite) build artifacts
+**/.granite/
+*.ait
