@@ -31,6 +31,7 @@ import { LiveNearbyRail } from '../components/space/LiveNearbyRail'
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { UseCaseDiscovery } from '../components/space/UseCaseDiscovery'
 import { Button } from '../components/ui/Button'
+import { SponsoredSpaces } from '../domains/deskcloud/SponsoredSpaces'
 import { useSpacesSearch } from '../domains/spaces/api'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -102,6 +103,9 @@ export default function HomePage() {
         </div>
         <FeaturedSpacesBand spaces={popular.data?.items} loading={popular.isLoading} />
       </section>
+
+      {/* 추천(Sponsored) 공간 — 네이티브 AdDesk 레일; 서빙될 때만 렌더 */}
+      <SponsoredSpaces />
 
       <CategoryRow />
 
