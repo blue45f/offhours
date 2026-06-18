@@ -29,7 +29,7 @@ import { useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import { SpaceReportAction } from '../components/deskcloud/moderation/SpaceReportAction'
+import { SpaceReportButton } from '../components/deskcloud/SpaceReportButton'
 import { ReservationPanel } from '../components/reservation/ReservationPanel'
 import { ReviewThread } from '../components/space/ReviewThread'
 import { SpaceCard } from '../components/space/SpaceCard'
@@ -331,9 +331,9 @@ export default function SpaceDetailPage() {
             )}
           </section>
 
-          {/* ModerationDesk — 공개 신고 동작(env 게이트). 미설정이면 미렌더. */}
+          {/* ModerationDesk — 네이티브 공개 신고(env 게이트). 미설정이면 미렌더. */}
           <div className="flex justify-end pt-2">
-            <SpaceReportAction spaceId={data.id} />
+            <SpaceReportButton spaceId={data.id} />
           </div>
         </div>
 

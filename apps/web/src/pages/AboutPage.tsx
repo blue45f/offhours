@@ -1,6 +1,7 @@
 import { ArrowRight, Clock, Compass, Moon, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { TestimonialsSection } from '../components/deskcloud/TestimonialsSection'
 import { Button } from '../components/ui/Button'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
@@ -73,6 +74,9 @@ export default function AboutPage() {
             ))}
           </ol>
         </section>
+
+        {/* ReviewDesk — 서비스 전반 후기 벽(env 게이트). 공간별 코어 후기와 별개. 미설정 시 미렌더. */}
+        <TestimonialsSection />
 
         <div className="mt-16 rounded-[var(--radius-2xl)] hairline bg-[var(--color-bg-elevated)] p-10 text-center shadow-[var(--shadow-sm)] md:mt-20">
           <h2 className="text-title serif">우리와 함께해요</h2>
