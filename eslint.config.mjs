@@ -13,6 +13,8 @@ export default defineConfig(
     '**/*.tsbuildinfo',
     'apps/api/prisma/migrations/**',
     '**/*.config.{js,mjs,cjs,ts}',
+
+    'apps/toss/**',
   ]),
 
   // 공유 베이스(TS + import 위생 + 커스텀 규칙 + prettier 충돌 비활성).

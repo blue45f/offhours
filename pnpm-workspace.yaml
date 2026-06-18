@@ -10,6 +10,20 @@ allowBuilds:
   '@scarf/scarf': false
   msw: true
   unrs-resolver: true
+  '@sentry/cli': true
+  '@swc/core': true
+  protobufjs: true
+onlyBuiltDependencies:
+  - prisma
+  - '@prisma/engines'
+  - '@nestjs/core'
+  - argon2
+  - esbuild
+  - msw
+  - unrs-resolver
+  - '@sentry/cli'
+  - '@swc/core'
+  - protobufjs
 minimumReleaseAgeExclude:
   - lucide-react@1.17.0
   - zustand@5.0.14
