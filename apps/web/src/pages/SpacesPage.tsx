@@ -94,23 +94,43 @@ export default function SpacesPage() {
     setParams(new URLSearchParams(), { replace: true })
   }
 
-  const activeFilters: string[] = []
-  if (query.region) activeFilters.push(`지역: ${query.region}`)
-  if (query.category) activeFilters.push(`카테고리: ${VenueCategoryLabel[query.category]}`)
-  if (query.purpose) activeFilters.push(`용도: ${PurposeLabel[query.purpose]}`)
-  if (query.capacity) activeFilters.push(`인원 ${query.capacity}명+`)
+  // 활성 필터 칩의 ✕ — 해당 필터가 차지한 URL 키들을 한 번에 비운다(가격처럼 min/max 쌍 포함).
+  function removeFilter(keys: string[]) {
+    const next = new URLSearchParams(params)
+    for (const key of keys) next.delete(key)
+    next.delete('page')
+    setParams(next, { replace: true })
+  }
+
+  // 각 활성 필터를 라벨 + 제거 시 비울 URL 키와 함께 구조화 — 칩 하나씩 ✕ 로 해제 가능.
+  // region·useCases 는 위 칩바에서도 다루지만, 여기 통합 바에서 한 번에 해제할 수 있게 포함.
+  const activeFilters: { label: string; keys: string[] }[] = []
+  if (query.region) activeFilters.push({ label: `지역: ${query.region}`, keys: ['region'] })
+  if (query.category)
+    activeFilters.push({
+      label: `카테고리: ${VenueCategoryLabel[query.category]}`,
+      keys: ['category'],
+    })
+  if (query.purpose)
+    activeFilters.push({ label: `용도: ${PurposeLabel[query.purpose]}`, keys: ['purpose'] })
+  if (query.capacity) activeFilters.push({ label: `인원 ${query.capacity}명+`, keys: ['capacity'] })
   if (query.priceMin || query.priceMax)
-    activeFilters.push(
-      `${formatKRWShort(query.priceMin ?? 0)}~${query.priceMax ? formatKRWShort(query.priceMax) : '∞'}`
-    )
-  if (query.amenities) activeFilters.push(`편의 ${query.amenities.split(',').length}개`)
+    activeFilters.push({
+      label: `${formatKRWShort(query.priceMin ?? 0)}~${query.priceMax ? formatKRWShort(query.priceMax) : '∞'}`,
+      keys: ['priceMin', 'priceMax'],
+    })
+  if (query.amenities)
+    activeFilters.push({
+      label: `편의 ${query.amenities.split(',').length}개`,
+      keys: ['amenities'],
+    })
   if (queryUseCases) {
     const codes = queryUseCases.split(',').filter(Boolean) as UseCase[]
     const labels = codes.map((c) => USE_CASE_META[c]?.label ?? c).join(', ')
-    activeFilters.push(`모임: ${labels}`)
+    activeFilters.push({ label: `모임: ${labels}`, keys: ['useCases'] })
   }
-  if (query.instantBook) activeFilters.push('즉시 예약')
-  if (query.verifiedOnly) activeFilters.push('검증된 사업장')
+  if (query.instantBook) activeFilters.push({ label: '즉시 예약', keys: ['instantBook'] })
+  if (query.verifiedOnly) activeFilters.push({ label: '검증된 사업장', keys: ['verifiedOnly'] })
 
   const sortOptions = [
     { value: 'popular', label: '인기 순' },
@@ -155,6 +175,11 @@ export default function SpacesPage() {
             onClick={() => setFilterOpen(true)}
           >
             필터
+            {activeFilters.length > 0 && (
+              <span className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-[var(--radius-pill)] bg-[var(--color-primary)] px-1.5 text-xs font-semibold text-[var(--color-primary-fg)] tabular-nums">
+                {activeFilters.length}
+              </span>
+            )}
           </Button>
         </div>
       </div>
@@ -267,19 +292,26 @@ export default function SpacesPage() {
 
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-6">
-          {activeFilters.map((label) => (
-            <span
+          {activeFilters.map(({ label, keys }) => (
+            <button
               key={label}
-              className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] px-3 py-1 text-xs"
+              type="button"
+              onClick={() => removeFilter(keys)}
+              aria-label={`${label} 필터 제거`}
+              className="group inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--color-bg-subtle)] py-1 pl-3 pr-2 text-xs transition-colors hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)]"
             >
               {label}
-            </span>
+              <X
+                size={12}
+                className="text-[var(--color-fg-muted)] transition-colors group-hover:text-[var(--color-primary)]"
+              />
+            </button>
           ))}
           <button
             onClick={clearAll}
             className="text-xs text-[var(--color-fg-muted)] underline ml-2"
           >
-            초기화
+            모두 초기화
           </button>
         </div>
       )}

@@ -1,7 +1,7 @@
 import { PurposeLabel, RsvpStatusLabel } from '@offhours/shared'
 import { format, parseISO } from 'date-fns'
 import { ko } from 'date-fns/locale/ko'
-import { ArrowRight, CalendarDays, MapPin, Pencil, Users } from 'lucide-react'
+import { ArrowRight, CalendarDays, MapPin, Pencil, Share2, Users } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -15,6 +15,7 @@ import { getClientToken, readSavedName, saveName } from '../domains/events/clien
 import { RsvpControl } from '../domains/events/RsvpControl'
 import { useCountdown, type Countdown } from '../domains/events/useCountdown'
 import { getErrorMessage } from '../infrastructure/api'
+import { shareWithToast } from '../lib/share'
 import { cn } from '../utils/cn'
 
 import type { EventSummary, Rsvp, RsvpStatus } from '@offhours/shared'
@@ -272,6 +273,23 @@ function Hero({
               {ended ? '이미 끝난 모임이에요' : countdownLabel(countdown)}
             </span>
           )}
+          <button
+            type="button"
+            onClick={() =>
+              void shareWithToast(
+                {
+                  url: globalThis.location.href,
+                  title: `${event.hostName}님의 ${event.spaceTitle} 모임 초대`,
+                  text: `${inviteDateLine(event.startAt)} · 참석 여부를 알려주세요!`,
+                },
+                { copiedMessage: '초대 링크를 복사했어요' }
+              )
+            }
+            className="inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--color-bg-elevated)]/92 px-3.5 py-1.5 text-sm font-semibold text-[var(--color-fg)] backdrop-blur-sm transition-colors hover:bg-[var(--color-bg-elevated)]"
+          >
+            <Share2 size={14} aria-hidden />
+            초대 공유
+          </button>
         </motion.div>
       </div>
     </header>

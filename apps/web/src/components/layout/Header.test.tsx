@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { AuthProvider } from '../../lib/firebaseAuth'
 import { useAuthStore } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
 
@@ -46,10 +47,12 @@ function LocationProbe() {
 
 function renderHeader() {
   return render(
-    <MemoryRouter initialEntries={['/']}>
-      <Header />
-      <LocationProbe />
-    </MemoryRouter>
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/']}>
+        <Header />
+        <LocationProbe />
+      </MemoryRouter>
+    </AuthProvider>
   )
 }
 

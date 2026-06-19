@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 
 import { useCreateSplit, useReservationSplit } from '../../domains/splits/api'
 import { getErrorMessage } from '../../infrastructure/api'
+import { shareWithToast } from '../../lib/share'
 import { formatKRW } from '../../utils/format'
 import { Button } from '../ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '../ui/Card'
@@ -204,19 +205,14 @@ function MemberRow({
     toast.success(`${idx}번 멤버 링크를 복사했어요`)
   }
   async function share() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${spaceTitle} 1/N 분담 결제`,
-          text: '오프아워스 분담 결제 링크에요!',
-          url,
-        })
-        return
-      } catch {
-        /* user cancelled */
-      }
-    }
-    copy()
+    await shareWithToast(
+      {
+        title: `${spaceTitle} 1/N 분담 결제`,
+        text: '오프아워스 분담 결제 링크에요!',
+        url,
+      },
+      { copiedMessage: `${idx}번 멤버 링크를 복사했어요` }
+    )
   }
   const isPaid = member.status === 'PAID'
   return (

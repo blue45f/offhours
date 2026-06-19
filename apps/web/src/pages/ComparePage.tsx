@@ -11,12 +11,12 @@ import { useQueries } from '@tanstack/react-query'
 import { ArrowRight, Check, GitCompare, Share2, X } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { toast } from 'sonner'
 
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Skeleton } from '../components/ui/Skeleton'
 import { api } from '../infrastructure/api'
+import { shareWithToast } from '../lib/share'
 import { COMPARE_MAX, useCompareStore } from '../store/compare'
 import { cn } from '../utils/cn'
 import { formatKRW } from '../utils/format'
@@ -149,11 +149,11 @@ export default function ComparePage() {
   const isLoading = queries.some((q) => q.isLoading)
 
   function copyShareLink() {
-    const url = `${globalThis.location.origin}/compare?spaces=${slugs.join(',')}`
-    navigator.clipboard?.writeText(url).then(
-      () => toast.success('공유 링크를 복사했어요'),
-      () => toast.error('복사에 실패했어요')
-    )
+    void shareWithToast({
+      url: `${globalThis.location.origin}/compare?spaces=${slugs.join(',')}`,
+      title: '오프아워스 공간 비교',
+      text: `${slugs.length}개 공간 비교`,
+    })
   }
 
   if (slugs.length === 0) {

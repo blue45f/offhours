@@ -25,7 +25,7 @@ import {
   Sparkles,
   TrendingUp,
 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -36,6 +36,7 @@ import { SpaceCard } from '../components/space/SpaceCard'
 import { Avatar } from '../components/ui/Avatar'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
+import { Lightbox } from '../components/ui/Lightbox'
 import { Skeleton } from '../components/ui/Skeleton'
 import { StarRating } from '../components/ui/StarRating'
 import { useOpenSpaceInquiry } from '../domains/chat/api'
@@ -49,6 +50,7 @@ import {
 import { useJsonLd } from '../hooks/useJsonLd'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { getErrorMessage } from '../infrastructure/api'
+import { shareWithToast } from '../lib/share'
 import { useMe } from '../store/auth'
 import { useRecentlyViewedStore } from '../store/recentlyViewed'
 import { formatKRW } from '../utils/format'
@@ -128,9 +130,10 @@ export default function SpaceDetailPage() {
             size="sm"
             leading={<Share2 size={14} />}
             onClick={() => {
-              navigator
-                .share?.({ url: globalThis.location.href, title: data.title })
-                .catch(() => null)
+              void shareWithToast(
+                { url: globalThis.location.href, title: data.title, text: data.summary },
+                { copiedMessage: '공간 링크를 복사했어요' }
+              )
             }}
           >
             공유
@@ -552,38 +555,60 @@ function Gallery({
   photos: { url: string; alt: string | null }[]
   title: string
 }) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
   if (photos.length === 0) {
     return (
       <div className="aspect-[16/9] w-full rounded-[var(--radius-2xl)] bg-[var(--color-bg-subtle)]" />
     )
   }
   return (
-    <div className="group relative grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 rounded-[var(--radius-2xl)] overflow-hidden hairline">
-      <div className="col-span-2 row-span-2 relative overflow-hidden bg-[var(--color-bg-subtle)]">
-        <img
-          src={photos[0].url}
-          alt={photos[0].alt ?? title}
-          className="size-full object-cover aspect-[4/3] transition-transform duration-[var(--duration-slow)] ease-[var(--easing-standard)] group-hover:scale-[1.02]"
-        />
-      </div>
-      {photos.slice(1, 5).map((p) => (
-        <div
-          key={p.url}
-          className="relative overflow-hidden bg-[var(--color-bg-subtle)] hidden md:block"
+    <>
+      <div className="group relative grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 rounded-[var(--radius-2xl)] overflow-hidden hairline">
+        <button
+          type="button"
+          onClick={() => setLightboxIndex(0)}
+          aria-label={`${title} 사진 크게 보기`}
+          className="col-span-2 row-span-2 relative overflow-hidden bg-[var(--color-bg-subtle)] cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
         >
           <img
-            src={p.url}
-            alt={p.alt ?? title}
-            className="size-full object-cover aspect-[4/3] transition-transform duration-[var(--duration-slow)] ease-[var(--easing-standard)] hover:scale-[1.03]"
+            src={photos[0].url}
+            alt={photos[0].alt ?? title}
+            className="size-full object-cover aspect-[4/3] transition-transform duration-[var(--duration-slow)] ease-[var(--easing-standard)] group-hover:scale-[1.02]"
           />
-        </div>
-      ))}
-      {photos.length > 1 && (
-        <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-elevated)]/85 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-[var(--color-fg-muted)] shadow-[var(--shadow-sm)]">
-          <ImageIcon size={11} /> 사진 {photos.length}장
-        </span>
-      )}
-    </div>
+        </button>
+        {photos.slice(1, 5).map((p, i) => (
+          <button
+            type="button"
+            key={p.url}
+            onClick={() => setLightboxIndex(i + 1)}
+            aria-label={`${title} 사진 ${i + 2} 크게 보기`}
+            className="relative overflow-hidden bg-[var(--color-bg-subtle)] hidden md:block cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]"
+          >
+            <img
+              src={p.url}
+              alt={p.alt ?? title}
+              className="size-full object-cover aspect-[4/3] transition-transform duration-[var(--duration-slow)] ease-[var(--easing-standard)] hover:scale-[1.03]"
+            />
+          </button>
+        ))}
+        {photos.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setLightboxIndex(0)}
+            className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-bg-elevated)]/85 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-[var(--color-fg-muted)] shadow-[var(--shadow-sm)] transition-colors hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-fg)]"
+          >
+            <ImageIcon size={11} /> 사진 {photos.length}장 모두 보기
+          </button>
+        )}
+      </div>
+      <Lightbox
+        photos={photos}
+        index={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+        label={`${title} 사진`}
+      />
+    </>
   )
 }
 

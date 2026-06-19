@@ -12,6 +12,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 import { useCastCollectionVote, useCollectionBySlug } from '../domains/collections/api'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { getErrorMessage } from '../infrastructure/api'
+import { shareWithToast } from '../lib/share'
 import { cn } from '../utils/cn'
 import { formatDateKR } from '../utils/format'
 
@@ -66,17 +67,11 @@ export default function CollectionDetailPage() {
   }
 
   async function share() {
-    const url = globalThis.location.href
-    if (navigator.share) {
-      try {
-        await navigator.share({ url, title: data?.name ?? '오프아워스 컬렉션' })
-        return
-      } catch {
-        /* user-cancelled */
-      }
-    }
-    await navigator.clipboard?.writeText(url)
-    toast.success('공유 링크를 복사했어요')
+    await shareWithToast({
+      url: globalThis.location.href,
+      title: data?.name ?? '오프아워스 컬렉션',
+      text: data?.description ?? undefined,
+    })
   }
 
   async function vote(favoriteId: string, value: VoteValue | null) {

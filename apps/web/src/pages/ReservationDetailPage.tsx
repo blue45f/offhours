@@ -33,6 +33,7 @@ import {
 } from '../domains/reservations/api'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getErrorMessage } from '../infrastructure/api'
+import { shareWithToast } from '../lib/share'
 import { useMe } from '../store/auth'
 import { formatDateTimeKR, formatKRW, formatTimeRange } from '../utils/format'
 
@@ -106,13 +107,14 @@ export default function ReservationDetailPage() {
   }
 
   async function onShareEvent() {
-    const url = `${globalThis.location.origin}/event/${reservation.code}`
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.success('초대 링크를 복사했어요')
-    } catch {
-      toast.error('링크 복사에 실패했어요')
-    }
+    await shareWithToast(
+      {
+        url: `${globalThis.location.origin}/event/${reservation.code}`,
+        title: `${reservation.spaceTitle} 모임 초대`,
+        text: '오프아워스 모임에 초대합니다. 일정을 확인하고 참석 여부를 알려주세요!',
+      },
+      { copiedMessage: '초대 링크를 복사했어요' }
+    )
   }
 
   async function onClaim() {

@@ -16,6 +16,7 @@ import {
   useMyCollections,
 } from '../domains/collections/api'
 import { getErrorMessage } from '../infrastructure/api'
+import { shareWithToast } from '../lib/share'
 import { formatDateKR } from '../utils/format'
 
 export default function CollectionsPage() {
@@ -125,13 +126,15 @@ export default function CollectionsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        const url = `${globalThis.location.origin}/c/${c.slug}`
-                        navigator.clipboard?.writeText(url)
-                        toast.success('공유 링크를 복사했어요')
-                      }}
+                      onClick={() =>
+                        void shareWithToast({
+                          url: `${globalThis.location.origin}/c/${c.slug}`,
+                          title: c.name,
+                          text: c.description ?? undefined,
+                        })
+                      }
                     >
-                      링크 복사
+                      공유
                     </Button>
                     <Button
                       variant="ghost"
