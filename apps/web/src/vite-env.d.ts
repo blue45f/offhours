@@ -28,6 +28,12 @@ interface ImportMetaEnv {
   readonly VITE_MODERATIONDESK_URL?: string
   /** ModerationDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
   readonly VITE_MODERATIONDESK_PK?: string
+  /** AdDesk 엔드포인트. 설정 시 홈 추천 스폰서 공간 레일 노출(미설정=미렌더). */
+  readonly VITE_ADDESK_URL?: string
+  /** AdDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
+  readonly VITE_ADDESK_PK?: string
+  /** AdDesk 슬롯 키 목록(콤마 구분). 미설정 시 홈 기본 슬롯 3개. */
+  readonly VITE_ADDESK_SLOTS?: string
 
   /* ── 통합 로그인(Firebase Auth) — deskcloud-fleet-auth 단일 프로젝트 ──
    * 리터럴 금지(시크릿 스캔 차단). 로컬 `.env.local`(gitignored) + Vercel env 로만 공급.
