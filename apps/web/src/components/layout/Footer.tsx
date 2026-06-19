@@ -74,8 +74,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                {/* 인앱 문의 폼 — 외부 지원 센터 새 창 대신 같은 탭에서 접수 */}
-                <Link to="/contact" className="underline-offset-4 hover:underline">
+                {/* 인앱 문의 게시판 — 외부 지원 센터·전화·이메일 대신 같은 탭에서 접수 */}
+                <Link to="/support" className="underline-offset-4 hover:underline">
                   문의하기
                 </Link>
               </li>

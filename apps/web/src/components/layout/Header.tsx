@@ -37,6 +37,7 @@ export function Header() {
             { to: '/spaces', label: '공간 둘러보기' },
             { to: '/host', label: '호스트 되기' },
             { to: '/about', label: '서비스 소개' },
+            { to: '/support', label: '문의' },
           ].map((item) => (
             <NavLink
               key={item.to}

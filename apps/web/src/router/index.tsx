@@ -28,7 +28,7 @@ const EventHubPage = lazyRetry(() => import('../pages/EventHubPage'))
 const NotificationsPage = lazyRetry(() => import('../pages/NotificationsPage'))
 const ChatPage = lazyRetry(() => import('../pages/ChatPage'))
 const ChatThreadPage = lazyRetry(() => import('../pages/ChatThreadPage'))
-const ContactPage = lazyRetry(() => import('../pages/ContactPage'))
+const SupportPage = lazyRetry(() => import('../pages/SupportPage'))
 const HostLandingPage = lazyRetry(() => import('../pages/HostLandingPage'))
 const HostProfilePage = lazyRetry(() => import('../pages/HostProfilePage'))
 const HostDashboardPage = lazyRetry(() => import('../pages/HostDashboardPage'))
@@ -102,8 +102,10 @@ export const router = createBrowserRouter([
           { path: 'help', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/host', element: lazyEl(<ComingSoonPage />) },
           { path: 'help/guest', element: lazyEl(<ComingSoonPage />) },
-          // 인앱 문의 폼 — TermsDesk 공개 문의 API 접수(외부 리다이렉트 대체)
-          { path: 'contact', element: lazyEl(<ContactPage />) },
+          // 인앱 문의 게시판 — desk-platform 공개 REST 로 접수·공개 목록. 전화·이메일 연락
+          // 수단 없이 모든 문의를 이 게시판으로 통합한다. /contact 는 호환 위해 여기로 리다이렉트.
+          { path: 'support', element: lazyEl(<SupportPage />) },
+          { path: 'contact', element: <Navigate to="/support" replace /> },
           // 약관·정책은 TermsDesk 공개 API 를 내부에서 렌더(외부 리다이렉트 제거)
           { path: 'terms', element: lazyEl(<PolicyPage slug="terms-of-service" />) },
           { path: 'privacy', element: lazyEl(<PolicyPage slug="privacy-policy" />) },
