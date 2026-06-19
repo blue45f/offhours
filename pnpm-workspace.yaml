@@ -33,3 +33,4 @@ minimumReleaseAgeExclude:
 overrides:
   electron-to-chromium: 1.5.362
   enhanced-resolve: 5.22.0
+  zod@3.24.4: 3.25.76
