@@ -28,6 +28,23 @@ interface ImportMetaEnv {
   readonly VITE_MODERATIONDESK_URL?: string
   /** ModerationDesk publishable 키(pk_…). 미설정 시 'pk_demo'. */
   readonly VITE_MODERATIONDESK_PK?: string
+
+  /* ── 통합 로그인(Firebase Auth) — deskcloud-fleet-auth 단일 프로젝트 ──
+   * 리터럴 금지(시크릿 스캔 차단). 로컬 `.env.local`(gitignored) + Vercel env 로만 공급.
+   * 미설정이면 isFirebaseAuthConfigured=false 로 런타임 인증을 친절히 비활성화(빌드는 정상). */
+
+  /** Firebase 웹 apiKey(AIza…). 미설정 시 회원 로그인 런타임 비활성화. */
+  readonly VITE_FIREBASE_API_KEY?: string
+  /** Firebase 웹 appId. 미설정 시 회원 로그인 런타임 비활성화. */
+  readonly VITE_FIREBASE_APP_ID?: string
+  /** Firebase messagingSenderId. */
+  readonly VITE_FIREBASE_SENDER_ID?: string
+  /** Firebase storageBucket. */
+  readonly VITE_FIREBASE_STORAGE_BUCKET?: string
+  /** authDomain 오버라이드(미설정 시 deskcloud-fleet-auth.firebaseapp.com). */
+  readonly VITE_FIREBASE_AUTH_DOMAIN?: string
+  /** projectId 오버라이드(미설정 시 deskcloud-fleet-auth). */
+  readonly VITE_FIREBASE_PROJECT_ID?: string
 }
 
 interface ImportMeta {

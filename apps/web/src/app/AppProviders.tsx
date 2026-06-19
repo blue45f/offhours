@@ -8,6 +8,7 @@ import { Toaster } from 'sonner'
 import { ErrorBoundary } from '../components/layout/ErrorBoundary'
 import { ConfirmProvider } from '../components/ui/ConfirmDialog'
 import { PromptProvider } from '../components/ui/PromptDialog'
+import { AuthProvider } from '../lib/firebaseAuth'
 import { router } from '../router'
 import { bootstrapAuth } from '../store/auth'
 import { useThemeStore } from '../store/theme'
@@ -36,11 +37,13 @@ export function AppProviders() {
         <QueryErrorResetBoundary>
           {({ reset }) => (
             <ErrorBoundary onReset={reset}>
-              <ConfirmProvider>
-                <PromptProvider>
-                  <RouterProvider router={router} />
-                </PromptProvider>
-              </ConfirmProvider>
+              <AuthProvider>
+                <ConfirmProvider>
+                  <PromptProvider>
+                    <RouterProvider router={router} />
+                  </PromptProvider>
+                </ConfirmProvider>
+              </AuthProvider>
             </ErrorBoundary>
           )}
         </QueryErrorResetBoundary>

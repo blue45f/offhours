@@ -10,6 +10,8 @@ import { openCommandPalette } from '../commandPaletteEvents'
 import { Avatar } from '../ui/Avatar'
 import { Button } from '../ui/Button'
 
+import { MemberAuthControl } from './MemberAuthControl'
+
 export function Header() {
   const me = useMe()
   const isAuthed = useIsAuthed()
@@ -74,6 +76,7 @@ export function Header() {
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+          <MemberAuthControl className="ml-0.5" />
           {isAuthed ? (
             <>
               <Link
