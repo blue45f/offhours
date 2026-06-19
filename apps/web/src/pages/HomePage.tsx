@@ -31,6 +31,7 @@ import { LiveNearbyRail } from '../components/space/LiveNearbyRail'
 import { SpaceCardGrid } from '../components/space/SpaceCardGrid'
 import { UseCaseDiscovery } from '../components/space/UseCaseDiscovery'
 import { Button } from '../components/ui/Button'
+import { Reveal } from '../components/ui/Reveal'
 import { useSpacesSearch } from '../domains/spaces/api'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -171,7 +172,26 @@ function RotatingNoun() {
   )
 }
 
+const EASE = [0.2, 0, 0, 1] as const
+
+const HERO_TRUST = [
+  { value: '1,200+', label: '검증된 영업 외 공간' },
+  { value: '평균 48h', label: '첫 예약까지 걸린 시간' },
+  { value: '4.9 / 5', label: '게스트 만족도' },
+] as const
+
 function Hero() {
+  const reduce = useReducedMotion()
+  // 헤드라인 두 줄을 한 박자씩 떠오르게 — 콘텐츠는 항상 DOM 에 있고 transform 만 진입한다.
+  const lineIn = (delay: number) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 18 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.6, delay, ease: EASE },
+        }
+
   return (
     <section className="relative overflow-hidden bg-[var(--color-bg-subtle)]">
       {/* 따뜻한 톤 레이어링 — 마감 후 실내처럼, 위는 크림빛 잔광 아래는 차분히 가라앉는다. 메쉬·블롭 없음 */}
@@ -189,82 +209,110 @@ function Hero() {
       <div className="container-page pt-12 pb-14 md:pt-20 md:pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           <div className="lg:col-span-7 space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.2, 0, 0, 1] }}
-            >
-              <span className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] hairline bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)] shadow-[var(--shadow-sm)]">
+            <div>
+              <motion.span
+                {...lineIn(0)}
+                className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] hairline bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)] shadow-[var(--shadow-sm)]"
+              >
                 <LightStillOn />
                 영업이 끝난 뒤에도, 불은 켜져 있습니다
-              </span>
+              </motion.span>
               <h1 className="mt-6 text-display serif leading-[1.1]">
-                마감한 가게의 불을
-                <br />
-                당신의 <RotatingNoun />
-                으로 켭니다.
+                <motion.span {...lineIn(0.08)} className="block">
+                  마감한 가게의 불을
+                </motion.span>
+                <motion.span {...lineIn(0.18)} className="block">
+                  당신의 <RotatingNoun />
+                  으로 켭니다.
+                </motion.span>
               </h1>
-              <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-fg-muted)]">
+              <motion.p
+                {...lineIn(0.28)}
+                className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-fg-muted)]"
+              >
                 카페·바·레스토랑·갤러리의 휴무일과 영업 종료 후. 평소엔 만날 수 없던 감성 공간을
                 파티·스몰웨딩·모임·팝업으로 시간 단위 통대관 하세요.
-              </p>
-            </motion.div>
+              </motion.p>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15, ease: [0.2, 0, 0, 1] }}
-            >
+            <motion.div {...lineIn(0.36)}>
               <HeroSearch />
             </motion.div>
+
+            <motion.dl
+              {...lineIn(0.46)}
+              className="flex flex-wrap items-stretch gap-x-8 gap-y-4 border-t border-[var(--color-border)] pt-6"
+            >
+              {HERO_TRUST.map((stat) => (
+                <div key={stat.label} className="min-w-[7rem]">
+                  <dt className="serif text-2xl font-bold leading-none text-[var(--color-fg)]">
+                    {stat.value}
+                  </dt>
+                  <dd className="mt-1.5 text-xs text-[var(--color-fg-muted)]">{stat.label}</dd>
+                </div>
+              ))}
+            </motion.dl>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.2, 0, 0, 1] }}
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            animate={reduce ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
             className="hidden lg:block lg:col-span-5"
           >
-            <div className="relative group rounded-[var(--radius-2xl)] bg-[var(--color-bg-elevated)] p-3 hairline shadow-[var(--shadow-md)] transition-all duration-[var(--duration-slow)] hover:scale-[1.01] hover:shadow-[var(--shadow-lg)]">
-              <div className="overflow-hidden rounded-[var(--radius-xl)] aspect-[4/3] relative">
-                <img
-                  src="/images/hannam-rooftop.jpg"
-                  alt="한남동 루프탑 라운지"
-                  className="object-cover size-full transition-transform duration-[4000ms] group-hover:scale-105"
-                />
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,20,0.6)] via-transparent to-transparent"
-                />
-                <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent)] shadow-[var(--shadow-sm)]">
-                  <span className="relative inline-flex size-2 items-center justify-center">
-                    <span className="absolute inset-0 rounded-full bg-[var(--color-accent)] animate-pulse" />
-                    <span className="size-1 rounded-full bg-[var(--color-accent-soft)]" />
-                  </span>
-                  오늘 22:00 예약 가능
-                </span>
-              </div>
-              <div className="mt-4 px-2 pb-2">
-                <span className="text-xs font-semibold text-[var(--color-fg-subtle)]">
-                  용산구 · 루프탑
-                </span>
-                <div className="flex items-center justify-between mt-1">
-                  <h3 className="font-bold serif text-lg text-[var(--color-fg)]">
-                    한남동 루프탑 라운지
-                  </h3>
-                  <span className="text-sm font-semibold text-[var(--color-primary)]">
-                    시간당 80,000원
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-[var(--color-fg-muted)] line-clamp-1">
-                  남산타워가 한눈에 보이는 조용하고 따뜻한 옥상 정원
-                </p>
-              </div>
-            </div>
+            <HeroShowcaseCard />
           </motion.div>
         </div>
       </div>
     </section>
+  )
+}
+
+/**
+ * 히어로 쇼케이스 카드. 마감 후에도 켜진 한 점의 불을 모티프로,
+ * 호버 시 사진이 천천히 깊어지고 라이브 슬롯 핀이 떠오른다. 발광 블롭·메쉬 없음.
+ */
+function HeroShowcaseCard() {
+  const reduce = useReducedMotion()
+  return (
+    <motion.div
+      whileHover={reduce ? undefined : { y: -4 }}
+      transition={{ duration: 0.42, ease: EASE }}
+      className="relative group rounded-[var(--radius-2xl)] bg-[var(--color-bg-elevated)] p-3 hairline shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-shadow duration-[var(--duration-slow)]"
+    >
+      <div className="overflow-hidden rounded-[var(--radius-xl)] aspect-[4/3] relative">
+        <img
+          src="/images/hannam-rooftop.jpg"
+          alt="해 질 녘, 남산타워가 보이는 한남동 루프탑 라운지의 따뜻한 조명"
+          className="object-cover size-full transition-transform duration-[4000ms] ease-[var(--easing-standard)] group-hover:scale-105"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,20,0.62)] via-transparent to-transparent"
+        />
+        <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent)] shadow-[var(--shadow-sm)]">
+          <LightStillOn />
+          오늘 22:00 예약 가능
+        </span>
+        {/* 호버 시 떠오르는 라이브 슬롯 핀 — 오프아워의 약속을 카드 위에서 한 번 더 */}
+        <motion.span
+          initial={false}
+          className="pointer-events-none absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-[var(--color-bg-elevated)]/90 px-2 py-1 text-[11px] font-semibold text-[var(--color-primary)] opacity-0 shadow-[var(--shadow-sm)] backdrop-blur-sm transition-all duration-[var(--duration-base)] group-hover:opacity-100 group-hover:translate-y-0 translate-y-1"
+        >
+          <Clock size={11} /> 23:00–06:00 · 7시간
+        </motion.span>
+      </div>
+      <div className="mt-4 px-2 pb-2">
+        <span className="text-xs font-semibold text-[var(--color-fg-subtle)]">용산구 · 루프탑</span>
+        <div className="flex items-center justify-between mt-1">
+          <h3 className="font-bold serif text-lg text-[var(--color-fg)]">한남동 루프탑 라운지</h3>
+          <span className="text-sm font-semibold text-[var(--color-primary)]">시간당 80,000원</span>
+        </div>
+        <p className="mt-1 text-xs text-[var(--color-fg-muted)] line-clamp-1">
+          남산타워가 한눈에 보이는 조용하고 따뜻한 옥상 정원
+        </p>
+      </div>
+    </motion.div>
   )
 }
 
@@ -290,26 +338,36 @@ function LightStillOn() {
 }
 
 function CategoryRow() {
+  const reduce = useReducedMotion()
   return (
     <section className="container-page py-8 md:py-12">
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-        {categories.map(({ value, icon: Icon, hue }) => (
-          <Link
+        {categories.map(({ value, icon: Icon, hue }, i) => (
+          <motion.div
             key={value}
-            to={`/spaces?category=${value}`}
-            className="group shrink-0 flex flex-col items-center gap-2 rounded-[var(--radius-xl)] hairline bg-[var(--color-bg-elevated)] px-6 py-4 min-w-[120px] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            // 가로 레일이라 스태거는 짧게 캡(최대 ~0.18s) — 줄줄이 늦게 뜨는 인상 방지
+            transition={{ duration: 0.32, delay: Math.min(i, 9) * 0.02, ease: EASE }}
+            className="shrink-0"
           >
-            <span
-              className="inline-flex size-10 items-center justify-center rounded-full group-hover:scale-110 transition-transform"
-              style={{
-                background: `oklch(var(--category-tint-bg) ${hue})`,
-                color: `oklch(var(--category-tint-fg) ${hue})`,
-              }}
+            <Link
+              to={`/spaces?category=${value}`}
+              className="group flex flex-col items-center gap-2 rounded-[var(--radius-xl)] hairline bg-[var(--color-bg-elevated)] px-6 py-4 min-w-[120px] transition-all duration-[var(--duration-base)] ease-[var(--easing-standard)] hover:-translate-y-1 hover:border-[var(--color-border-strong)] hover:shadow-[var(--shadow-md)] active:translate-y-0 active:scale-[0.98]"
             >
-              <Icon size={18} />
-            </span>
-            <span className="text-sm font-medium">{VenueCategoryLabel[value]}</span>
-          </Link>
+              <span
+                className="inline-flex size-10 items-center justify-center rounded-full transition-transform duration-[var(--duration-base)] ease-[var(--easing-standard)] group-hover:scale-110 group-hover:-rotate-3"
+                style={{
+                  background: `oklch(var(--category-tint-bg) ${hue})`,
+                  color: `oklch(var(--category-tint-fg) ${hue})`,
+                }}
+              >
+                <Icon size={18} />
+              </span>
+              <span className="text-sm font-medium">{VenueCategoryLabel[value]}</span>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </section>
@@ -430,8 +488,20 @@ function NowNearbySection({
 function HostCta() {
   return (
     <section className="container-page my-16 md:my-24">
-      <div className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-fg)] text-[var(--color-bg)] p-10 md:p-16">
-        <div className="absolute -right-12 -top-12 size-60 rounded-full bg-[var(--color-primary)] opacity-30 blur-3xl" />
+      <Reveal
+        y={20}
+        duration={0.6}
+        className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--color-fg)] text-[var(--color-bg)] p-10 md:p-16"
+      >
+        {/* 마감 후에도 켜진 한 줄기 빛 — 발광 블롭 대신 우상단에서 비스듬히 떨어지는 절제된 톤 레이어 */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--color-primary) 26%, transparent) 0%, transparent 55%)',
+          }}
+        />
         <div className="relative max-w-2xl">
           <span className="text-xs font-bold tracking-widest uppercase opacity-60">For Hosts</span>
           <h2 className="mt-3 text-headline serif">
@@ -460,7 +530,7 @@ function HostCta() {
             </Link>
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   )
 }

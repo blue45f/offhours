@@ -1,6 +1,24 @@
+import { motion, useReducedMotion } from 'motion/react'
 import { Link } from 'react-router-dom'
 
 import { deskEnabled } from '../../domains/deskcloud/clients'
+
+/** "불은 켜져 있다" 모티프 — 마감 후에도 켜진 한 점의 등을 토큰 색으로 호흡시킨다. */
+function LightStillOn() {
+  const reduce = useReducedMotion()
+  return (
+    <span aria-hidden className="relative inline-flex size-2 items-center justify-center">
+      <motion.span
+        className="absolute inset-0 rounded-full bg-[var(--color-accent)]"
+        animate={reduce ? { opacity: 0.9 } : { opacity: [0.55, 1, 0.55], scale: [0.9, 1, 0.9] }}
+        transition={
+          reduce ? { duration: 0 } : { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }
+        }
+      />
+      <span className="size-1 rounded-full bg-[var(--color-accent-soft)]" />
+    </span>
+  )
+}
 
 export function Footer() {
   // DeskCloud 네이티브 페이지 링크는 해당 Desk env 가 설정된 경우에만 노출(미설정 시 깨진 링크 방지)
@@ -11,8 +29,8 @@ export function Footer() {
       <div className="container-page break-keep py-12 md:py-16">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-4">
           <div className="col-span-2 sm:col-span-3 md:col-span-1">
-            <div className="flex items-center gap-2.5">
-              <span className="inline-flex size-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-fg)] font-bold serif">
+            <div className="group flex items-center gap-2.5">
+              <span className="inline-flex size-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-fg)] font-bold serif transition-transform duration-[var(--duration-base)] ease-[var(--easing-standard)] group-hover:-rotate-6 group-hover:scale-105">
                 오
               </span>
               <span className="font-bold text-lg">Offhours</span>
@@ -21,6 +39,10 @@ export function Footer() {
               비어 있던 그 시간,
               <br />
               가장 멋진 공간이 됩니다.
+            </p>
+            <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-fg-subtle)]">
+              <LightStillOn />
+              마감 후에도, 불은 켜져 있습니다
             </p>
           </div>
           <div>
