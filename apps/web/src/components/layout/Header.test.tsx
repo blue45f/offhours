@@ -136,7 +136,7 @@ describe('Header 중간 브레이크포인트(768~1023) 레이아웃 가드', ()
 
   it('로고·액션 존은 shrink-0 으로 고정되어 중간 폭에서 찌부러지지 않는다', () => {
     renderHeader()
-    expect(screen.getByRole('link', { name: 'Offhours' })).toHaveClass('shrink-0')
+    expect(screen.getByRole('link', { name: /Offhours/ })).toHaveClass('shrink-0')
     const actions = screen.getByRole('button', { name: '검색 (⌘K)' }).parentElement
     expect(actions).toHaveClass('shrink-0')
   })
