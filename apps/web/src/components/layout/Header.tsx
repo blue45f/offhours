@@ -59,6 +59,9 @@ export function Header() {
             오
           </span>
           <span className="font-bold tracking-tight text-lg">Offhours</span>
+          <span className="rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-bg-subtle)] px-1.5 py-0.5 text-[10px] font-black leading-none text-[var(--color-primary)]">
+            BETA
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">

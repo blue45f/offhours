@@ -143,10 +143,10 @@ export function Footer() {
           </span>
           <span aria-hidden>·</span>
           <Link
-            to="/design"
+            to="/sitemap"
             className="underline-offset-4 hover:text-[var(--color-fg-muted)] hover:underline"
           >
-            디자인 시스템
+            사이트맵
           </Link>
         </div>
       </div>

@@ -48,6 +48,7 @@ const NotFoundPage = lazyRetry(() => import('../pages/NotFoundPage'))
 const ComingSoonPage = lazyRetry(() => import('../pages/ComingSoonPage'))
 const PolicyPage = lazyRetry(() => import('../pages/PolicyPage'))
 const DesignSystemPage = lazyRetry(() => import('../pages/DesignSystemPage'))
+const SitemapPage = lazyRetry(() => import('../pages/SitemapPage'))
 // DeskCloud 네이티브 통합 페이지(ChangelogDesk·CommunityDesk) — env 게이트 시 데이터 노출, 미설정 시 안내
 const WhatsNewPage = lazyRetry(() => import('../pages/WhatsNewPage'))
 const CommunityPage = lazyRetry(() => import('../pages/CommunityPage'))
@@ -113,6 +114,7 @@ export const router = createBrowserRouter([
           { path: 'safety', element: lazyEl(<ComingSoonPage />) },
           // 디자인 시스템 가이드 — 토큰·컴포넌트 전시(주 내비 미노출, 푸터에서만 진입)
           { path: 'design', element: lazyEl(<DesignSystemPage />) },
+          { path: 'sitemap', element: lazyEl(<SitemapPage />) },
           // ChangelogDesk(업데이트 소식)·CommunityDesk(커뮤니티) 네이티브 페이지 — env 게이트로 데이터 노출
           { path: 'whats-new', element: lazyEl(<WhatsNewPage />) },
           { path: 'community', element: lazyEl(<CommunityPage />) },
