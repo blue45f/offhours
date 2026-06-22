@@ -36,6 +36,7 @@ import { SponsoredSpaces } from '../domains/deskcloud/SponsoredSpaces'
 import { useSpacesSearch } from '../domains/spaces/api'
 import { SEOUL_FALLBACK, useGeolocation } from '../hooks/useGeolocation'
 import { usePageMeta } from '../hooks/usePageMeta'
+import { heroStagger, riseChild } from '../lib/motion/reveal'
 
 const categories: { value: VenueCategory; icon: typeof Coffee; hue: number }[] = [
   { value: 'CAFE', icon: Coffee, hue: 40 },
@@ -186,16 +187,6 @@ const HERO_TRUST = [
 
 function Hero() {
   const reduce = useReducedMotion()
-  // 헤드라인 두 줄을 한 박자씩 떠오르게 — 콘텐츠는 항상 DOM 에 있고 transform 만 진입한다.
-  const lineIn = (delay: number) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 18 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.6, delay, ease: EASE },
-        }
-
   return (
     <section className="relative overflow-hidden bg-[var(--color-bg-subtle)]">
       {/* 따뜻한 톤 레이어링 — 마감 후 실내처럼, 위는 크림빛 잔광 아래는 차분히 가라앉는다. 메쉬·블롭 없음 */}
@@ -212,26 +203,29 @@ function Hero() {
 
       <div className="container-page pt-12 pb-14 md:pt-20 md:pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          <div className="lg:col-span-7 space-y-8">
+          <motion.div
+            variants={heroStagger}
+            initial={reduce ? false : 'hidden'}
+            animate="show"
+            className="lg:col-span-7 space-y-8"
+          >
             <div>
               <motion.span
-                {...lineIn(0)}
+                variants={riseChild}
                 className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] hairline bg-[var(--color-bg-elevated)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)] shadow-[var(--shadow-sm)]"
               >
                 <LightStillOn />
                 영업이 끝난 뒤에도, 불은 켜져 있습니다
               </motion.span>
-              <h1 className="mt-6 text-display serif leading-[1.1]">
-                <motion.span {...lineIn(0.08)} className="block">
-                  마감한 가게의 불을
-                </motion.span>
-                <motion.span {...lineIn(0.18)} className="block">
+              <motion.h1 variants={riseChild} className="mt-6 text-display serif leading-[1.1]">
+                <span className="block">마감한 가게의 불을</span>
+                <span className="block">
                   당신의 <RotatingNoun />
                   으로 켭니다.
-                </motion.span>
-              </h1>
+                </span>
+              </motion.h1>
               <motion.p
-                {...lineIn(0.28)}
+                variants={riseChild}
                 className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[var(--color-fg-muted)]"
               >
                 카페·바·레스토랑·갤러리의 휴무일과 영업 종료 후. 평소엔 만날 수 없던 감성 공간을
@@ -239,12 +233,12 @@ function Hero() {
               </motion.p>
             </div>
 
-            <motion.div {...lineIn(0.36)}>
+            <motion.div variants={riseChild}>
               <HeroSearch />
             </motion.div>
 
             <motion.dl
-              {...lineIn(0.46)}
+              variants={riseChild}
               className="flex flex-wrap items-stretch gap-x-8 gap-y-4 border-t border-[var(--color-border)] pt-6"
             >
               {HERO_TRUST.map((stat) => (
@@ -256,7 +250,7 @@ function Hero() {
                 </div>
               ))}
             </motion.dl>
-          </div>
+          </motion.div>
 
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 24 }}
@@ -269,6 +263,26 @@ function Hero() {
         </div>
       </div>
     </section>
+  )
+}
+
+/**
+ * 사진 우상단 스트링 라이트 근처에 켜진 등불의 잔광 한 점. 페이지 스케일 블롭이 아니라
+ * 카드 내부 작은 영역에 한정한 따뜻한 광원으로, reduced-motion 에서는 정적으로 켜둔다.
+ */
+function LampWarmth() {
+  const reduce = useReducedMotion()
+  return (
+    <motion.span
+      aria-hidden
+      className="pointer-events-none absolute right-6 top-8 size-24 rounded-full mix-blend-screen"
+      style={{
+        background:
+          'radial-gradient(circle, rgba(255,229,210,0.55) 0%, rgba(255,229,210,0.16) 45%, transparent 72%)',
+      }}
+      animate={reduce ? { opacity: 0.7 } : { opacity: [0.45, 0.8, 0.45] }}
+      transition={reduce ? { duration: 0 } : { duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+    />
   )
 }
 
@@ -294,6 +308,7 @@ function HeroShowcaseCard() {
           aria-hidden
           className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,20,0.62)] via-transparent to-transparent"
         />
+        <LampWarmth />
         <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent)] shadow-[var(--shadow-sm)]">
           <LightStillOn />
           오늘 22:00 예약 가능

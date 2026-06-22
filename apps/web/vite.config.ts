@@ -24,6 +24,13 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/utils'),
     },
   },
+  optimizeDeps: {
+    // @heejun/deskcloud lazily imports socket.io-client (an optional peer) behind
+    // @vite-ignore / webpackIgnore; the dev dep-optimizer still tries to pre-bundle
+    // it and errors when the optional peer is absent. Excluding it from optimization
+    // keeps the lazy import lazy (prod Rollup already honors the ignore comments).
+    exclude: ['@heejun/deskcloud'],
+  },
   server: {
     port: 5173,
     proxy: {

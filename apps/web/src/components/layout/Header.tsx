@@ -1,10 +1,10 @@
 import * as RDropdown from '@radix-ui/react-dropdown-menu'
 import { Bell, Heart, LogIn, Menu, Moon, Search, Sun } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 
 import { useUnreadNotifications } from '../../domains/notifications/useUnreadNotifications'
+import { useScrolled } from '../../hooks/useScrolled'
 import { useIsAdmin, useIsAuthed, useIsHost, useMe } from '../../store/auth'
 import { useThemeStore } from '../../store/theme'
 import { cn } from '../../utils/cn'
@@ -21,18 +21,6 @@ const NAV_ITEMS = [
   { to: '/support', label: '문의' },
 ] as const
 
-/** 스크롤이 시작되면 헤어라인만 두던 헤더가 조용히 떠오른다(글래스 + 약한 그림자). */
-function useScrolledPastTop(threshold = 4) {
-  const [scrolled, setScrolled] = useState(false)
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > threshold)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [threshold])
-  return scrolled
-}
-
 export function Header() {
   const me = useMe()
   const isAuthed = useIsAuthed()
@@ -41,23 +29,26 @@ export function Header() {
   const navigate = useNavigate()
   const { theme, toggle } = useThemeStore()
   const { data: unread = 0 } = useUnreadNotifications()
-  const scrolled = useScrolledPastTop()
+  // 콘텐츠 위로 올라타면 헤어라인 한 줄을 은은한 그림자로 바꾸고 높이를 조금 줄인다.
+  const scrolled = useScrolled()
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-[var(--z-sticky)] glass border-b transition-[box-shadow,border-color] duration-[var(--duration-base)] ease-[var(--easing-standard)]',
-        scrolled ? 'border-[var(--color-border)] shadow-[var(--shadow-sm)]' : 'border-transparent'
+        'sticky top-0 z-[var(--z-sticky)] glass transition-[box-shadow,border-color] duration-[var(--duration-base)] ease-[var(--easing-standard)]',
+        scrolled
+          ? 'border-b border-[var(--color-border)] shadow-[var(--shadow-sm)]'
+          : 'border-b border-transparent'
       )}
     >
-      <div className="container-page flex h-16 items-center justify-between gap-3 lg:gap-4 md:h-18">
+      <div
+        className={cn(
+          'container-page flex items-center justify-between gap-3 lg:gap-4 transition-[height] duration-[var(--duration-base)] ease-[var(--easing-standard)]',
+          scrolled ? 'h-14 md:h-16' : 'h-16 md:h-18'
+        )}
+      >
         <Link to="/" className="group flex shrink-0 items-center gap-2.5">
-          <span
-            aria-hidden
-            className="inline-flex size-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-fg)] font-bold serif transition-transform duration-[var(--duration-base)] ease-[var(--easing-standard)] group-hover:-rotate-6 group-hover:scale-105"
-          >
-            오
-          </span>
+          <LogoMark />
           <span className="font-bold tracking-tight text-lg">Offhours</span>
           <span className="rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-bg-subtle)] px-1.5 py-0.5 text-[10px] font-black leading-none text-[var(--color-primary)]">
             BETA
@@ -186,6 +177,27 @@ export function Header() {
         </div>
       </div>
     </header>
+  )
+}
+
+/**
+ * 로고 마크 — 올리브 타일 위 한글 '오' 와, "마감 후에도 켜진 불" 모티프를 잇는
+ * 작은 시에나 등불 한 점. reduced-motion 에서는 정적으로 켜둔다.
+ */
+function LogoMark() {
+  const reduce = useReducedMotion()
+  return (
+    <span
+      aria-hidden
+      className="relative inline-flex size-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-fg)] font-bold serif transition-transform duration-[var(--duration-base)] ease-[var(--easing-standard)] group-hover:-translate-y-0.5"
+    >
+      오
+      <motion.span
+        className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-[var(--color-accent)] ring-2 ring-[var(--color-bg)]"
+        animate={reduce ? { opacity: 0.9 } : { opacity: [0.5, 1, 0.5] }}
+        transition={reduce ? { duration: 0 } : { duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+      />
+    </span>
   )
 }
 
