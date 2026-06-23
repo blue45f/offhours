@@ -43,13 +43,10 @@ describe('Footer 구조/접근성', () => {
 })
 
 describe('Footer 법적 고지', () => {
-  it('placeholder 사업자 정보 대신 데모 서비스 고지를 노출한다 (정직성 원칙)', () => {
+  it('실제 사업자 정보를 노출한다', () => {
     renderFooter()
-    expect(
-      screen.getByText(/데모 서비스 — 사업자 정보는 정식 오픈 시 게시됩니다/)
-    ).toBeInTheDocument()
-    expect(screen.queryByText(/000-00-00000/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/○○○/)).not.toBeInTheDocument()
+    expect(screen.getByText(/상호: 에이치준랩스/)).toBeInTheDocument()
+    expect(screen.getByText(/사업자등록번호: 355-07-03473/)).toBeInTheDocument()
   })
 
   it('푸터 링크는 hover 밑줄 어포던스를 가진다', () => {

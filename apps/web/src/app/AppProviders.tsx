@@ -6,6 +6,7 @@ import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'sonner'
 
 import { ErrorBoundary } from '../components/layout/ErrorBoundary'
+import { IntroSplashScreen } from '../components/layout/IntroSplashScreen'
 import { ConfirmProvider } from '../components/ui/ConfirmDialog'
 import { PromptProvider } from '../components/ui/PromptDialog'
 import { AuthProvider } from '../lib/firebaseAuth'
@@ -40,6 +41,7 @@ export function AppProviders() {
               <AuthProvider>
                 <ConfirmProvider>
                   <PromptProvider>
+                    <IntroSplashScreen />
                     <RouterProvider router={router} />
                   </PromptProvider>
                 </ConfirmProvider>
