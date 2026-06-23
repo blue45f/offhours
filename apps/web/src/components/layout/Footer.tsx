@@ -136,18 +136,36 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[var(--color-border)] pt-6 text-xs text-[var(--color-fg-subtle)]">
-          <span>
-            © {new Date().getFullYear()} Offhours. All rights reserved. · 데모 서비스 — 사업자
-            정보는 정식 오픈 시 게시됩니다
-          </span>
-          <span aria-hidden>·</span>
-          <Link
-            to="/sitemap"
-            className="underline-offset-4 hover:text-[var(--color-fg-muted)] hover:underline"
-          >
-            사이트맵
-          </Link>
+        <div className="mt-12 border-t border-[var(--color-border)] pt-8 text-[11px] text-[var(--color-fg-subtle)] space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 leading-relaxed">
+            <div>
+              <p className="font-semibold text-[var(--color-fg-muted)]">상호: 에이치준랩스</p>
+              <p>대표자: 김희준 | 개인정보책임자: 김희준</p>
+            </div>
+            <div>
+              <p>사업자등록번호: 355-07-03473</p>
+              <p>주소: 서울특별시 송파구 가락로34길 13, 101호(방이동)</p>
+            </div>
+            <div>
+              <p>이메일: blue45f@gmail.com</p>
+              <p>전화번호: 010-3873-4197</p>
+            </div>
+            <div>
+              <p>호스팅 서비스: Vercel (Frontend)</p>
+              <p>플랫폼 형태: 공간 대여 양면 마켓플레이스</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--color-border)] pt-4 mt-4">
+            <span>
+              © {new Date().getFullYear()} Offhours. All rights reserved.
+            </span>
+            <Link
+              to="/sitemap"
+              className="underline-offset-4 hover:text-[var(--color-fg-muted)] hover:underline"
+            >
+              사이트맵
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
