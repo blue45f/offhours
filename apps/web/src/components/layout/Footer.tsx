@@ -157,7 +157,7 @@ export function Footer() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--color-border)] pt-4 mt-4">
             <span>
-              © {new Date().getFullYear()} Offhours. All rights reserved.
+              © {new Date().getFullYear()} Offhours (Beta). All rights reserved.
             </span>
             <Link
               to="/sitemap"
