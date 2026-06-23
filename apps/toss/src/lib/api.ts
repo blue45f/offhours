@@ -1,7 +1,8 @@
-import data from '../sample-data.json'
+import { VenueCategoryLabel } from '@offhours/shared'
 
 export interface Space {
   id: string
+  slug: string
   title: string
   summary: string
   description: string
@@ -17,6 +18,9 @@ export interface Space {
   rating: number
   photos: string[]
 }
+
+const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:3000'
+const PREFIX = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`
 
 export const AMENITY_LABEL: Record<string, string> = {
   wifi: '와이파이',
@@ -48,11 +52,63 @@ export const CATERING_LABEL: Record<string, string> = {
   NONE: '케이터링 불가',
 }
 
-const items: Space[] = (data as { items?: Space[] }).items || []
-export function getSpaces(): Space[] {
-  return items
+export async function getSpaces(): Promise<Space[]> {
+  try {
+    const res = await fetch(`${PREFIX}/spaces?pageSize=100`)
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+    const data = await res.json()
+    const items = data.items || []
+    return items.map((card: any) => ({
+      id: card.id,
+      slug: card.slug,
+      title: card.title,
+      summary: card.summary,
+      description: card.summary,
+      category: card.category,
+      categoryLabel: VenueCategoryLabel[card.category as keyof typeof VenueCategoryLabel] ?? card.category,
+      district: card.district,
+      addressRoad: '',
+      capacity: card.capacityMax,
+      basePriceKRW: card.basePriceKRW,
+      alcohol: '',
+      catering: '',
+      amenities: [],
+      rating: card.ratingAvg,
+      photos: [card.thumbnailUrl, ...card.photoUrls].filter(Boolean),
+    }))
+  } catch (error) {
+    console.error('getSpaces failed:', error)
+    return []
+  }
 }
-export function getSpace(id: string): Space | undefined {
-  return items.find((s) => s.id === id)
+
+export async function getSpace(slug: string): Promise<Space | undefined> {
+  try {
+    const res = await fetch(`${PREFIX}/spaces/slug/${slug}`)
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+    const detail = await res.json()
+    return {
+      id: detail.id,
+      slug: detail.slug,
+      title: detail.title,
+      summary: detail.summary,
+      description: detail.description,
+      category: detail.category,
+      categoryLabel: VenueCategoryLabel[detail.category as keyof typeof VenueCategoryLabel] ?? detail.category,
+      district: detail.district,
+      addressRoad: detail.venue?.addressRoad ?? '',
+      capacity: detail.capacityMax,
+      basePriceKRW: detail.basePriceKRW,
+      alcohol: detail.alcoholPolicy,
+      catering: detail.cateringPolicy,
+      amenities: detail.amenities || [],
+      rating: detail.ratingAvg,
+      photos: (detail.photos || []).map((p: any) => p.url),
+    }
+  } catch (error) {
+    console.error(`getSpace failed for ${slug}:`, error)
+    return undefined
+  }
 }
+
 export const won = (n: number) => '₩' + n.toLocaleString('ko-KR')

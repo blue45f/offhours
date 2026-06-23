@@ -1,20 +1,34 @@
 import { Button } from '@toss/tds-mobile'
 import { useEffect, useState } from 'react'
 
-import { getSpace, won, AMENITY_LABEL, ALCOHOL_LABEL, CATERING_LABEL } from '../lib/api'
+import { getSpace, won, AMENITY_LABEL, ALCOHOL_LABEL, CATERING_LABEL, type Space } from '../lib/api'
 import { shareMessage } from '../lib/toss'
 import { navigate } from '../router'
 import { theme } from '../theme'
 import { Badge, Cover, StatStrip } from '../ui'
 
 export function SpaceDetailPage({ id = '' }: { id?: string }) {
-  const s = getSpace(id)
+  const [s, setS] = useState<Space | null>(null)
+  const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
   useEffect(() => {
     if (!toast) return
     const x = window.setTimeout(() => setToast(null), 1800)
     return () => window.clearTimeout(x)
   }, [toast])
+
+  useEffect(() => {
+    if (!id) return
+    getSpace(id)
+      .then((data) => {
+        setS(data || null)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [id])
 
   const Header = (
     <header
@@ -50,6 +64,18 @@ export function SpaceDetailPage({ id = '' }: { id?: string }) {
       </button>
     </header>
   )
+
+  if (loading) {
+    return (
+      <div style={{ background: theme.bg, minHeight: '100dvh' }}>
+        {Header}
+        <p style={{ textAlign: 'center', color: theme.textMuted, paddingTop: 40 }}>
+          불러오는 중...
+        </p>
+      </div>
+    )
+  }
+
   if (!s)
     return (
       <div style={{ background: theme.bg, minHeight: '100dvh' }}>
