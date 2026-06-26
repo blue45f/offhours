@@ -45,7 +45,9 @@ describe('SpaceCard 뱃지 토큰', () => {
 
     const badge = screen.getByText('🔥 인기')
     expect(badge.className).toContain('bg-[var(--color-accent-soft)]')
-    expect(badge.className).toContain('text-[var(--color-accent)]')
+    // accent-soft 알약 위에선 기본 accent(#a15e40)가 4.15:1로 AA 미달이라
+    // 한 톤 진한 accent-strong(#8b4a2d, 5.6:1)으로 칠한다 — 앰버 톤은 유지.
+    expect(badge.className).toContain('text-[var(--color-accent-strong)]')
   })
 
   it('폐기된 옛 테라코타(#e76f51) 하드코딩이 되살아나지 않는다', () => {

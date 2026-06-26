@@ -71,6 +71,11 @@
   /* Semantic — accent */
   --color-accent: var(--ref-sienna-500);
   --color-accent-soft: var(--ref-sienna-100);
+  /* WCAG AA: sienna-500(#a15e40) 텍스트는 크림/흰 배경에선 통과(4.7–5.0:1)하지만
+     accent-soft(#ffe5d2) 알약 위에선 4.15:1로 미달 → 소프트 배지 텍스트 전용으로
+     한 톤 진한 sienna-700(#8b4a2d, soft 위 5.6:1)을 쓴다. 단색 채움·온크림 사용은
+     기존 --color-accent 유지(앰버의 희소성·룩은 변함 없음). */
+  --color-accent-strong: var(--ref-sienna-700);
 
   /* Semantic — status */
   --color-success: var(--ref-success);
@@ -155,6 +160,9 @@
 
   --color-accent: #dca284;
   --color-accent-soft: rgba(220, 162, 132, 0.18);
+  /* 다크: accent-soft 는 근검정 위 반투명이라 밝은 sienna 가 이미 충분한 대비를
+     낸다 — 라이트처럼 어둡게 내리면 오히려 대비가 떨어지므로 accent 와 동일 유지. */
+  --color-accent-strong: var(--color-accent);
 
   --color-overlay: rgba(0, 0, 0, 0.6);
 
@@ -201,6 +209,7 @@
 
     --color-accent: #dca284;
     --color-accent-soft: rgba(220, 162, 132, 0.18);
+    --color-accent-strong: var(--color-accent);
 
     --color-overlay: rgba(0, 0, 0, 0.6);
 

@@ -231,7 +231,7 @@ function AdCard({
         loading="lazy"
         decoding="async"
       />
-      <span className="absolute left-2.5 top-2.5 rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10.5px] font-extrabold tracking-[0.12em] text-[var(--color-accent)]">
+      <span className="absolute left-2.5 top-2.5 rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10.5px] font-extrabold tracking-[0.12em] text-[var(--color-accent-strong)]">
         AD
       </span>
       {creative.linkUrl && (

@@ -209,11 +209,14 @@ export const handlers = [
     ]
     const items = samples.map((r, i) => ({
       id: `${params.spaceId}_review_${i}`,
+      authorId: `usr_review_${i}`,
       authorName: ['민지', '준호', '서연'][i],
       authorAvatarUrl: null,
       rating: r.rating,
       comment: r.comment,
       hostResponse: r.hostResponse,
+      attachments: [] as string[],
+      replies: [] as never[],
       createdAt: new Date(Date.now() - (i + 1) * 86_400_000 * 3).toISOString(),
     }))
     return HttpResponse.json(await delay({ items, total }))

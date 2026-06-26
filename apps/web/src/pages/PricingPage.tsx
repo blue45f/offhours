@@ -52,7 +52,7 @@ export default function PricingPage() {
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-[var(--color-fg-muted)]">플랫폼 수수료 12%</dt>
-                <dd className="text-[var(--color-accent)]">-60,000원</dd>
+                <dd className="text-[var(--color-accent-strong)]">-60,000원</dd>
               </div>
               <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-2 text-base font-semibold">
                 <dt>호스트 정산액</dt>

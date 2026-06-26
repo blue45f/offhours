@@ -22,6 +22,7 @@
   --color-primary-fg: var(--color-primary-fg);
   --color-accent: var(--color-accent);
   --color-accent-soft: var(--color-accent-soft);
+  --color-accent-strong: var(--color-accent-strong);
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
   --color-error: var(--color-error);

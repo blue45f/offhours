@@ -100,7 +100,7 @@ export default function CollectionsPage() {
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
                         c.isPublic
-                          ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
+                          ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)]'
                           : 'bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)]'
                       }`}
                     >

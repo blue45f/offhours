@@ -13,7 +13,7 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 const toneSoft: Record<Tone, string> = {
   neutral: 'bg-[var(--color-bg-subtle)] text-[var(--color-fg)]',
   primary: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
-  accent: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]',
+  accent: 'bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)]',
   success:
     'bg-[color-mix(in_srgb,var(--color-success)_14%,transparent)] text-[var(--color-success)]',
   warning:

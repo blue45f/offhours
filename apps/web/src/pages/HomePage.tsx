@@ -309,7 +309,7 @@ function HeroShowcaseCard() {
           className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,20,0.62)] via-transparent to-transparent"
         />
         <LampWarmth />
-        <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent)] shadow-[var(--shadow-sm)]">
+        <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent-strong)] shadow-[var(--shadow-sm)]">
           <LightStillOn />
           오늘 22:00 예약 가능
         </span>
@@ -465,7 +465,7 @@ function NowNearbySection({
       <div className="container-page py-10 md:py-14">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent)]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[var(--color-accent-strong)]">
               <Clock size={12} /> 라이브
             </span>
             <h2 className="mt-2 text-headline serif">지금 인근에서 비어있는 공간</h2>

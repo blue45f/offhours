@@ -31,7 +31,7 @@ const TAG_META: Record<
   improved: {
     label: '개선',
     icon: Wrench,
-    cls: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]',
+    cls: 'bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)]',
   },
   fixed: {
     label: '버그 수정',

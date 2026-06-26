@@ -246,7 +246,7 @@ export function SpaceCard({ space, layout = 'card' }: Props) {
         </h3>
         <p className="text-sm text-[var(--color-fg-muted)] line-clamp-1">{space.summary}</p>
         {space.nextAvailableAt && (
-          <div className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 text-[11px] font-semibold">
+          <div className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)] px-2 py-0.5 text-[11px] font-semibold">
             <Clock size={10} />
             {formatNextSlot(space.nextAvailableAt)}
             {space.lastMinuteDiscount ? (

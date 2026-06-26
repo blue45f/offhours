@@ -31,6 +31,11 @@ export function ReviewThread({ review, hostUserId }: ReviewThreadProps) {
   const [composing, setComposing] = useState(false)
   const [body, setBody] = useState('')
   const canReply = !!me && (me.id === review.authorId || me.id === hostUserId)
+  // Tolerate payloads that omit the optional collections (e.g. older API
+  // shapes or partial mocks) — a single malformed review must never blank the
+  // whole space page through the route error boundary.
+  const replies = review.replies ?? []
+  const attachments = review.attachments ?? []
 
   async function submit() {
     if (body.trim().length < 2) {
@@ -62,7 +67,7 @@ export function ReviewThread({ review, hostUserId }: ReviewThreadProps) {
         </div>
       </div>
       <p className="mt-3 whitespace-pre-line text-sm leading-relaxed">{review.comment}</p>
-      <AttachmentThumbs attachments={review.attachments} className="mt-3" />
+      <AttachmentThumbs attachments={attachments} className="mt-3" />
 
       {review.hostResponse && (
         <div className="mt-3 rounded-[var(--radius-md)] bg-[var(--color-primary-soft)] p-3">
@@ -71,9 +76,9 @@ export function ReviewThread({ review, hostUserId }: ReviewThreadProps) {
         </div>
       )}
 
-      {(review.replies.length > 0 || canReply) && (
+      {(replies.length > 0 || canReply) && (
         <div className="mt-3 space-y-2.5 border-l-2 border-[var(--color-border-subtle)] pl-4">
-          {review.replies.map((reply) => (
+          {replies.map((reply) => (
             <div key={reply.id} className="flex items-start gap-2.5">
               <Avatar name={reply.authorName} src={reply.authorAvatarUrl} size="xs" />
               <div className="min-w-0 flex-1">

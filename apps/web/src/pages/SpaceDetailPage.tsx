@@ -173,7 +173,7 @@ export default function SpaceDetailPage() {
                 {(superHost || data.venue.host.isVerifiedBusiness || data.venue.host.isInsured) && (
                   <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                     {superHost && (
-                      <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 text-[11px] font-semibold">
+                      <span className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)] px-2 py-0.5 text-[11px] font-semibold">
                         ⭐ 우수 호스트
                       </span>
                     )}
@@ -470,7 +470,7 @@ function ActivityPulse({
         </h3>
         <div className="flex gap-1.5">
           {isHot && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 text-[11px] font-bold">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)] px-2 py-0.5 text-[11px] font-bold">
               <Flame size={10} /> 인기
             </span>
           )}

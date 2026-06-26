@@ -242,7 +242,7 @@ function BlockRow({ block }: { block: VenueBlock }) {
           <span
             className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
               block.source === 'EXTERNAL'
-                ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
+                ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)]'
                 : 'bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)]'
             }`}
           >

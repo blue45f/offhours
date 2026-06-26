@@ -125,7 +125,7 @@ export function AuthDialog({
         <span className="flex items-center gap-2.5">
           <span
             aria-hidden
-            className="grid size-8 place-items-center rounded-[var(--radius-md)] bg-[var(--color-accent-soft)] text-[var(--color-accent)]"
+            className="grid size-8 place-items-center rounded-[var(--radius-md)] bg-[var(--color-accent-soft)] text-[var(--color-accent-strong)]"
           >
             {mode === 'signup' ? <UserPlus size={16} /> : <LogIn size={16} />}
           </span>
